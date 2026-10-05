@@ -1,10 +1,20 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { getCaptcha as getCaptchaApi, login as loginApi, logout as logoutApi } from '@/api/auth'
+import { getMerchantMine, getMerchantMineResources, loginMerchant } from '@/api/merchant'
 import { getMine, getMineResources } from '@/api/upms'
 import { RESOURCE_TYPE, isGroupResourceType, isMenuResourceType } from '@/constants/resource'
+import type { MerchantMineVo } from '@/types/merchant'
 import type { CaptchaVo, LoginRequest, MineVo, ResourceTreeNode } from '@/types/upms'
-import { getToken, removeToken, setToken } from '@/utils/auth'
+import {
+  getLoginSubject,
+  getToken,
+  removeLoginSubject,
+  removeToken,
+  setLoginSubject,
+  setToken,
+  type LoginSubject,
+} from '@/utils/auth'
 import { resetUnauthorizedState } from '@/utils/session'
 import { useAppStore } from './app'
 
@@ -132,18 +142,23 @@ function collectPermissionSet(resources: ResourceTreeNode[], bucket = new Set<st
 }
 
 let bootstrapPromise: Promise<void> | null = null
+type AuthMineVo = MineVo | MerchantMineVo
 
 export const useAuthStore = defineStore('auth', () => {
   const appStore = useAppStore()
   const token = ref(getToken())
-  const mine = ref<MineVo | null>(null)
+  const subject = ref<LoginSubject>(getLoginSubject())
+  const mine = ref<AuthMineVo | null>(null)
   const permissions = ref<string[]>([])
   const resources = ref<ResourceTreeNode[]>([])
   const initialized = ref(false)
 
   const hasWildcardPermission = computed(() => permissions.value.includes('*:*:*'))
   const normalizedResources = computed(() => normalizeResourceTree(resources.value, undefined, hasWildcardPermission.value))
-  const displayName = computed(() => mine.value?.user?.nickname || mine.value?.user?.username || '未登录')
+  const displayName = computed(() => {
+    const user = mine.value?.user as Record<string, unknown> | undefined
+    return String(user?.nickname || user?.username || user?.loginAccount || '未登录')
+  })
   const sidebarMenus = computed(() => normalizeMenuTree(resources.value, undefined, hasWildcardPermission.value))
   const accessiblePaths = computed(() => new Set(collectAccessiblePaths(sidebarMenus.value)))
   const permissionSet = computed(() => {
@@ -160,12 +175,16 @@ export const useAuthStore = defineStore('auth', () => {
     return response.data as CaptchaVo
   }
 
-  async function login(payload: LoginRequest) {
-    const response = await loginApi(payload)
+  async function login(payload: LoginRequest, nextSubject: LoginSubject = 'admin') {
+    const response = nextSubject === 'merchant'
+      ? await loginMerchant(payload)
+      : await loginApi(payload)
     const nextToken = response.data.token
 
     setToken(nextToken)
+    setLoginSubject(nextSubject)
     token.value = nextToken
+    subject.value = nextSubject
     initialized.value = false
     resetUnauthorizedState()
 
@@ -177,7 +196,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function assignAuthContext(mineData: MineVo, resourceTree: ResourceTreeNode[]) {
+  function assignAuthContext(mineData: AuthMineVo, resourceTree: ResourceTreeNode[]) {
     mine.value = mineData
     permissions.value = mineData.permissions || []
     resources.value = resourceTree || []
@@ -185,6 +204,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function fetchAuthContext() {
+    if (subject.value === 'merchant') {
+      return Promise.all([getMerchantMine(), getMerchantMineResources()]).then(([mineResponse, resourceResponse]) => {
+        assignAuthContext(mineResponse.data, resourceResponse.data || [])
+      })
+    }
     return Promise.all([getMine(), getMineResources()]).then(([mineResponse, resourceResponse]) => {
       assignAuthContext(mineResponse.data, resourceResponse.data || [])
     })
@@ -216,7 +240,7 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    const response = await getMine()
+    const response = subject.value === 'merchant' ? await getMerchantMine() : await getMine()
     mine.value = response.data
     permissions.value = response.data.permissions || []
   }
@@ -231,12 +255,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function clearAuth() {
     token.value = ''
+    subject.value = 'admin'
     mine.value = null
     permissions.value = []
     resources.value = []
     initialized.value = false
     appStore.clearPageTags()
     removeToken()
+    removeLoginSubject()
   }
 
   async function logout() {
@@ -280,6 +306,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     token,
+    subject,
     mine,
     permissions,
     resources,

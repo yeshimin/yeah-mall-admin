@@ -111,3 +111,6 @@ export function request<T>(config: RequestConfig) {
     return Promise.reject(new Error(message))
   })
 }
+
+// Compatibility export for migrated JavaScript business API modules.
+export default request

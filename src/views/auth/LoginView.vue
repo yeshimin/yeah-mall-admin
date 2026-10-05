@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-panel">
       <div
-        v-if="loginPageOptions.noticeEnabled && loginPageOptions.noticeContent"
+        v-if="loginSubject === 'admin' && loginPageOptions.noticeEnabled && loginPageOptions.noticeContent"
         class="login-notice"
       >
         <el-alert
@@ -16,11 +16,15 @@
           </template>
         </el-alert>
       </div>
-      <div class="login-box">
+        <div class="login-box">
         <div class="login-header">
-          <h2>管理后台</h2>
+          <h2>{{ loginSubject === 'admin' ? '管理后台' : '商家后台' }}</h2>
           <p>欢迎回来，请登录</p>
         </div>
+        <el-radio-group v-model="loginSubject" class="login-subject" @change="handleLoginSubjectChange">
+          <el-radio-button label="admin">管理端</el-radio-button>
+          <el-radio-button label="merchant">商家端</el-radio-button>
+        </el-radio-group>
         <el-form
           ref="loginFormRef"
           :model="loginForm"
@@ -31,7 +35,7 @@
           <el-form-item prop="username">
             <el-input
               v-model="loginForm.username"
-              placeholder="请输入用户名"
+              :placeholder="loginSubject === 'admin' ? '请输入用户名' : '请输入商家账号'"
               prefix-icon="User"
               clearable
             ></el-input>
@@ -45,7 +49,7 @@
               show-password
             ></el-input>
           </el-form-item>
-          <el-form-item v-if="captchaEnabled" prop="code">
+          <el-form-item v-if="loginSubject === 'admin' && captchaEnabled" prop="code">
             <div class="captcha-row">
               <el-input
                 v-model="loginForm.code"
@@ -62,7 +66,7 @@
             <el-checkbox v-model="loginForm.remember">记住用户名</el-checkbox>
             <div class="login-form-links">
               <el-link
-                v-if="loginPageOptions.registerEnabled"
+                v-if="loginSubject === 'admin' && loginPageOptions.registerEnabled"
                 type="primary"
                 :underline="false"
                 @click="openRegisterDialog"
@@ -170,18 +174,20 @@ import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import { getRegisterCaptcha, register } from '@/api/auth'
 import { getPublicSysConfigs } from '@/api/upms'
+import type { LoginSubject } from '@/utils/auth'
 import { sha256Hex } from '@/utils/crypto'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-const REMEMBERED_USERNAME_KEY = 'yeah-boot-admin-remembered-username'
+const REMEMBERED_USERNAME_KEY_PREFIX = 'yeah-boot-admin-remembered-username'
 
 // 登录表单引用
 const loginFormRef = ref<FormInstance>()
 
 // 登录加载状态
 const loginLoading = ref(false)
+const loginSubject = ref<LoginSubject>(authStore.subject)
 const captchaEnabled = ref(false)
 const captchaImage = ref('')
 const registerDialogVisible = ref(false)
@@ -271,7 +277,7 @@ const registerRules = reactive<FormRules>({
 
 const redirectPath = () => {
   const redirect = route.query.redirect
-  return typeof redirect === 'string' && redirect ? redirect : '/system/user'
+  return typeof redirect === 'string' && redirect ? redirect : authStore.firstAccessiblePath
 }
 
 const loadCaptcha = async () => {
@@ -293,6 +299,15 @@ const loadCaptcha = async () => {
 }
 
 const loadLoginPageOptions = async () => {
+  if (loginSubject.value !== 'admin') {
+    Object.assign(loginPageOptions, {
+      noticeEnabled: false,
+      noticeTitle: '',
+      noticeContent: '',
+      registerEnabled: false,
+    })
+    return
+  }
   try {
     const response = await getPublicSysConfigs({ groupCode: 'auth.login' })
     const values = new Map(response.data.map((item) => [item.name, item.value]))
@@ -377,17 +392,32 @@ const handleForgotPassword = () => {
 }
 
 const loadRememberedUsername = () => {
-  const username = localStorage.getItem(REMEMBERED_USERNAME_KEY) || ''
+  const username = localStorage.getItem(`${REMEMBERED_USERNAME_KEY_PREFIX}-${loginSubject.value}`) || ''
   loginForm.username = username
   loginForm.remember = Boolean(username)
 }
 
 const saveRememberedUsername = () => {
+  const key = `${REMEMBERED_USERNAME_KEY_PREFIX}-${loginSubject.value}`
   if (loginForm.remember) {
-    localStorage.setItem(REMEMBERED_USERNAME_KEY, loginForm.username.trim())
+    localStorage.setItem(key, loginForm.username.trim())
     return
   }
-  localStorage.removeItem(REMEMBERED_USERNAME_KEY)
+  localStorage.removeItem(key)
+}
+
+const handleLoginSubjectChange = async () => {
+  loginForm.username = ''
+  loginForm.password = ''
+  loginForm.code = ''
+  loginForm.key = ''
+  captchaEnabled.value = false
+  captchaImage.value = ''
+  loadRememberedUsername()
+  await loadLoginPageOptions()
+  if (loginSubject.value === 'admin') {
+    await loadCaptcha()
+  }
 }
 
 // 处理登录
@@ -401,15 +431,15 @@ const handleLogin = async () => {
     await authStore.login({
       username: loginForm.username,
       password: hashedPassword,
-      code: captchaEnabled.value ? loginForm.code : undefined,
-      key: captchaEnabled.value ? loginForm.key : undefined,
+      code: loginSubject.value === 'admin' && captchaEnabled.value ? loginForm.code : undefined,
+      key: loginSubject.value === 'admin' && captchaEnabled.value ? loginForm.key : undefined,
       terminal: loginForm.terminal,
-    })
+    }, loginSubject.value)
     saveRememberedUsername()
     await router.push(redirectPath())
     ElMessage.success('登录成功')
   } catch {
-    if (captchaEnabled.value) {
+    if (loginSubject.value === 'admin' && captchaEnabled.value) {
       await loadCaptcha()
     }
   } finally {
@@ -419,8 +449,7 @@ const handleLogin = async () => {
 
 onMounted(() => {
   loadRememberedUsername()
-  void loadLoginPageOptions()
-  void loadCaptcha()
+  void handleLoginSubjectChange()
 })
 </script>
 
@@ -457,6 +486,12 @@ onMounted(() => {
   margin: 0;
   color: #909399;
   font-size: 14px;
+}
+
+.login-subject {
+  display: flex;
+  justify-content: center;
+  margin: 20px 30px 0;
 }
 
 .login-form {
