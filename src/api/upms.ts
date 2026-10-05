@@ -1,0 +1,509 @@
+import type { PageResponse } from '@/types/api'
+import type {
+  MineVo,
+  NameValueVo,
+  RoleCreateRequest,
+  RoleQueryParams,
+  RoleUpdateRequest,
+  ResourceTreeNode,
+  SysDictEntity,
+  SysConfigEntity,
+  SysDictTreeNode,
+  SysLogEntity,
+  SysOrgEntity,
+  SysOrgTreeNode,
+  SysPostEntity,
+  SysResEntity,
+  SysResGroupEntity,
+  SysResMountEntity,
+  SysResMountItem,
+  SysRoleEntity,
+  SysRoleVo,
+  SysUserImportResultVo,
+  UpdateMineRequest,
+  SysUserVo,
+} from '@/types/upms'
+import { downloadByUrl, resolveApiUrl } from '@/utils/download'
+import { request } from '@/utils/request'
+
+export function getMine() {
+  return request<MineVo>({
+    url: '/admin/sysUser/mine',
+    method: 'get',
+  })
+}
+
+export function getMineResources() {
+  return request<ResourceTreeNode[]>({
+    url: '/admin/sysUser/mineResources',
+    method: 'get',
+  })
+}
+
+export function updateMine(data: UpdateMineRequest) {
+  return request<void>({
+    url: '/admin/sysUser/updateMine',
+    method: 'post',
+    data,
+  })
+}
+
+export function queryUsers(params: Record<string, unknown>) {
+  return request<PageResponse<SysUserVo>>({
+    url: '/admin/sysUser/query',
+    method: 'get',
+    params,
+  })
+}
+
+export function getUserDetail(id: number) {
+  return request<SysUserVo>({
+    url: '/admin/sysUser/detail',
+    method: 'get',
+    params: { id },
+  })
+}
+
+export function createUser(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysUser/create',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function updateUser(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysUser/update',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function resetUserPassword(data: { id: number; password: string }) {
+  return request<void>({
+    url: '/admin/sysUser/resetPassword',
+    method: 'post',
+    data,
+  })
+}
+
+export function downloadUserImportTemplate() {
+  return downloadByUrl(resolveApiUrl('/admin/sysUser/importTemplate'), '用户导入模板.xlsx')
+}
+
+export function importUsers(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request<SysUserImportResultVo>({
+    url: '/admin/sysUser/import',
+    method: 'post',
+    data: formData,
+  })
+}
+
+export function exportUsers(params: Record<string, unknown>) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') {
+      return
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item) => searchParams.append(key, String(item)))
+      return
+    }
+    searchParams.append(key, String(value))
+  })
+  const query = searchParams.toString()
+  const path = query ? `/admin/sysUser/export?${query}` : '/admin/sysUser/export'
+  return downloadByUrl(resolveApiUrl(path), '用户数据.xlsx')
+}
+
+export function deleteUsers(ids: number[], options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysUser/delete',
+    method: 'post',
+    data: { ids },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function queryRoles(params: RoleQueryParams) {
+  return request<PageResponse<SysRoleEntity>>({
+    url: '/admin/sysRole/crud/query',
+    method: 'get',
+    params,
+  })
+}
+
+export function getRoleDetail(id: number) {
+  return request<SysRoleVo>({
+    url: '/admin/sysRole/detail',
+    method: 'get',
+    params: { id },
+  })
+}
+
+export function createRole(data: RoleCreateRequest, options?: { suppressErrorMessage?: boolean }) {
+  return request<SysRoleEntity>({
+    url: '/admin/sysRole/create',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function updateRole(data: RoleUpdateRequest, options?: { suppressErrorMessage?: boolean }) {
+  return request<SysRoleEntity>({
+    url: '/admin/sysRole/update',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function deleteRoles(ids: number[], options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysRole/delete',
+    method: 'post',
+    data: { ids },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function getViewResourceTree(params?: Record<string, unknown>) {
+  return request<ResourceTreeNode[]>({
+    url: '/admin/sysRes/viewTree',
+    method: 'get',
+    params,
+  })
+}
+
+export function getApiResourceTree(params?: Record<string, unknown>) {
+  return request<ResourceTreeNode[]>({
+    url: '/admin/sysRes/apiTree',
+    method: 'get',
+    params,
+  })
+}
+
+export function getResourceDetail(id: number) {
+  return request<SysResEntity>({
+    url: '/admin/sysRes/crud/detail',
+    method: 'get',
+    params: { id },
+  })
+}
+
+export function createResource(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysRes/create',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function updateResource(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysRes/update',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function deleteResources(ids: number[], options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysRes/delete',
+    method: 'post',
+    data: { ids },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function createResourceGroup(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<SysResGroupEntity>({
+    url: '/admin/sysResGroup/create',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function updateResourceGroup(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<SysResGroupEntity>({
+    url: '/admin/sysResGroup/update',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function deleteResourceGroups(ids: number[], options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysResGroup/delete',
+    method: 'post',
+    data: { ids },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function queryMountedApis(viewResId: number) {
+  return request<SysResMountEntity[]>({
+    url: '/admin/sysResMount/queryByViewResId',
+    method: 'get',
+    params: { viewResId },
+  })
+}
+
+export function saveMountedApis(
+  viewResId: number,
+  items: SysResMountItem[],
+  options?: { suppressErrorMessage?: boolean },
+) {
+  return request<boolean>({
+    url: '/admin/sysResMount/saveByViewResId',
+    method: 'post',
+    data: { viewResId, items },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function queryPosts(params: Record<string, unknown>) {
+  return request<PageResponse<SysPostEntity>>({
+    url: '/admin/sysPost/crud/query',
+    method: 'get',
+    params,
+  })
+}
+
+export function getPostDetail(id: number) {
+  return request<SysPostEntity>({
+    url: '/admin/sysPost/crud/detail',
+    method: 'get',
+    params: { id },
+  })
+}
+
+export function createPost(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysPost/create',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function updatePost(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysPost/update',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function deletePosts(ids: number[], options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysPost/delete',
+    method: 'post',
+    data: { ids },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function querySysConfigs(params: Record<string, unknown>) {
+  return request<PageResponse<SysConfigEntity>>({
+    url: '/admin/sysConfig/crud/query',
+    method: 'get',
+    params,
+  })
+}
+
+export function getSysConfigDetail(id: number) {
+  return request<SysConfigEntity>({
+    url: '/admin/sysConfig/crud/detail',
+    method: 'get',
+    params: { id },
+  })
+}
+
+export function createSysConfig(
+  data: Record<string, unknown>,
+  options?: { suppressErrorMessage?: boolean },
+) {
+  return request<SysConfigEntity>({
+    url: '/admin/sysConfig/create',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function updateSysConfig(
+  data: Record<string, unknown>,
+  options?: { suppressErrorMessage?: boolean },
+) {
+  return request<SysConfigEntity>({
+    url: '/admin/sysConfig/update',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function deleteSysConfigs(ids: number[], options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysConfig/delete',
+    method: 'post',
+    data: { ids },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function refreshSysConfigCache(options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysConfig/refreshCache',
+    method: 'post',
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function getPublicSysConfigs(params: { groupCode?: string; configKey?: string }) {
+  return request<NameValueVo[]>({
+    url: '/admin/sysConfig/publicConfig',
+    method: 'get',
+    params,
+    skipAuth: true,
+    suppressErrorMessage: true,
+  })
+}
+
+export function queryRoleResourceTree(roleId: number) {
+  return request<ResourceTreeNode[]>({
+    url: '/admin/sysRole/queryResourceTree',
+    method: 'get',
+    params: { roleId },
+  })
+}
+
+export function setRoleResources(
+  roleId: number,
+  viewResIds: number[],
+  mountIds: number[] = [],
+  options?: { suppressErrorMessage?: boolean },
+) {
+  return request<void>({
+    url: '/admin/sysRole/setResources',
+    method: 'post',
+    data: { roleId, viewResIds, mountIds },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function getOrgTree(params?: Record<string, unknown>) {
+  return request<SysOrgTreeNode[]>({
+    url: '/admin/sysOrg/tree',
+    method: 'get',
+    params,
+  })
+}
+
+export function getOrgDetail(id: number) {
+  return request<SysOrgEntity>({
+    url: '/admin/sysOrg/crud/detail',
+    method: 'get',
+    params: { id },
+  })
+}
+
+export function createOrg(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysOrg/create',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function updateOrg(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysOrg/update',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function deleteOrgs(ids: number[], options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysOrg/delete',
+    method: 'post',
+    data: { ids },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function getDictTree(rootNodeCode?: string) {
+  return request<SysDictTreeNode[]>({
+    url: '/admin/sysDict/tree',
+    method: 'get',
+    params: {
+      rootNodeCode: rootNodeCode || undefined,
+    },
+  })
+}
+
+export function getDictDetail(id: number) {
+  return request<SysDictEntity>({
+    url: '/admin/sysDict/crud/detail',
+    method: 'get',
+    params: { id },
+  })
+}
+
+export function createDict(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysDict/create',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function updateDict(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysDict/update',
+    method: 'post',
+    data,
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function deleteDicts(ids: number[], force = false, options?: { suppressErrorMessage?: boolean }) {
+  return request<void>({
+    url: '/admin/sysDict/delete',
+    method: 'post',
+    data: { ids, force },
+    suppressErrorMessage: options?.suppressErrorMessage,
+  })
+}
+
+export function queryLogs(params: Record<string, unknown>) {
+  return request<PageResponse<SysLogEntity>>({
+    url: '/admin/sysLog/crud/query',
+    method: 'get',
+    params,
+  })
+}
+
+export function getLogDetail(id: number) {
+  return request<SysLogEntity>({
+    url: '/admin/sysLog/detail',
+    method: 'get',
+    params: { id },
+  })
+}

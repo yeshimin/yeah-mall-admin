@@ -1,0 +1,51 @@
+import { request } from '@/utils/request'
+import type { AdminRegisterRequest, CaptchaVo, LoginRequest, LoginVo } from '@/types/upms'
+
+export function getCaptcha() {
+  return request<CaptchaVo>({
+    url: '/admin/auth/captcha',
+    method: 'get',
+    skipAuth: true,
+  })
+}
+
+export function login(payload: LoginRequest) {
+  return request<LoginVo>({
+    url: '/admin/auth/login',
+    method: 'post',
+    data: payload,
+    skipAuth: true,
+  })
+}
+
+export function getRegisterCaptcha() {
+  return request<CaptchaVo>({
+    url: '/admin/auth/registerCaptcha',
+    method: 'get',
+    skipAuth: true,
+  })
+}
+
+export function register(payload: AdminRegisterRequest) {
+  return request<void>({
+    url: '/admin/auth/register',
+    method: 'post',
+    data: payload,
+    skipAuth: true,
+  })
+}
+
+export function logout() {
+  return request<void>({
+    url: '/auth/logout',
+    method: 'post',
+  })
+}
+
+export function clearLoginLimit(data: { username: string; terminal?: string }) {
+  return request<void>({
+    url: '/admin/auth/clearLoginLimit',
+    method: 'post',
+    data,
+  })
+}
