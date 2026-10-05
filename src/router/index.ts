@@ -45,6 +45,7 @@ const ProfileView = () => import('../views/profile/ProfileView.vue')
 const HomeView = () => import('../views/home/HomeView.vue')
 const backendViewModules = import.meta.glob('../views/**/*.vue')
 const registeredDynamicRouteNames = new Set<string>()
+const dynamicRouteSignatures = new Map<string, string>()
 
 const BACKEND_COMPONENT_MAP: Record<string, () => Promise<unknown>> = {
   'system/user/index': UserManage,
@@ -255,15 +256,47 @@ function buildDynamicRouteNode(node: ResourceTreeNode): RouteRecordRaw {
   }
 }
 
+function getDynamicRouteSignature(node: ResourceTreeNode): string {
+  return JSON.stringify({
+    id: node.id,
+    path: node.path,
+    component: node.component,
+    isLink: node.isLink,
+    type: node.type,
+    children: (node.children || [])
+      .filter(hasInternalRouteNode)
+      .map((child) => getDynamicRouteSignature(child)),
+  })
+}
+
 function ensureDynamicRoutes(resources: ResourceTreeNode[]) {
   const dynamicMenus = resources.filter(
     (item) => hasInternalRouteNode(item) && !item.path?.startsWith('/system'),
   )
-  dynamicMenus.forEach((node) => {
+  const dynamicRoutes = dynamicMenus.map((node) => {
     const route = buildDynamicRouteNode(node)
-    if (route.name && !registeredDynamicRouteNames.has(String(route.name))) {
+    return {
+      route,
+      name: String(route.name),
+      signature: getDynamicRouteSignature(node),
+    }
+  })
+
+  // 登录主体或资源权限变更时，同步移除上一个上下文注入的动态路由。
+  Array.from(registeredDynamicRouteNames).forEach((routeName) => {
+    const nextRoute = dynamicRoutes.find((item) => item.name === routeName)
+    if (!nextRoute || dynamicRouteSignatures.get(routeName) !== nextRoute.signature) {
+      router.removeRoute(routeName)
+      registeredDynamicRouteNames.delete(routeName)
+      dynamicRouteSignatures.delete(routeName)
+    }
+  })
+
+  dynamicRoutes.forEach(({ route, name, signature }) => {
+    if (!registeredDynamicRouteNames.has(name)) {
       router.addRoute(route)
-      registeredDynamicRouteNames.add(String(route.name))
+      registeredDynamicRouteNames.add(name)
+      dynamicRouteSignatures.set(name, signature)
     }
   })
 }

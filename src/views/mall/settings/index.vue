@@ -66,6 +66,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { ElMessage } from 'element-plus';
 import { getToken } from '@/utils/auth';
+import { getMchShopDetail, updateMchShop } from '@/api/mall/shop';
 
 const loading = ref(false);
 const saving = ref(false);
@@ -89,6 +90,12 @@ function getFullImageUrl(fileKey) {
   return getStoragePreviewUrl(fileKey)
 }
 
+// 与其他商家业务页面共用当前选择的店铺标识。
+function getCurrentShopId() {
+  const shopId = Number(localStorage.getItem('shopId'));
+  return Number.isSafeInteger(shopId) && shopId > 0 ? shopId : null;
+}
+
 // 处理Logo上传成功
 const handleLogoUpload = (response) => {
   if (response.code === 0 && response.data && response.data.fileKey) {
@@ -106,41 +113,40 @@ const handleUploadError = () => {
 
 // 保存设置
 const handleSaveSettings = async () => {
+  const shopId = getCurrentShopId();
+  if (!shopId) {
+    ElMessage.warning('请先选择店铺');
+    return;
+  }
+
   try {
     await settingsFormRef.value.validate();
 
     saving.value = true;
 
-    // 调用真实的API更新店铺信息
-    const response = await fetch('/dev-api/mch/shop/update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getToken()}`
-      },
-      body: JSON.stringify({
-        id: '1', // 店铺ID，实际项目中可能需要从其他地方获取
-        shopName: settingsForm.shopName,
-        shopLogo: settingsForm.shopLogo
-      })
+    const response = await updateMchShop({
+      id: shopId,
+      shopName: settingsForm.shopName,
+      shopLogo: settingsForm.shopLogo
     });
 
-    const result = await response.json();
-
-    if (result.code === 0) {
+    if (response.code === 0) {
       // 更新localStorage中的店铺信息，以便同步更新右上角的店铺名称
       const currentShop = localStorage.getItem('currentShop');
       if (currentShop) {
-        const shopInfo = JSON.parse(currentShop);
-        shopInfo.name = settingsForm.shopName;
-        localStorage.setItem('currentShop', JSON.stringify(shopInfo));
-
-        // 触发自定义事件，通知Navbar组件更新店铺名称
-        window.dispatchEvent(new CustomEvent('shopInfoUpdated'));
+        try {
+          const shopInfo = JSON.parse(currentShop);
+          shopInfo.name = settingsForm.shopName;
+          shopInfo.shopName = settingsForm.shopName;
+          localStorage.setItem('currentShop', JSON.stringify(shopInfo));
+          window.dispatchEvent(new CustomEvent('shopInfoUpdated'));
+        } catch {
+          // 当前店铺缓存异常时不影响已成功保存的店铺资料。
+        }
       }
       ElMessage.success('设置保存成功');
     } else {
-      ElMessage.error(result.message || '保存失败');
+      ElMessage.error(response.message || '保存失败');
     }
   } catch (error) {
     console.error('保存设置失败:', error);
@@ -157,26 +163,24 @@ const handleResetForm = () => {
 
 // 获取店铺信息
 const getShopInfo = async () => {
+  const shopId = getCurrentShopId();
+  if (!shopId) {
+    ElMessage.warning('请先选择店铺');
+    return;
+  }
+
   try {
     loading.value = true;
 
-    // 调用真实的API获取店铺详情
-    const response = await fetch('/dev-api/mch/shop/crud/detail?id=1', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getToken()}`
-      }
-    });
+    const response = await getMchShopDetail(shopId);
 
-    const result = await response.json();
-
-    if (result.code === 0 && result.data) {
-      const shopInfo = result.data;
+    if (response.code === 0 && response.data) {
+      const shopInfo = response.data;
       settingsForm.shopNo = shopInfo.shopNo || '';
       settingsForm.shopName = shopInfo.shopName || '';
       settingsForm.shopLogo = shopInfo.shopLogo || '';
     } else {
-      ElMessage.error('获取店铺信息失败');
+      ElMessage.error(response.message || '获取店铺信息失败');
     }
   } catch (error) {
     console.error('获取店铺信息失败:', error);

@@ -53,3 +53,21 @@ export function queryShopList(params) {
     params
   })
 }
+
+// 查询当前商家店铺详情
+export function getMchShopDetail(id) {
+  return request({
+    url: '/mch/shop/crud/detail',
+    method: 'get',
+    params: { id }
+  })
+}
+
+// 更新当前商家店铺
+export function updateMchShop(data) {
+  return request({
+    url: '/mch/shop/update',
+    method: 'post',
+    data
+  })
+}

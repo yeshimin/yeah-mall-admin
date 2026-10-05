@@ -40,6 +40,26 @@ export function queryConversationMessages(params) {
   })
 }
 
+// 初始化会话并获取会话详情
+export function initConversation(data) {
+  return request({
+    url: `/mch/csConversation/init`,
+    method: 'post',
+    data
+  })
+}
+
+// 上传客服消息附件
+export function uploadCsMessageFile(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: `/mch/storage/upload`,
+    method: 'post',
+    data: formData
+  })
+}
+
 // 发送消息
 export function sendMessage(data) {
   return request({

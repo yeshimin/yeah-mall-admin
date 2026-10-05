@@ -828,81 +828,28 @@ const handleCurrentChange = (current) => {
 const handleOrderDetail = async (row) => {
   try {
     deliveryTracking.value = [];
+    currentOrder.value = null;
+    orderItems.value = [];
+    detailDialogVisible.value = false;
 
-    let orderData = null;
-    let itemsData = [];
-
-    try {
-      const response = await getOrderDetail(row.id);
-      if (response.code === 0 && response.data) {
-        orderData = response.data.order;
-        itemsData = response.data.shopProducts || [];
-
-        if (response.data.deliveryTracking) {
-          if (response.data.deliveryTracking.error_code === 0 && response.data.deliveryTracking.result) {
-            deliveryTracking.value = (response.data.deliveryTracking.result.list || []).map(track => ({
-              time: track.datetime || '',
-              content: track.remark || ''
-            })).reverse();
-
-            if (orderData) {
-              orderData.deliveryQueryStatus = '2';
-              orderData.trackingStatusDetail = response.data.deliveryTracking.result.status_detail || 'UNKNOWN';
-            }
-          } else {
-            deliveryTracking.value = [];
-            if (orderData) {
-              orderData.deliveryQueryStatus = '3';
-            }
-          }
-        }
-      }
-    } catch (apiError) {
-      console.log('API调用失败，使用mock数据:', apiError);
+    const response = await getOrderDetail(row.id);
+    if (response.code !== 0 || !response.data?.order) {
+      throw new Error(response.message || '订单详情不存在');
     }
 
-    if (!orderData) {
-      orderData = {
-        ...row,
-        paySuccessTime: row.paySuccessTime || '2026-01-16 14:30:00',
-        receiverName: row.receiverName || '张三',
-        receiverContact: row.receiverContact || '13800138000',
-        receiverFullAddress: row.receiverFullAddress || '北京市朝阳区建国路88号',
-        deliveryNo: row.status >= '3' ? 'SF1234567890' : '',
-        deliveryCompany: row.status >= '3' ? '顺丰速运' : '',
-        deliverTime: row.status >= '3' ? '2026-01-16 15:00:00' : ''
-      };
+    const orderData = response.data.order;
+    const itemsData = response.data.shopProducts || [];
+    const tracking = response.data.deliveryTracking;
 
-      itemsData = [
-        {
-          id: 1,
-          spuId: 35,
-          spuName: '叶牌挖掘机',
-          spuMainImage: '2ddcc6e552cd4107a9aa3186e8241bb3',
-          skuId: 29,
-          skuName: 'C型挖掘机',
-          specs: [
-            { specId: 1, specName: '颜色', optId: 2, optName: '黄色', sort: 1 },
-            { specId: 3, specName: '尺寸', optId: 5, optName: '大杯', sort: 2 }
-          ],
-          price: 2222.00,
-          quantity: 2
-        },
-        {
-          id: 2,
-          spuId: 1,
-          spuName: '红米k20',
-          spuMainImage: 'd86b9521bed1459c84b81bca3a8a2ed6',
-          skuId: 36,
-          skuName: '4个规格',
-          specs: [
-            { specId: 1, specName: '颜色', optId: 1, optName: '红色', sort: 1 },
-            { specId: 9, specName: '重量', optId: 21, optName: '很重', sort: 2 }
-          ],
-          price: 111.00,
-          quantity: 1
-        }
-      ];
+    if (tracking?.error_code === 0 && tracking.result) {
+      deliveryTracking.value = (tracking.result.list || []).map(track => ({
+        time: track.datetime || '',
+        content: track.remark || ''
+      })).reverse();
+      orderData.deliveryQueryStatus = '2';
+      orderData.trackingStatusDetail = tracking.result.status_detail || 'UNKNOWN';
+    } else if (tracking) {
+      orderData.deliveryQueryStatus = '3';
     }
 
     currentOrder.value = orderData;

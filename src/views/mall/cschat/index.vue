@@ -194,8 +194,7 @@ import { ref, reactive, onMounted, nextTick } from 'vue';
 import { ElMessage, ElIcon } from 'element-plus';
 import { PictureFilled, Close, User } from '@element-plus/icons-vue';
 import wsService from '@/utils/websocket';
-import { getToken } from '@/utils/auth';
-import { queryConversationList, queryConversationMessages } from '@/api/mall/cschat';
+import { initConversation, queryConversationList, queryConversationMessages, uploadCsMessageFile } from '@/api/mall/cschat';
 import { resolveApiUrl } from '@/utils/download';
 
 const loading = ref(false);
@@ -366,22 +365,13 @@ const getChatMessages = async (conversationId, isLoadMore = false) => {
 // 获取会话详细信息
 const getConversationDetail = async (conversationId) => {
   try {
-    const response = await fetch('/dev-api/mch/csConversation/init', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getToken()}`
-      },
-      body: JSON.stringify({ id: conversationId })
-    });
+    const response = await initConversation({ id: conversationId });
 
-    const result = await response.json();
-
-    if (result.code === 0 && result.data) {
-      conversationDetail.value = result.data;
-      return result.data;
+    if (response.code === 0 && response.data) {
+      conversationDetail.value = response.data;
+      return response.data;
     } else {
-      console.error('获取会话详细信息失败:', result.message);
+      console.error('获取会话详细信息失败:', response.message);
       return null;
     }
   } catch (error) {
@@ -481,21 +471,7 @@ const sendTextMessage = async () => {
 // 发送图片消息
 const sendImageMessage = async () => {
   const file = selectedImageFile.value;
-
-  // 创建FormData对象
-  const formData = new FormData();
-  formData.append('file', file.raw);
-
-  // 调用上传接口
-  const response = await fetch('/dev-api/mch/storage/upload', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${getToken()}`
-    },
-    body: formData
-  });
-
-  const result = await response.json();
+  const result = await uploadCsMessageFile(file.raw);
 
   if (result.code === 0 && result.data && result.data.fileKey) {
     const fileKey = result.data.fileKey;
