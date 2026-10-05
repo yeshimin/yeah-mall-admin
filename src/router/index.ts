@@ -162,14 +162,24 @@ const asyncRoutes = [
       },
     ],
   },
-  // 404 必须放在最后
-  { path: '/:pathMatch(.*)*', redirect: '/404', hidden: true },
+  // 保留原始地址，供动态路由在权限资源加载后重新匹配。
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('../views/error/404.vue'),
+    meta: { title: '404', ignoreAccessControl: true },
+    hidden: true,
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [...constantRoutes, ...asyncRoutes],
 })
+
+function updateDocumentTitle(title: unknown) {
+  document.title = String(title || '管理后台')
+}
 
 function resolveBackendView(component?: string) {
   if (!component || component === 'Layout') {
@@ -262,11 +272,9 @@ function ensureDynamicRoutes(resources: ResourceTreeNode[]) {
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
-  // 设置页面标题
-  document.title = `${to.meta.title || '管理后台'}`
-
   // 不需要登录的页面直接放行
   if (to.path === '/login') {
+    updateDocumentTitle(to.meta.title)
     return true
   }
 
@@ -311,7 +319,7 @@ router.beforeEach(async (to) => {
     return authStore.firstAccessiblePath
   }
 
-  // 有 token 放行
+  updateDocumentTitle(to.meta.title)
   return true
 })
 
