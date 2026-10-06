@@ -71,9 +71,19 @@
         <el-table-column prop="orderNo" label="订单编号" min-width="180"></el-table-column>
         <el-table-column prop="createTime" label="下单时间" min-width="180" sortable="custom"></el-table-column>
         <el-table-column prop="paySuccessTime" label="支付时间" min-width="180" sortable="custom"></el-table-column>
-        <el-table-column prop="totalAmount" label="订单金额" min-width="120" align="right">
+        <el-table-column prop="totalAmount" label="商品总额" min-width="120" align="right">
           <template #default="scope">
-            <span>¥{{ scope.row.totalAmount.toFixed(2) }}</span>
+            <span>¥{{ formatAmount(scope.row.totalAmount) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="discountAmount" label="优惠金额" min-width="110" align="right">
+          <template #default="scope">
+            <span>-¥{{ formatAmount(scope.row.discountAmount) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="finalAmount" label="优惠后应付" min-width="120" align="right">
+          <template #default="scope">
+            <span>¥{{ formatAmount(scope.row.finalAmount) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="orderType" label="订单类型" min-width="120">
@@ -140,11 +150,19 @@
                 <span class="value">{{ currentOrder.orderNo }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">订单金额：</span>
-                <span class="value amount">¥{{ currentOrder.totalAmount.toFixed(2) }}</span>
+                <span class="label">商品总额：</span>
+                <span class="value amount">¥{{ formatAmount(currentOrder.totalAmount) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">优惠金额：</span>
+                <span class="value amount">-¥{{ formatAmount(currentOrder.discountAmount) }}</span>
               </div>
             </div>
             <div class="detail-row">
+              <div class="detail-item">
+                <span class="label">优惠后应付：</span>
+                <span class="value amount">¥{{ formatAmount(currentOrder.finalAmount) }}</span>
+              </div>
               <div class="detail-item">
                 <span class="label">订单状态：</span>
                 <el-tag :type="getStatusType(currentOrder.status)">{{ getStatusText(currentOrder.status) }}</el-tag>
@@ -326,15 +344,19 @@
           <div class="order-summary" style="margin-top: 10px; text-align: right;">
             <div class="summary-item">
               <span>商品总价：</span>
-              <span class="amount">¥{{ currentOrder.totalAmount.toFixed(2) }}</span>
+              <span class="amount">¥{{ formatAmount(currentOrder.totalAmount) }}</span>
+            </div>
+            <div class="summary-item">
+              <span>优惠金额：</span>
+              <span class="amount">-¥{{ formatAmount(currentOrder.discountAmount) }}</span>
             </div>
             <div class="summary-item">
               <span>运费：</span>
               <span class="amount">¥0.00</span>
             </div>
             <div class="summary-item total">
-              <span>实付金额：</span>
-              <span class="amount">¥{{ currentOrder.totalAmount.toFixed(2) }}</span>
+              <span>优惠后应付：</span>
+              <span class="amount">¥{{ formatAmount(currentOrder.finalAmount) }}</span>
             </div>
           </div>
         </el-collapse-item>
@@ -631,6 +653,10 @@ import ImagePreview from '@/components/ImagePreview/index.vue';
 
 function getFullImageUrl(fileKey) {
   return getStoragePreviewUrl(fileKey)
+}
+
+function formatAmount(value) {
+  return Number(value || 0).toFixed(2)
 }
 
 const loading = ref(false);
