@@ -6,6 +6,7 @@ import type { ResourceTreeNode } from '@/types/upms'
 // 引入 Layout 组件
 const Layout = () => import('../components/layout/index.vue')
 const RoutePlaceholderView = () => import('../views/system/RoutePlaceholderView.vue')
+const RouteContainerView = () => import('../views/system/RouteContainerView.vue')
 
 // 静态路由
 const constantRoutes = [
@@ -217,7 +218,7 @@ function hasInternalRouteNode(node: ResourceTreeNode): boolean {
   return isPageResourceType(node.type) && Boolean(node.path)
 }
 
-function buildDynamicRouteNode(node: ResourceTreeNode): RouteRecordRaw {
+function buildDynamicRouteNode(node: ResourceTreeNode, isTopLevel = false): RouteRecordRaw {
   const routeName = `dynamic-${node.id}`
   const internalChildren = (node.children || []).filter(hasInternalRouteNode)
   const hasChildren = internalChildren.length > 0
@@ -233,7 +234,8 @@ function buildDynamicRouteNode(node: ResourceTreeNode): RouteRecordRaw {
     return {
       path: node.path || `/${node.id}`,
       name: routeName,
-      component: Layout,
+      // 动态顶级菜单负责承载后台框架，嵌套菜单仅继续渲染子路由。
+      component: isTopLevel ? Layout : RouteContainerView,
       redirect: firstChild,
       meta: {
         title: node.name,
@@ -274,7 +276,7 @@ function ensureDynamicRoutes(resources: ResourceTreeNode[]) {
     (item) => hasInternalRouteNode(item) && !item.path?.startsWith('/system'),
   )
   const dynamicRoutes = dynamicMenus.map((node) => {
-    const route = buildDynamicRouteNode(node)
+    const route = buildDynamicRouteNode(node, true)
     return {
       route,
       name: String(route.name),
