@@ -3,16 +3,17 @@ import { ElMessage } from 'element-plus'
 import type { ApiResponse } from '@/types/api'
 import { getToken } from './auth'
 import { handleUnauthorized } from './session'
+import { apiBaseUrl } from './api-base-url'
+import { decryptApiResponse, encryptApiRequest, type ApiEncryptionRequestConfig } from './api-encryption'
 
-type RequestConfig = AxiosRequestConfig & {
+type RequestConfig = ApiEncryptionRequestConfig & {
   skipAuth?: boolean
   suppressErrorMessage?: boolean
+  idempotencyKey?: string
 }
 
 const service = axios.create({
-  baseURL: import.meta.env.DEV
-    ? '/api'
-    : (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8080'),
+  baseURL: apiBaseUrl,
   timeout: 10000,
   paramsSerializer: {
     serialize: (params) => {
@@ -43,14 +44,14 @@ const service = axios.create({
   },
 })
 
-service.interceptors.request.use((config) => {
+service.interceptors.request.use(async (config) => {
   const nextConfig = config
   const skipAuth = (nextConfig as RequestConfig).skipAuth
   const token = getToken()
   const headers = AxiosHeaders.from(nextConfig.headers || {})
   nextConfig.headers = headers
 
-  // Let the browser generate the multipart boundary for FormData requests.
+  // FormData 请求由浏览器自动生成 multipart boundary。
   if (nextConfig.data instanceof FormData) {
     headers.delete('Content-Type')
   }
@@ -59,11 +60,24 @@ service.interceptors.request.use((config) => {
     headers.set('Authorization', `Bearer ${token}`)
   }
 
+  const idempotencyKey = (nextConfig as RequestConfig).idempotencyKey
+  if (idempotencyKey) {
+    // 同一表单提交意图复用此键，供后端阻止重复执行业务写操作。
+    headers.set('Idempotency-Key', idempotencyKey)
+  }
+
+  // 协议启用后统一包装 JSON/查询参数；文件流和显式豁免请求保持原样。
+  await encryptApiRequest(nextConfig as RequestConfig, headers)
+
   return nextConfig
 })
 
 service.interceptors.response.use(
-  (response) => response,
+  async (response) => {
+    // 响应解密必须先于统一 R<T> 结构的业务处理。
+    response.data = await decryptApiResponse(response.config as RequestConfig, response.data)
+    return response
+  },
   (error: AxiosError) => {
     const requestConfig = error.config as RequestConfig | undefined
     if (error.response?.status === 401 && !requestConfig?.skipAuth) {

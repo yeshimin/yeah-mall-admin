@@ -173,22 +173,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { uploadStorageFile } from '@/api/storage'
 import { STORAGE_UPLOAD_PATH } from '@/constants/storage'
+import { usePasswordPolicy } from '@/composables/usePasswordPolicy'
 import { updateMine } from '@/api/upms'
 import { useAuthStore } from '@/stores/auth'
 import type { UpdateMineRequest } from '@/types/upms'
 import { DEFAULT_AVATAR_URL, normalizeAvatarValue, resolveAvatarUrl } from '@/utils/avatar'
 import { sha256Hex } from '@/utils/crypto'
+import { validatePasswordPolicy } from '@/utils/password-policy'
 import { formatDisabledName, joinStatusNames } from '@/utils/status'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { passwordPolicy, loadPasswordPolicy } = usePasswordPolicy()
 const refreshing = ref(false)
 const avatarUploading = ref(false)
 const profileSaving = ref(false)
@@ -313,7 +316,17 @@ const passwordRules = reactive<FormRules>({
   ],
   newPassword: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '新密码长度不能少于 6 位', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        if (!value) {
+          callback()
+          return
+        }
+        const message = validatePasswordPolicy(String(value), passwordPolicy)
+        callback(message ? new Error(message) : undefined)
+      },
+      trigger: 'blur',
+    },
   ],
   confirmPassword: [
     { required: true, message: '请再次输入新密码', trigger: 'blur' },
@@ -422,6 +435,10 @@ watch(avatarSource, () => {
 
 watch([() => pendingAvatarUrl.value, () => profileForm.avatar], () => {
   formAvatarLoadFailed.value = false
+})
+
+onMounted(() => {
+  void loadPasswordPolicy()
 })
 
 onBeforeUnmount(() => {

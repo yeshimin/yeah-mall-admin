@@ -26,12 +26,13 @@ export function getRegisterCaptcha() {
   })
 }
 
-export function register(payload: AdminRegisterRequest) {
+export function register(payload: AdminRegisterRequest, options?: { idempotencyKey?: string }) {
   return request<void>({
     url: '/admin/auth/register',
     method: 'post',
     data: payload,
     skipAuth: true,
+    idempotencyKey: options?.idempotencyKey,
   })
 }
 

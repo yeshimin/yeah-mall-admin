@@ -370,6 +370,7 @@ import type { FormInstance, FormRules, TableInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import { clearLoginLimit } from '@/api/auth'
+import { usePasswordPolicy } from '@/composables/usePasswordPolicy'
 import {
   createUser,
   deleteUsers,
@@ -387,6 +388,8 @@ import {
 import type { SysOrgTreeNode, SysUserVo } from '@/types/upms'
 import { sha256Hex } from '@/utils/crypto'
 import { getRequestErrorMessage as getDeleteErrorMessage, isUserCancel } from '@/utils/error'
+import { createIdempotencyKey } from '@/utils/idempotency'
+import { validatePasswordPolicy } from '@/utils/password-policy'
 import { formatDisabledName, isDisabledStatus, joinStatusNames } from '@/utils/status'
 
 type SelectOption = {
@@ -407,6 +410,7 @@ interface UserListItem extends SysUserVo {
 }
 
 const authStore = useAuthStore()
+const { passwordPolicy, loadPasswordPolicy } = usePasswordPolicy()
 const canCreateUser = computed(() => authStore.hasPermission('view:admin:sysUser:create'))
 const canViewUserDetail = computed(() => authStore.hasPermission('view:admin:sysUser:detail'))
 const canUpdateUser = computed(() => authStore.hasPermission('view:admin:sysUser:update'))
@@ -457,6 +461,7 @@ const userList = ref<UserListItem[]>([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增用户')
 const userFormSubmitting = ref(false)
+let createUserSubmission: { fingerprint: string; key: string } | null = null
 const detailVisible = ref(false)
 const currentUserDetail = ref<SysUserVo | null>(null)
 const importDialogVisible = ref(false)
@@ -537,7 +542,17 @@ const userRules = reactive<FormRules>({
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' }
+    {
+      validator: (_rule, value, callback) => {
+        if (!value) {
+          callback()
+          return
+        }
+        const message = validatePasswordPolicy(String(value), passwordPolicy)
+        callback(message ? new Error(message) : undefined)
+      },
+      trigger: 'blur',
+    },
   ],
   mobile: [
     { pattern: /^(?:0|86|\+86)?1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
@@ -637,7 +652,7 @@ function ensureLockedSelection(key: UserRelationKey, selectedIds: number[]) {
 
 // 页面加载时获取用户列表
 onMounted(() => {
-  void Promise.all([loadOptions(), getUserList()])
+  void Promise.all([loadOptions(), getUserList(), loadPasswordPolicy()])
 })
 
 // 获取用户列表
@@ -974,12 +989,11 @@ const handleResetPassword = async (row: UserListItem) => {
     warnNoPermission()
     return
   }
-  ElMessageBox.prompt('请输入新密码，至少 6 位', '重置密码', {
+  ElMessageBox.prompt('请输入符合当前密码规则的新密码', '重置密码', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     inputType: 'password',
-    inputPattern: /^.{6,}$/,
-    inputErrorMessage: '密码长度不能少于 6 位',
+    inputValidator: (value) => validatePasswordPolicy(value.trim(), passwordPolicy) || true,
   }).then(async ({ value }) => {
     const hashedPassword = await sha256Hex(value.trim())
     await resetUserPassword({
@@ -1066,7 +1080,10 @@ const handleSubmitUser = async () => {
       ElMessage.success('编辑用户成功')
     } else {
       payload.password = await sha256Hex(userForm.password.trim())
-      await createUser(payload, { suppressErrorMessage: true })
+      await createUser(payload, {
+        suppressErrorMessage: true,
+        idempotencyKey: getCreateUserIdempotencyKey(payload),
+      })
       ElMessage.success('新增用户成功')
     }
     dialogVisible.value = false
@@ -1085,8 +1102,18 @@ const handleSubmitUser = async () => {
 const resetUserForm = () => {
   syncLockedDisabledRelations()
   originalUserRoleIds.value = []
+  createUserSubmission = null
   Object.assign(userForm, createDefaultUserForm())
   userFormRef.value?.clearValidate()
+}
+
+// 相同表单快照复用一个幂等键；字段变化代表新的提交意图。
+const getCreateUserIdempotencyKey = (payload: Record<string, unknown>) => {
+  const fingerprint = JSON.stringify(payload)
+  if (!createUserSubmission || createUserSubmission.fingerprint !== fingerprint) {
+    createUserSubmission = { fingerprint, key: createIdempotencyKey() }
+  }
+  return createUserSubmission.key
 }
 
 // 关闭对话框

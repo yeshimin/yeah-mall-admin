@@ -170,11 +170,17 @@ import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import { getRegisterCaptcha, register } from '@/api/auth'
 import { getPublicSysConfigs } from '@/api/upms'
+import { usePasswordPolicy } from '@/composables/usePasswordPolicy'
+import type { AdminRegisterRequest } from '@/types/upms'
 import { sha256Hex } from '@/utils/crypto'
+import { createIdempotencyKey } from '@/utils/idempotency'
+import { validatePasswordPolicy } from '@/utils/password-policy'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const { passwordPolicy, loadPasswordPolicy } = usePasswordPolicy()
+let registerSubmission: { fingerprint: string; key: string } | null = null
 const REMEMBERED_USERNAME_KEY = 'yeah-boot-admin-remembered-username'
 
 // 登录表单引用
@@ -248,7 +254,17 @@ const registerRules = reactive<FormRules>({
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 32, message: '密码长度在 6 到 32 个字符', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        if (!value) {
+          callback()
+          return
+        }
+        const message = validatePasswordPolicy(String(value), passwordPolicy)
+        callback(message ? new Error(message) : undefined)
+      },
+      trigger: 'blur',
+    },
   ],
   confirmPassword: [
     {
@@ -294,13 +310,13 @@ const loadCaptcha = async () => {
 
 const loadLoginPageOptions = async () => {
   try {
-    const response = await getPublicSysConfigs({ groupCode: 'auth.login' })
+    const response = await getPublicSysConfigs({ groupCode: 'admin.auth.login' })
     const values = new Map(response.data.map((item) => [item.name, item.value]))
     Object.assign(loginPageOptions, {
-      noticeEnabled: values.get('auth.login.notice.enabled') === 'true',
-      noticeTitle: values.get('auth.login.notice.title') || '',
-      noticeContent: values.get('auth.login.notice.content') || '',
-      registerEnabled: values.get('auth.login.register.enabled') === 'true',
+      noticeEnabled: values.get('admin.auth.login.notice.enabled') === 'true',
+      noticeTitle: values.get('admin.auth.login.notice.title') || '',
+      noticeContent: values.get('admin.auth.login.notice.content') || '',
+      registerEnabled: values.get('admin.auth.login.register.enabled') === 'true',
     })
   } catch {
     Object.assign(loginPageOptions, {
@@ -329,6 +345,7 @@ const loadRegisterCaptcha = async () => {
 }
 
 const resetRegisterForm = () => {
+  registerSubmission = null
   Object.assign(registerForm, {
     username: '',
     password: '',
@@ -355,12 +372,13 @@ const handleRegister = async () => {
   try {
     await registerFormRef.value.validate()
     registerLoading.value = true
-    await register({
+    const payload = {
       username: registerForm.username.trim(),
       password: await sha256Hex(registerForm.password.trim()),
       key: registerForm.key,
       code: registerForm.code,
-    })
+    }
+    await register(payload, { idempotencyKey: getRegisterIdempotencyKey(payload) })
     loginForm.username = registerForm.username.trim()
     loginForm.password = ''
     registerDialogVisible.value = false
@@ -370,6 +388,15 @@ const handleRegister = async () => {
   } finally {
     registerLoading.value = false
   }
+}
+
+// 相同注册表单快照复用一个幂等键；表单或验证码变化代表新的提交意图。
+const getRegisterIdempotencyKey = (payload: AdminRegisterRequest) => {
+  const fingerprint = JSON.stringify(payload)
+  if (!registerSubmission || registerSubmission.fingerprint !== fingerprint) {
+    registerSubmission = { fingerprint, key: createIdempotencyKey() }
+  }
+  return registerSubmission.key
 }
 
 const handleForgotPassword = () => {
@@ -420,6 +447,7 @@ const handleLogin = async () => {
 onMounted(() => {
   loadRememberedUsername()
   void loadLoginPageOptions()
+  void loadPasswordPolicy()
   void loadCaptcha()
 })
 </script>

@@ -241,6 +241,7 @@ export interface SysLogEntity {
   id: number
   triggerType?: number
   category?: number
+  clientIp?: string
   event?: string
   input?: string
   output?: string

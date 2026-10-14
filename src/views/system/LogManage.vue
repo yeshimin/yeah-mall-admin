@@ -23,6 +23,9 @@
         <el-form-item label="执行人">
           <el-input v-model="searchForm.createBy" placeholder="请输入执行人" clearable></el-input>
         </el-form-item>
+        <el-form-item label="客户端IP">
+          <el-input v-model="searchForm.clientIp" placeholder="请输入客户端IP" clearable></el-input>
+        </el-form-item>
         <el-form-item label="结果">
           <el-select v-model="searchForm.success" placeholder="请选择结果" clearable>
             <el-option label="成功" :value="1"></el-option>
@@ -56,6 +59,7 @@
       <el-table-column prop="event" label="事件" min-width="160"></el-table-column>
       <el-table-column prop="comment" label="方法" min-width="220" show-overflow-tooltip></el-table-column>
       <el-table-column prop="createBy" label="执行人" min-width="120"></el-table-column>
+      <el-table-column prop="clientIp" label="客户端IP" min-width="140"></el-table-column>
       <el-table-column prop="success" label="结果" width="100">
         <template #default="{ row }">
           <el-tag :type="row.success === 1 ? 'success' : 'danger'">
@@ -99,6 +103,7 @@
         </el-descriptions-item>
         <el-descriptions-item label="事件">{{ currentLog.event || '-' }}</el-descriptions-item>
         <el-descriptions-item label="执行人">{{ currentLog.createBy || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="客户端IP">{{ currentLog.clientIp || '-' }}</el-descriptions-item>
         <el-descriptions-item label="结果">
           {{ currentLog.success === 1 ? '成功' : '失败' }}
         </el-descriptions-item>
@@ -132,6 +137,7 @@ const searchForm = reactive({
   category: '' as number | '',
   event: '',
   createBy: '',
+  clientIp: '',
   success: '' as number | '',
 })
 
@@ -166,6 +172,7 @@ async function getLogList() {
         { field: 'category', operator: 'eq', value: searchForm.category },
         { field: 'event', operator: 'like', value: searchForm.event },
         { field: 'createBy', operator: 'like', value: searchForm.createBy },
+        { field: 'clientIp', operator: 'like', value: searchForm.clientIp },
         { field: 'id', operator: 'sort', value: 'desc' },
       ]),
       success: searchForm.success === '' ? undefined : searchForm.success,
@@ -187,6 +194,7 @@ async function handleReset() {
     category: '',
     event: '',
     createBy: '',
+    clientIp: '',
     success: '',
   })
   pagination.currentPage = 1
