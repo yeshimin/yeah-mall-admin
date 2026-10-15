@@ -229,9 +229,14 @@ function fromBase64Url(value: string) {
   return Uint8Array.from(binary, (char) => char.charCodeAt(0))
 }
 
-/** 将前端 SM2 库返回的十六进制密文转为二进制，并补齐未压缩点前缀。 */
+/**
+ * 将前端 SM2 库返回的原始 C1C3C2 十六进制密文转为二进制。
+ *
+ * sm-crypto-v3 的非 ASN.1 输出固定省略 C1 的未压缩点前缀，因此必须无条件补充 04；
+ * 不能按密文首字节猜测，否则随机 C1 坐标以 04 开头时会少传一个字节。
+ */
 function hexToBytes(value: string) {
-  const normalized = value.startsWith('04') ? value : `04${value}`
+  const normalized = `04${value}`
   if (!/^[0-9a-fA-F]+$/.test(normalized) || normalized.length % 2 !== 0) {
     throw new Error('SM2 加密结果无效')
   }
