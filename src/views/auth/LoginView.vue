@@ -45,16 +45,22 @@
               show-password
             ></el-input>
           </el-form-item>
-          <el-form-item v-if="captchaEnabled" prop="code">
+          <el-form-item v-if="captchaEnabled || captchaLoadFailed" prop="code">
             <div class="captcha-row">
               <el-input
                 v-model="loginForm.code"
-                placeholder="请输入验证码"
+                :disabled="captchaLoadFailed"
+                :placeholder="captchaLoadFailed ? '验证码加载失败，请重新获取' : '请输入验证码'"
                 prefix-icon="Key"
               ></el-input>
-              <button type="button" class="captcha-trigger" @click="loadCaptcha">
+              <button
+                type="button"
+                class="captcha-trigger"
+                :disabled="captchaLoading"
+                @click="loadCaptcha"
+              >
                 <img v-if="captchaImage" :src="captchaImage" alt="验证码" class="captcha-image" />
-                <span v-else>获取验证码</span>
+                <span v-else>{{ captchaLoading ? '加载中...' : '重新获取' }}</span>
               </button>
             </div>
           </el-form-item>
@@ -83,6 +89,7 @@
             <el-button
               type="primary"
               class="login-form-submit"
+              :disabled="captchaLoadFailed"
               :loading="loginLoading"
               @click="handleLogin"
             >
@@ -189,6 +196,8 @@ const loginFormRef = ref<FormInstance>()
 // 登录加载状态
 const loginLoading = ref(false)
 const captchaEnabled = ref(false)
+const captchaLoading = ref(false)
+const captchaLoadFailed = ref(false)
 const captchaImage = ref('')
 const registerDialogVisible = ref(false)
 const registerFormRef = ref<FormInstance>()
@@ -291,9 +300,14 @@ const redirectPath = () => {
 }
 
 const loadCaptcha = async () => {
+  if (captchaLoading.value) {
+    return
+  }
+  captchaLoading.value = true
   try {
     const captcha = await authStore.refreshCaptcha()
     captchaEnabled.value = Boolean(captcha.enabled)
+    captchaLoadFailed.value = false
     loginForm.key = captcha.key || ''
     loginForm.code = ''
     captchaImage.value = captcha.image
@@ -303,8 +317,11 @@ const loadCaptcha = async () => {
       : ''
   } catch {
     captchaEnabled.value = false
+    captchaLoadFailed.value = true
     loginForm.key = ''
     captchaImage.value = ''
+  } finally {
+    captchaLoading.value = false
   }
 }
 
@@ -525,6 +542,12 @@ onMounted(() => {
   background-color: #fff;
   cursor: pointer;
   overflow: hidden;
+}
+
+.captcha-trigger:disabled {
+  cursor: not-allowed;
+  color: #909399;
+  background-color: #f5f7fa;
 }
 
 .captcha-image {
