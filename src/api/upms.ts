@@ -64,12 +64,16 @@ export function getUserDetail(id: number) {
   })
 }
 
-export function createUser(data: Record<string, unknown>, options?: { suppressErrorMessage?: boolean }) {
+export function createUser(
+  data: Record<string, unknown>,
+  options?: { suppressErrorMessage?: boolean; idempotencyKey?: string },
+) {
   return request<void>({
     url: '/admin/sysUser/create',
     method: 'post',
     data,
     suppressErrorMessage: options?.suppressErrorMessage,
+    idempotencyKey: options?.idempotencyKey,
   })
 }
 

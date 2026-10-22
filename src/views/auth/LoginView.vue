@@ -49,16 +49,22 @@
               show-password
             ></el-input>
           </el-form-item>
-          <el-form-item v-if="loginSubject === 'admin' && captchaEnabled" prop="code">
+          <el-form-item v-if="loginSubject === 'admin' && (captchaEnabled || captchaLoadFailed)" prop="code">
             <div class="captcha-row">
               <el-input
                 v-model="loginForm.code"
-                placeholder="请输入验证码"
+                :disabled="captchaLoadFailed"
+                :placeholder="captchaLoadFailed ? '验证码加载失败，请重新获取' : '请输入验证码'"
                 prefix-icon="Key"
               ></el-input>
-              <button type="button" class="captcha-trigger" @click="loadCaptcha">
+              <button
+                type="button"
+                class="captcha-trigger"
+                :disabled="captchaLoading"
+                @click="loadCaptcha"
+              >
                 <img v-if="captchaImage" :src="captchaImage" alt="验证码" class="captcha-image" />
-                <span v-else>获取验证码</span>
+                <span v-else>{{ captchaLoading ? '加载中...' : '重新获取' }}</span>
               </button>
             </div>
           </el-form-item>
@@ -87,6 +93,7 @@
             <el-button
               type="primary"
               class="login-form-submit"
+              :disabled="loginSubject === 'admin' && captchaLoadFailed"
               :loading="loginLoading"
               @click="handleLogin"
             >
@@ -195,14 +202,20 @@ import { useAuthStore } from '@/stores/auth'
 import { getRegisterCaptcha, register } from '@/api/auth'
 import { getPublicSysConfigs } from '@/api/upms'
 import { getLoginSubjectPreference, type LoginSubject, setLoginSubjectPreference } from '@/utils/auth'
+import { usePasswordPolicy } from '@/composables/usePasswordPolicy'
+import type { AdminRegisterRequest } from '@/types/upms'
 import { sha256Hex } from '@/utils/crypto'
+import { createIdempotencyKey } from '@/utils/idempotency'
+import { validatePasswordPolicy } from '@/utils/password-policy'
 import { clearCurrentShop, setCurrentShop } from '@/utils/shop'
 import { request } from '@/utils/request'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const { passwordPolicy, loadPasswordPolicy } = usePasswordPolicy()
 const REMEMBERED_USERNAME_KEY_PREFIX = 'yeah-boot-admin-remembered-username'
+let registerSubmission: { fingerprint: string; key: string } | null = null
 
 // 登录表单引用
 const loginFormRef = ref<FormInstance>()
@@ -211,6 +224,8 @@ const loginFormRef = ref<FormInstance>()
 const loginLoading = ref(false)
 const loginSubject = ref<LoginSubject>(getLoginSubjectPreference())
 const captchaEnabled = ref(false)
+const captchaLoading = ref(false)
+const captchaLoadFailed = ref(false)
 const captchaImage = ref('')
 const registerDialogVisible = ref(false)
 const registerFormRef = ref<FormInstance>()
@@ -281,6 +296,17 @@ const registerRules = reactive<FormRules>({
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 32, message: '密码长度在 6 到 32 个字符', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        if (!value) {
+          callback()
+          return
+        }
+        const message = validatePasswordPolicy(String(value), passwordPolicy)
+        callback(message ? new Error(message) : undefined)
+      },
+      trigger: 'blur',
+    },
   ],
   confirmPassword: [
     {
@@ -382,9 +408,14 @@ const cancelShopSelection = async () => {
 }
 
 const loadCaptcha = async () => {
+  if (captchaLoading.value) {
+    return
+  }
+  captchaLoading.value = true
   try {
     const captcha = await authStore.refreshCaptcha()
     captchaEnabled.value = Boolean(captcha.enabled)
+    captchaLoadFailed.value = false
     loginForm.key = captcha.key || ''
     loginForm.code = ''
     captchaImage.value = captcha.image
@@ -394,8 +425,11 @@ const loadCaptcha = async () => {
       : ''
   } catch {
     captchaEnabled.value = false
+    captchaLoadFailed.value = true
     loginForm.key = ''
     captchaImage.value = ''
+  } finally {
+    captchaLoading.value = false
   }
 }
 
@@ -410,13 +444,13 @@ const loadLoginPageOptions = async () => {
     return
   }
   try {
-    const response = await getPublicSysConfigs({ groupCode: 'auth.login' })
+    const response = await getPublicSysConfigs({ groupCode: 'admin.auth.login' })
     const values = new Map(response.data.map((item) => [item.name, item.value]))
     Object.assign(loginPageOptions, {
-      noticeEnabled: values.get('auth.login.notice.enabled') === 'true',
-      noticeTitle: values.get('auth.login.notice.title') || '',
-      noticeContent: values.get('auth.login.notice.content') || '',
-      registerEnabled: values.get('auth.login.register.enabled') === 'true',
+      noticeEnabled: values.get('admin.auth.login.notice.enabled') === 'true',
+      noticeTitle: values.get('admin.auth.login.notice.title') || '',
+      noticeContent: values.get('admin.auth.login.notice.content') || '',
+      registerEnabled: values.get('admin.auth.login.register.enabled') === 'true',
     })
   } catch {
     Object.assign(loginPageOptions, {
@@ -445,6 +479,7 @@ const loadRegisterCaptcha = async () => {
 }
 
 const resetRegisterForm = () => {
+  registerSubmission = null
   Object.assign(registerForm, {
     username: '',
     password: '',
@@ -471,12 +506,13 @@ const handleRegister = async () => {
   try {
     await registerFormRef.value.validate()
     registerLoading.value = true
-    await register({
+    const payload = {
       username: registerForm.username.trim(),
       password: await sha256Hex(registerForm.password.trim()),
       key: registerForm.key,
       code: registerForm.code,
-    })
+    }
+    await register(payload, { idempotencyKey: getRegisterIdempotencyKey(payload) })
     loginForm.username = registerForm.username.trim()
     loginForm.password = ''
     registerDialogVisible.value = false
@@ -486,6 +522,17 @@ const handleRegister = async () => {
   } finally {
     registerLoading.value = false
   }
+}
+
+/**
+ * 相同注册表单快照复用一个幂等键；表单或验证码变化代表新的提交意图。
+ */
+const getRegisterIdempotencyKey = (payload: AdminRegisterRequest) => {
+  const fingerprint = JSON.stringify(payload)
+  if (!registerSubmission || registerSubmission.fingerprint !== fingerprint) {
+    registerSubmission = { fingerprint, key: createIdempotencyKey() }
+  }
+  return registerSubmission.key
 }
 
 const handleForgotPassword = () => {
@@ -519,6 +566,8 @@ const handleLoginSubjectChange = async () => {
   loginForm.code = ''
   loginForm.key = ''
   captchaEnabled.value = false
+  captchaLoading.value = false
+  captchaLoadFailed.value = false
   captchaImage.value = ''
   loadRememberedUsername()
   await loadLoginPageOptions()
@@ -559,6 +608,7 @@ const handleLogin = async () => {
 
 onMounted(() => {
   loadRememberedUsername()
+  void loadPasswordPolicy()
   void handleLoginSubjectChange()
 })
 </script>
@@ -642,6 +692,12 @@ onMounted(() => {
   background-color: #fff;
   cursor: pointer;
   overflow: hidden;
+}
+
+.captcha-trigger:disabled {
+  cursor: not-allowed;
+  color: #909399;
+  background-color: #f5f7fa;
 }
 
 .captcha-image {

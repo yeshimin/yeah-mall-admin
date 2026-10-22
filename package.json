@@ -24,6 +24,7 @@
     "element-plus": "^2.13.1",
     "lodash-es": "^4.17.22",
     "pinia": "2.2.4",
+    "sm-crypto-v3": "1.0.6",
     "vue": "~3.4.0",
     "vue-router": "~4.4.0"
   },
