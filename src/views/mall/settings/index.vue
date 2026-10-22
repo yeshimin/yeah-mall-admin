@@ -23,7 +23,7 @@
         <el-form-item label="店铺Logo" prop="shopLogo">
           <el-upload
             class="logo-upload"
-            action="/dev-api/mch/storage/upload"
+            :action="merchantStorageUploadUrl"
             :headers="{ 'Authorization': `Bearer ${getToken()}` }"
             :show-file-list="false"
             :on-success="handleLogoUpload"
@@ -66,11 +66,14 @@ import { ref, reactive, onMounted } from 'vue';
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { ElMessage } from 'element-plus';
 import { getToken } from '@/utils/auth';
+import { resolveApiUrl } from '@/utils/download'
 import { getMchShopDetail, updateMchShop } from '@/api/mall/shop';
+import { getCurrentShop, setCurrentShop } from '@/utils/shop'
 
 const loading = ref(false);
 const saving = ref(false);
 const settingsFormRef = ref(null);
+const merchantStorageUploadUrl = resolveApiUrl('/mch/storage/upload')
 
 const settingsForm = reactive({
   shopNo: '',
@@ -92,8 +95,7 @@ function getFullImageUrl(fileKey) {
 
 // 与其他商家业务页面共用当前选择的店铺标识。
 function getCurrentShopId() {
-  const shopId = Number(localStorage.getItem('shopId'));
-  return Number.isSafeInteger(shopId) && shopId > 0 ? shopId : null;
+  return getCurrentShop()?.id || null;
 }
 
 // 处理Logo上传成功
@@ -131,19 +133,7 @@ const handleSaveSettings = async () => {
     });
 
     if (response.code === 0) {
-      // 更新localStorage中的店铺信息，以便同步更新右上角的店铺名称
-      const currentShop = localStorage.getItem('currentShop');
-      if (currentShop) {
-        try {
-          const shopInfo = JSON.parse(currentShop);
-          shopInfo.name = settingsForm.shopName;
-          shopInfo.shopName = settingsForm.shopName;
-          localStorage.setItem('currentShop', JSON.stringify(shopInfo));
-          window.dispatchEvent(new CustomEvent('shopInfoUpdated'));
-        } catch {
-          // 当前店铺缓存异常时不影响已成功保存的店铺资料。
-        }
-      }
+      setCurrentShop({ id: shopId, name: settingsForm.shopName });
       ElMessage.success('设置保存成功');
     } else {
       ElMessage.error(response.message || '保存失败');

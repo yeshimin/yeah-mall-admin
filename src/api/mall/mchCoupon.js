@@ -64,3 +64,12 @@ export function getSpuDetail(id) {
     params: { id }
   })
 }
+
+// 查询优惠券领取和使用记录
+export function queryMchCouponRecord(params) {
+  return request({
+    url: '/mch/memberCoupon/record/query',
+    method: 'get',
+    params
+  })
+}

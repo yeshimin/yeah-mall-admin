@@ -16,6 +16,7 @@ import {
   type LoginSubject,
 } from '@/utils/auth'
 import { resetUnauthorizedState } from '@/utils/session'
+import { clearCurrentShop } from '@/utils/shop'
 import { useAppStore } from './app'
 
 const MENU_ROUTE_MAP: Record<string, string> = {
@@ -261,6 +262,7 @@ export const useAuthStore = defineStore('auth', () => {
     resources.value = []
     initialized.value = false
     appStore.clearPageTags()
+    clearCurrentShop()
     removeToken()
     removeLoginSubject()
   }

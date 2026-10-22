@@ -11,7 +11,7 @@ export interface MerchantLoginVo {
 }
 
 export interface MerchantEntity {
-  id: number
+  id: string
   username?: string
   nickname?: string
   loginAccount?: string

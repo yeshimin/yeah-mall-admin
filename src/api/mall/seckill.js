@@ -81,6 +81,15 @@ export function getSeckillMonitorData(activityId) {
   })
 }
 
+// 获取秒杀经营分析数据
+export function getSeckillAnalysisData(activityId) {
+  return request({
+    url: '/admin/seckill/analysis/data',
+    method: 'get',
+    params: { activityId }
+  })
+}
+
 // 更新秒杀活动状态
 export function updateSeckillActivityStatus(data) {
   return request({

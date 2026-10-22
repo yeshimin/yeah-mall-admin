@@ -14,7 +14,7 @@ export function getShippingInfo() {
 export function saveShippingInfo(data) {
   const shopId = localStorage.getItem('shopId') || '';
   const saveData = {
-    shopId: parseInt(shopId),
+    shopId,
     name: data.senderName,
     contact: data.senderPhone,
     provinceCode: data.provinceCode,
@@ -75,7 +75,7 @@ export function createDeliveryProvider(data) {
     method: 'post',
     data: {
       ...data,
-      shopId: parseInt(shopId)
+      shopId
     }
   })
 }
@@ -88,7 +88,7 @@ export function queryDeliveryProviderList(params) {
     method: 'get',
     params: {
       ...params,
-      shopId: parseInt(shopId)
+      shopId
     }
   })
 }
@@ -110,7 +110,7 @@ export function updateDeliveryProvider(data) {
     method: 'post',
     data: {
       ...data,
-      shopId: parseInt(shopId)
+      shopId
     }
   })
 }
@@ -123,7 +123,7 @@ export function setDefaultDeliveryProvider(id, isDefault = true) {
     method: 'post',
     data: {
       id,
-      shopId: parseInt(shopId),
+      shopId,
       isDefault
     }
   })
@@ -137,7 +137,7 @@ export function setPopularDeliveryProvider(id, isPopular = true) {
     method: 'post',
     data: {
       id,
-      shopId: parseInt(shopId),
+      shopId,
       isPopular
     }
   })
@@ -159,7 +159,7 @@ export function syncExpCompany() {
     url: `/mch/deliveryProvider/syncExpCompany`,
     method: 'post',
     data: {
-      shopId: parseInt(shopId)
+      shopId
     }
   })
 }

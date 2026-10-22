@@ -45,6 +45,10 @@ const StorageManage = () => import('../views/system/StorageManage.vue')
 const ProfileView = () => import('../views/profile/ProfileView.vue')
 const HomeView = () => import('../views/home/HomeView.vue')
 const backendViewModules = import.meta.glob('../views/**/*.vue')
+const MchGroupBuyApply = backendViewModules['../views/mall/mch-group-buy/apply/index.vue'] || RoutePlaceholderView
+const MchGroupBuyProduct = backendViewModules['../views/mall/mch-group-buy/product/index.vue'] || RoutePlaceholderView
+const MchGroupBuyOrder = backendViewModules['../views/mall/mch-group-buy/order/index.vue'] || RoutePlaceholderView
+const MchSku = backendViewModules['../views/mall/sku/index.vue'] || RoutePlaceholderView
 const registeredDynamicRouteNames = new Set<string>()
 const dynamicRouteSignatures = new Map<string, string>()
 
@@ -161,6 +165,32 @@ const asyncRoutes = [
         name: 'system-config',
         component: ConfigManage,
         meta: { title: '系统参数' },
+      },
+      // 商家拼团活动的关联业务页不作为独立菜单，由活动页按当前活动跳转访问。
+      {
+        path: '/mall/mch-group-buy/apply',
+        name: 'mch-group-buy-apply',
+        component: MchGroupBuyApply,
+        meta: { title: '拼团申请记录', ignoreAccessControl: true },
+      },
+      {
+        path: '/mall/mch-group-buy/product',
+        name: 'mch-group-buy-product',
+        component: MchGroupBuyProduct,
+        meta: { title: '拼团商品', ignoreAccessControl: true },
+      },
+      {
+        path: '/mall/mch-group-buy/order',
+        name: 'mch-group-buy-order',
+        component: MchGroupBuyOrder,
+        meta: { title: '拼团订单', ignoreAccessControl: true },
+      },
+      // 商品 SKU 管理由商品 SPU 页面进入，不作为独立菜单展示。
+      {
+        path: '/mall/sku',
+        name: 'mch-sku',
+        component: MchSku,
+        meta: { title: 'SKU 管理', ignoreAccessControl: true },
       },
     ],
   },

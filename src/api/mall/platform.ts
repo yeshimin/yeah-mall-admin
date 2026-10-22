@@ -10,7 +10,7 @@ export function queryMerchants(params: Record<string, unknown>) {
   })
 }
 
-export function getMerchantDetail(id: number) {
+export function getMerchantDetail(id: string) {
   return request<MerchantRecord>({
     url: '/admin/merchant/crud/detail',
     method: 'get',
@@ -34,7 +34,7 @@ export function updateMerchant(data: MerchantForm) {
   })
 }
 
-export function deleteMerchants(ids: number[]) {
+export function deleteMerchants(ids: string[]) {
   return request<void>({
     url: '/admin/merchant/delete',
     method: 'post',
@@ -50,7 +50,7 @@ export function queryShops(params: Record<string, unknown>) {
   })
 }
 
-export function getShopDetail(id: number) {
+export function getShopDetail(id: string) {
   return request<ShopRecord>({
     url: '/admin/shop/detail',
     method: 'get',
@@ -74,7 +74,7 @@ export function updateShop(data: ShopForm) {
   })
 }
 
-export function deleteShops(ids: number[]) {
+export function deleteShops(ids: string[]) {
   return request<void>({
     url: '/admin/shop/delete',
     method: 'post',

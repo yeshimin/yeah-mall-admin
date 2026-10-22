@@ -50,13 +50,15 @@
     <el-table v-loading="loading" :data="applyList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="activityName" label="活动名称" min-width="200" />
-      <el-table-column prop="productName" label="商品名称" min-width="200" />
-      <el-table-column prop="groupPrice" label="拼团价" width="100">
+      <el-table-column label="报名商品" min-width="220">
         <template #default="scope">
-          ¥{{ scope.row.groupPrice }}
+          <div class="product-cell">
+            <el-image v-if="scope.row.mainImage" :src="getImagePreviewUrl(scope.row.mainImage)" fit="cover" class="product-image" />
+            <div v-else class="product-image product-image-placeholder">暂无图片</div>
+            <span class="product-name">{{ scope.row.spuName || '-' }}</span>
+          </div>
         </template>
       </el-table-column>
-      <el-table-column prop="stock" label="库存" width="100" />
       <el-table-column prop="auditStatus" label="审核状态" width="120">
         <template #default="scope">
           <el-tag :type="getAuditStatusTagType(scope.row.auditStatus)">
@@ -64,8 +66,10 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="applyTime" label="申请时间" width="180" />
-      <el-table-column prop="auditTime" label="审核时间" width="180" />
+      <el-table-column prop="createTime" label="申请时间" width="180" />
+      <el-table-column label="审核时间" width="180">
+        <template #default="scope">{{ Number(scope.row.auditStatus) === 1 ? '-' : (scope.row.updateTime || '-') }}</template>
+      </el-table-column>
       <el-table-column prop="auditRemark" label="审核备注" min-width="200" />
       <el-table-column label="操作" width="150" fixed="right">
         <template #default="scope">
@@ -93,19 +97,23 @@
     <el-dialog title="申请详情" v-model="detailDialogVisible" width="600px">
       <el-form :model="detailForm" label-width="100px">
         <el-form-item label="活动名称">
-          <el-input v-model="detailForm.activityName" readonly />
+          <el-input v-model="detailForm.activityName" disabled />
         </el-form-item>
         <el-form-item label="商品名称">
-          <el-input v-model="detailForm.productName" readonly />
+          <el-input v-model="detailForm.productName" disabled />
         </el-form-item>
-        <el-form-item label="拼团价">
-          <el-input v-model="detailForm.groupPrice" readonly />
+        <el-form-item label="商品图片">
+          <el-image v-if="detailForm.mainImage" :src="getImagePreviewUrl(detailForm.mainImage)" fit="cover" class="detail-product-image" />
+          <span v-else class="table-secondary">暂无图片</span>
         </el-form-item>
-        <el-form-item label="库存">
-          <el-input v-model="detailForm.stock" readonly />
+        <el-form-item label="拼团价格">
+          <el-input v-model="detailForm.groupPrice" disabled />
+        </el-form-item>
+        <el-form-item label="报名库存">
+          <el-input v-model="detailForm.stock" disabled />
         </el-form-item>
         <el-form-item label="申请备注">
-          <el-input v-model="detailForm.applyRemark" type="textarea" rows="3" readonly />
+          <el-input v-model="detailForm.applyRemark" type="textarea" rows="3" disabled />
         </el-form-item>
         <el-form-item label="审核状态">
           <el-tag :type="getAuditStatusTagType(detailForm.auditStatus)">
@@ -113,13 +121,13 @@
           </el-tag>
         </el-form-item>
         <el-form-item label="审核备注">
-          <el-input v-model="detailForm.auditRemark" type="textarea" rows="3" readonly />
+          <el-input v-model="detailForm.auditRemark" type="textarea" rows="3" disabled />
         </el-form-item>
         <el-form-item label="申请时间">
-          <el-input v-model="detailForm.applyTime" readonly />
+          <el-input v-model="detailForm.applyTime" disabled />
         </el-form-item>
         <el-form-item label="审核时间">
-          <el-input v-model="detailForm.auditTime" readonly />
+          <el-input :model-value="detailForm.auditTime || '-'" disabled />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -133,19 +141,24 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, View } from '@element-plus/icons-vue'
+import { useRoute } from 'vue-router'
+import { queryMchGroupBuyApplyList } from '@/api/mall/groupBuy'
 import RightToolbar from '@/components/RightToolbar/index.vue'
+import { getStoragePreviewUrl } from '@/utils/storage'
+import { getCurrentShop } from '@/utils/shop'
 
 // 响应式数据
 const loading = ref(false)
 const showSearch = ref(true)
 const detailDialogVisible = ref(false)
+const route = useRoute()
 
 // 查询参数
 const queryParams = reactive({
   activityName: '',
   productName: '',
+  mainImage: '',
   auditStatus: ''
 })
 
@@ -173,38 +186,6 @@ const detailForm = reactive({
   auditTime: ''
 })
 
-// 模拟数据
-const mockApplyList = [
-  {
-    id: 1,
-    activityId: 1,
-    activityName: '春季拼团活动',
-    productId: 1,
-    productName: '春季拼团商品1',
-    groupPrice: 99,
-    stock: 100,
-    applyRemark: '申请参加拼团活动',
-    auditStatus: '2',
-    auditRemark: '审核通过',
-    applyTime: '2026-03-01 10:00:00',
-    auditTime: '2026-03-01 11:00:00'
-  },
-  {
-    id: 2,
-    activityId: 2,
-    activityName: '女神节拼团',
-    productId: 2,
-    productName: '女神节专属商品',
-    groupPrice: 199,
-    stock: 50,
-    applyRemark: '女神节特别申请',
-    auditStatus: '1',
-    auditRemark: '',
-    applyTime: '2026-03-02 11:00:00',
-    auditTime: ''
-  }
-]
-
 // 初始化
 onMounted(() => {
   getList()
@@ -212,30 +193,27 @@ onMounted(() => {
 
 // 获取申请列表
 function getList() {
+  const currentShop = getCurrentShop()
+  if (!currentShop) {
+    applyList.value = []
+    pagination.total = 0
+    return
+  }
   loading.value = true
-  const params = {
-    conditions_: `sort:applyTime:desc`,
+  queryMchGroupBuyApplyList({
+    current: pagination.current,
     size: pagination.size,
-    current: pagination.current
-  }
-
-  // 合并查询参数
-  if (queryParams.activityName) {
-    params.conditions_ += `,activityName:${queryParams.activityName}:like`
-  }
-  if (queryParams.productName) {
-    params.conditions_ += `,productName:${queryParams.productName}:like`
-  }
-  if (queryParams.auditStatus) {
-    params.conditions_ += `,auditStatus:${queryParams.auditStatus}:eq`
-  }
-
-  // 模拟API调用
-  setTimeout(() => {
-    applyList.value = mockApplyList
-    pagination.total = mockApplyList.length
+    activityId: route.query.activityId || undefined,
+    activityName: queryParams.activityName || undefined,
+    productName: queryParams.productName || undefined,
+    auditStatus: queryParams.auditStatus || undefined,
+    shopId: currentShop.id
+  }).then((res) => {
+    applyList.value = res.data?.records || []
+    pagination.total = Number(res.data?.total || 0)
+  }).finally(() => {
     loading.value = false
-  }, 500)
+  })
 }
 
 // 查看申请详情
@@ -243,14 +221,15 @@ function handleView(row) {
   // 填充详情表单
   detailForm.id = row.id
   detailForm.activityName = row.activityName
-  detailForm.productName = row.productName
-  detailForm.groupPrice = row.groupPrice
-  detailForm.stock = row.stock
+  detailForm.productName = row.spuName
+  detailForm.mainImage = row.mainImage
+  detailForm.groupPrice = formatPriceRange(row.minGroupPrice, row.maxGroupPrice)
+  detailForm.stock = row.groupStock ?? 0
   detailForm.applyRemark = row.applyRemark
   detailForm.auditStatus = row.auditStatus
   detailForm.auditRemark = row.auditRemark
-  detailForm.applyTime = row.applyTime
-  detailForm.auditTime = row.auditTime
+  detailForm.applyTime = row.createTime
+  detailForm.auditTime = Number(row.auditStatus) === 1 ? '' : row.updateTime
 
   // 打开详情对话框
   detailDialogVisible.value = true
@@ -303,6 +282,16 @@ function getAuditStatusTagType(status) {
   }
   return typeMap[status] || 'info'
 }
+
+function formatPriceRange(minPrice, maxPrice) {
+  const min = Number(minPrice || 0).toFixed(2)
+  const max = Number(maxPrice || 0).toFixed(2)
+  return min === max ? `¥${min}` : `¥${min} - ¥${max}`
+}
+
+function getImagePreviewUrl(fileKey) {
+  return getStoragePreviewUrl(fileKey)
+}
 </script>
 
 <style scoped>
@@ -323,4 +312,11 @@ function getAuditStatusTagType(status) {
 .dialog-footer {
   text-align: right;
 }
+
+.product-cell { display: flex; align-items: center; gap: 10px; }
+.product-image { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 4px; }
+.product-image-placeholder { display: flex; align-items: center; justify-content: center; color: var(--el-text-color-placeholder); background: var(--el-fill-color-light); font-size: 12px; }
+.product-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.detail-product-image { width: 72px; height: 72px; border-radius: 4px; }
+.table-secondary { color: var(--el-text-color-secondary); font-size: 13px; }
 </style>

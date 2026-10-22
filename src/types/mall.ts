@@ -1,5 +1,7 @@
+export type MallId = string
+
 export interface MallEntity {
-  id: number
+  id: MallId
   createTime?: string
   createBy?: string
   updateTime?: string
@@ -13,13 +15,13 @@ export interface MerchantRecord extends MallEntity {
 }
 
 export interface MerchantForm {
-  id?: number
+  id?: MallId
   loginAccount: string
   loginPassword?: string
 }
 
 export interface ShopRecord extends MallEntity {
-  mchId: number
+  mchId: MallId
   mchName?: string
   shopNo?: string
   shopName: string
@@ -27,8 +29,8 @@ export interface ShopRecord extends MallEntity {
 }
 
 export interface ShopForm {
-  id?: number
-  mchId?: number
+  id?: MallId
+  mchId?: MallId
   shopNo: string
   shopName: string
 }

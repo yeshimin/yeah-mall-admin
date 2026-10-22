@@ -22,6 +22,10 @@
       </el-breadcrumb>
     </div>
     <div class="header-right">
+      <div v-if="authStore.subject === 'merchant' && currentShop" class="current-shop">
+        <el-icon><Shop /></el-icon>
+        <span>{{ currentShop.name }}</span>
+      </div>
       <el-dropdown trigger="click" @command="handleCommand">
         <div class="user-info">
           <el-avatar :size="32" :src="avatarUrl || defaultAvatar" @error="handleAvatarError"></el-avatar>
@@ -46,14 +50,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { ArrowDown, Expand, Fold, User, SwitchButton } from '@element-plus/icons-vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { ArrowDown, Expand, Fold, Shop, User, SwitchButton } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import type { ResourceTreeNode } from '@/types/upms'
 import { DEFAULT_AVATAR_URL, resolveAvatarUrl } from '@/utils/avatar'
+import { getCurrentShop, refreshCurrentShop as refreshCurrentShopFromServer, SHOP_CONTEXT_CHANGED, type CurrentShop } from '@/utils/shop'
 
 const router = useRouter()
 const route = useRoute()
@@ -70,6 +75,7 @@ function hasConcreteRoute(path?: string) {
 // 默认头像
 const defaultAvatar = DEFAULT_AVATAR_URL
 const avatarLoadFailed = ref(false)
+const currentShop = ref<CurrentShop | null>(getCurrentShop())
 
 function findMenuTrail(
   nodes: ResourceTreeNode[],
@@ -124,6 +130,32 @@ const avatarUrl = computed(() => {
 
 watch(avatarSource, () => {
   avatarLoadFailed.value = false
+})
+
+const syncCurrentShop = () => {
+  currentShop.value = getCurrentShop()
+}
+
+async function refreshCurrentShop() {
+  if (authStore.subject !== 'merchant') {
+    return
+  }
+
+  try {
+    currentShop.value = await refreshCurrentShopFromServer()
+  } catch {
+    // 网络暂时不可用时继续使用当前缓存，避免误清除已选择店铺。
+    syncCurrentShop()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener(SHOP_CONTEXT_CHANGED, syncCurrentShop)
+  void refreshCurrentShop()
+})
+
+onUnmounted(() => {
+  window.removeEventListener(SHOP_CONTEXT_CHANGED, syncCurrentShop)
 })
 
 function handleAvatarError() {
@@ -196,6 +228,17 @@ const handleCommand = async (command: string) => {
 .header-right {
   display: flex;
   align-items: center;
+}
+
+.current-shop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 16px;
+  padding: 7px 10px;
+  color: #606266;
+  background: #f5f7fa;
+  border-radius: 6px;
 }
 
 .user-info {

@@ -54,16 +54,27 @@
     </el-row>
 
     <el-table v-loading="loading" :data="applyList" style="width: 100%">
-      <el-table-column label="序号" type="index" width="80" />
-      <el-table-column prop="activityName" label="活动名称" min-width="200" />
-      <el-table-column prop="mchName" label="商家名称" width="150" />
-      <el-table-column prop="productName" label="商品名称" min-width="200" />
-      <el-table-column prop="groupPrice" label="拼团价" width="100">
+      <el-table-column label="序号" type="index" width="70" />
+      <el-table-column prop="activityName" label="活动名称" min-width="160" show-overflow-tooltip />
+      <el-table-column label="报名商品" min-width="240">
         <template #default="scope">
-          ¥{{ scope.row.groupPrice }}
+          <div class="product-cell">
+            <el-image v-if="scope.row.mainImage" :src="getImagePreviewUrl(scope.row.mainImage)" fit="cover" class="product-image" />
+            <div v-else class="product-image product-image-placeholder">暂无图片</div>
+            <span class="product-name">{{ scope.row.spuName || '-' }}</span>
+          </div>
         </template>
       </el-table-column>
-      <el-table-column prop="stock" label="库存" width="100" />
+      <el-table-column label="商家 / 店铺" min-width="180" show-overflow-tooltip>
+        <template #default="scope">
+          <div>{{ scope.row.mchName || '-' }}</div>
+          <div class="table-secondary">{{ scope.row.shopName || '-' }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column label="拼团价格" width="150">
+        <template #default="scope">{{ formatPriceRange(scope.row.minGroupPrice, scope.row.maxGroupPrice) }}</template>
+      </el-table-column>
+      <el-table-column prop="groupStock" label="报名库存" width="100" />
       <el-table-column prop="auditStatus" label="审核状态" width="120">
         <template #default="scope">
           <el-tag :type="getAuditStatusTagType(scope.row.auditStatus)">
@@ -71,23 +82,15 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="applyTime" label="申请时间" width="180" />
-      <el-table-column prop="auditTime" label="审核时间" width="180" />
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column prop="createTime" label="申请时间" width="180" />
+      <el-table-column label="审核时间" width="180">
+        <template #default="scope">{{ getAuditTime(scope.row) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="130" fixed="right">
         <template #default="scope">
           <el-button type="primary" size="small" @click="handleView(scope.row)" plain>
             <el-icon><View /></el-icon>
-            查看
-          </el-button>
-          <el-button
-            v-if="scope.row.auditStatus === '1'"
-            type="success"
-            size="small"
-            @click="handleAudit(scope.row)"
-            plain
-          >
-            <el-icon><Check /></el-icon>
-            审核
+            {{ isPendingAudit(scope.row.auditStatus) ? '审核' : '查看' }}
           </el-button>
         </template>
       </el-table-column>
@@ -105,41 +108,42 @@
       />
     </div>
 
-    <!-- 审核对话框 -->
-    <el-dialog title="审核申请" v-model="auditDialogVisible" width="600px">
-      <el-form :model="auditForm" label-width="100px">
-        <el-form-item label="活动名称">
-          <el-input v-model="auditForm.activityName" readonly />
+    <!-- 申请详情与审核对话框 -->
+    <el-dialog :title="canAudit ? '查看并审核申请' : '申请详情'" v-model="auditDialogVisible" width="760px">
+      <el-form :model="auditForm" label-width="100px" class="apply-detail-form">
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="活动名称"><el-input v-model="auditForm.activityName" disabled /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="商家 / 店铺"><el-input :model-value="formatMerchantShop()" disabled /></el-form-item></el-col>
+        </el-row>
+        <el-form-item label="报名商品">
+          <div class="detail-product">
+            <el-image v-if="auditForm.mainImage" :src="getImagePreviewUrl(auditForm.mainImage)" fit="cover" class="detail-product-image" />
+            <div>
+              <div class="detail-product-name">{{ auditForm.productName || '-' }}</div>
+              <div class="table-secondary">拼团价格：{{ auditForm.groupPrice }}，报名库存：{{ auditForm.stock }}</div>
+            </div>
+          </div>
         </el-form-item>
-        <el-form-item label="商家名称">
-          <el-input v-model="auditForm.mchName" readonly />
-        </el-form-item>
-        <el-form-item label="商品名称">
-          <el-input v-model="auditForm.productName" readonly />
-        </el-form-item>
-        <el-form-item label="拼团价">
-          <el-input v-model="auditForm.groupPrice" readonly />
-        </el-form-item>
-        <el-form-item label="库存">
-          <el-input v-model="auditForm.stock" readonly />
-        </el-form-item>
-        <el-form-item label="申请备注">
-          <el-input v-model="auditForm.applyRemark" type="textarea" rows="3" readonly />
-        </el-form-item>
-        <el-form-item label="审核结果">
-          <el-radio-group v-model="auditForm.auditStatus">
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="申请时间"><el-input v-model="auditForm.createTime" disabled /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="审核时间"><el-input :model-value="auditForm.updateTime || '-'" disabled /></el-form-item></el-col>
+        </el-row>
+        <el-form-item label="申请备注"><el-input v-model="auditForm.applyRemark" type="textarea" :rows="3" disabled /></el-form-item>
+        <el-form-item label="审核状态">
+          <el-radio-group v-if="canAudit" v-model="auditForm.reviewStatus">
             <el-radio label="2">通过</el-radio>
             <el-radio label="3">驳回</el-radio>
           </el-radio-group>
+          <el-tag v-else :type="getAuditStatusTagType(auditForm.auditStatus)">{{ getAuditStatusText(auditForm.auditStatus) }}</el-tag>
         </el-form-item>
         <el-form-item label="审核备注">
-          <el-input v-model="auditForm.auditRemark" type="textarea" rows="3" />
+          <el-input v-model="auditForm.auditRemark" type="textarea" :rows="3" :disabled="!canAudit" :placeholder="canAudit ? '审核通过或驳回原因' : ''" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="auditDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitAudit">提交审核</el-button>
+          <el-button @click="auditDialogVisible = false">{{ canAudit ? '取消' : '关闭' }}</el-button>
+          <el-button v-if="canAudit" type="primary" @click="submitAudit">提交审核</el-button>
         </span>
       </template>
     </el-dialog>
@@ -147,19 +151,26 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { computed, ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, View, Check } from '@element-plus/icons-vue'
+import { Search, Refresh, View } from '@element-plus/icons-vue'
 import RightToolbar from '@/components/RightToolbar/index.vue'
+import { auditGroupBuyApply, queryGroupBuyActivityList, queryGroupBuyApplyList } from '@/api/mall/groupBuy'
+import { getStoragePreviewUrl } from '@/utils/storage'
+import { useRoute } from 'vue-router'
 
 // 响应式数据
 const loading = ref(false)
 const showSearch = ref(true)
 const auditDialogVisible = ref(false)
+const activityList = ref([])
+const route = useRoute()
+const canAudit = computed(() => isPendingAudit(auditForm.auditStatus))
 
 // 查询参数
 const queryParams = reactive({
-  activityId: '',
+  // 从活动列表进入时默认筛选该活动，重置后可查看全部报名申请。
+  activityId: route.query.activityId || '',
   mchName: '',
   auditStatus: ''
 })
@@ -171,12 +182,6 @@ const pagination = reactive({
   total: 0
 })
 
-// 活动列表
-const activityList = ref([
-  { id: 1, name: '春季拼团活动' },
-  { id: 2, name: '女神节拼团' }
-])
-
 // 申请列表
 const applyList = ref([])
 
@@ -186,124 +191,94 @@ const auditForm = reactive({
   activityName: '',
   mchName: '',
   productName: '',
+  mainImage: '',
+  shopName: '',
   groupPrice: '',
   stock: '',
+  createTime: '',
+  updateTime: '',
   applyRemark: '',
   auditStatus: '',
+  reviewStatus: '2',
   auditRemark: ''
 })
 
-// 模拟数据
-const mockApplyList = [
-  {
-    id: 1,
-    activityId: 1,
-    activityName: '春季拼团活动',
-    mchId: 1,
-    mchName: '测试商家',
-    productId: 1,
-    productName: '春季拼团商品1',
-    groupPrice: 99,
-    stock: 100,
-    applyRemark: '申请参加拼团活动',
-    auditStatus: '1',
-    applyTime: '2026-03-01 10:00:00',
-    auditTime: ''
-  },
-  {
-    id: 2,
-    activityId: 2,
-    activityName: '女神节拼团',
-    mchId: 2,
-    mchName: '女神商家',
-    productId: 2,
-    productName: '女神节专属商品',
-    groupPrice: 199,
-    stock: 50,
-    applyRemark: '女神节特别申请',
-    auditStatus: '1',
-    applyTime: '2026-03-02 11:00:00',
-    auditTime: ''
-  }
-]
-
 // 初始化
 onMounted(() => {
+  queryGroupBuyActivityList({ current: 1, size: 100 }).then((res) => {
+    activityList.value = res.data?.records || []
+  })
+  getList()
+})
+
+watch(() => route.query.activityId, (activityId) => {
+  const nextActivityId = Array.isArray(activityId) ? activityId[0] : (activityId || '')
+  if (!nextActivityId || queryParams.activityId === nextActivityId) {
+    return
+  }
+  queryParams.activityId = nextActivityId
+  pagination.current = 1
   getList()
 })
 
 // 获取申请列表
 function getList() {
   loading.value = true
-  const params = {
-    conditions_: `sort:applyTime:desc`,
+  queryGroupBuyApplyList({
+    current: pagination.current,
     size: pagination.size,
-    current: pagination.current
-  }
-
-  // 合并查询参数
-  if (queryParams.activityId) {
-    params.conditions_ += `,activityId:${queryParams.activityId}:eq`
-  }
-  if (queryParams.mchName) {
-    params.conditions_ += `,mchName:${queryParams.mchName}:like`
-  }
-  if (queryParams.auditStatus) {
-    params.conditions_ += `,auditStatus:${queryParams.auditStatus}:eq`
-  }
-
-  // 模拟API调用
-  setTimeout(() => {
-    applyList.value = mockApplyList
-    pagination.total = mockApplyList.length
+    activityId: queryParams.activityId || undefined,
+    mchName: queryParams.mchName || undefined,
+    auditStatus: queryParams.auditStatus || undefined
+  }).then((res) => {
+    applyList.value = res.data?.records || []
+    pagination.total = Number(res.data?.total || 0)
+  }).finally(() => {
     loading.value = false
-  }, 500)
+  })
 }
 
-// 查看申请
+// 打开申请详情；待审核记录可直接在窗口内完成审核。
 function handleView(row) {
-  // 查看逻辑
-  ElMessage.info('查看申请详情功能开发中')
-}
-
-// 审核申请
-function handleAudit(row) {
-  // 填充审核表单
   auditForm.id = row.id
   auditForm.activityName = row.activityName
   auditForm.mchName = row.mchName
-  auditForm.productName = row.productName
-  auditForm.groupPrice = row.groupPrice
-  auditForm.stock = row.stock
+  auditForm.shopName = row.shopName
+  auditForm.productName = row.spuName
+  auditForm.mainImage = row.mainImage
+  auditForm.groupPrice = formatPriceRange(row.minGroupPrice, row.maxGroupPrice)
+  auditForm.stock = row.groupStock ?? 0
+  auditForm.createTime = row.createTime || '-'
+  auditForm.updateTime = isPendingAudit(row.auditStatus) ? '' : (row.updateTime || '-')
   auditForm.applyRemark = row.applyRemark
-  auditForm.auditStatus = '2' // 默认通过
-  auditForm.auditRemark = ''
-
-  // 打开审核对话框
+  auditForm.auditStatus = String(row.auditStatus)
+  auditForm.reviewStatus = '2'
+  auditForm.auditRemark = row.auditRemark || ''
   auditDialogVisible.value = true
 }
 
 // 提交审核
-function submitAudit() {
-  if (!auditForm.auditStatus) {
+async function submitAudit() {
+  if (!canAudit.value || !auditForm.reviewStatus) {
     ElMessage.warning('请选择审核结果')
     return
   }
 
-  ElMessageBox.confirm('确定要提交审核结果吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    loading.value = true
-    // 模拟API调用
-    setTimeout(() => {
-      ElMessage.success('审核成功')
-      auditDialogVisible.value = false
-      getList()
-      loading.value = false
-    }, 500)
-  })
+  try {
+    await ElMessageBox.confirm('确定要提交审核结果吗？', '提示', {
+      confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
+    })
+    await auditGroupBuyApply({
+      applyId: auditForm.id,
+      auditStatus: Number(auditForm.reviewStatus),
+      auditRemark: auditForm.auditRemark
+    })
+    ElMessage.success('审核成功')
+    auditDialogVisible.value = false
+    getList()
+  } catch {
+    // 请求层会展示业务错误，此处仅避免对话框操作留下未处理 Promise。
+  }
 }
 
 // 查询
@@ -353,6 +328,28 @@ function getAuditStatusTagType(status) {
   }
   return typeMap[status] || 'info'
 }
+
+function isPendingAudit(status) {
+  return Number(status) === 1
+}
+
+function getAuditTime(row) {
+  return isPendingAudit(row.auditStatus) ? '-' : (row.updateTime || '-')
+}
+
+function formatMerchantShop() {
+  return [auditForm.mchName, auditForm.shopName].filter(Boolean).join(' / ') || '-'
+}
+
+function getImagePreviewUrl(fileKey) {
+  return getStoragePreviewUrl(fileKey)
+}
+
+function formatPriceRange(minPrice, maxPrice) {
+  const min = Number(minPrice || 0).toFixed(2)
+  const max = Number(maxPrice || 0).toFixed(2)
+  return min === max ? `¥${min}` : `¥${min} - ¥${max}`
+}
 </script>
 
 <style scoped>
@@ -372,5 +369,55 @@ function getAuditStatusTagType(status) {
 
 .dialog-footer {
   text-align: right;
+}
+
+.product-cell,
+.detail-product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-image {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+}
+
+.product-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--el-text-color-placeholder);
+  background: var(--el-fill-color-light);
+  font-size: 12px;
+}
+
+.product-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-secondary {
+  margin-top: 3px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+
+.detail-product {
+  min-height: 64px;
+}
+
+.detail-product-image {
+  width: 64px;
+  height: 64px;
+  border-radius: 4px;
+}
+
+.detail-product-name {
+  color: var(--el-text-color-primary);
+  font-weight: 500;
 }
 </style>

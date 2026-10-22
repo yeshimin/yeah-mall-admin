@@ -55,6 +55,9 @@
     <el-table v-loading="loading" :data="couponList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="name" label="优惠券名称" min-width="150" />
+      <el-table-column label="支持拼团" width="100">
+        <template #default="scope">{{ scope.row.isSupportGroupBuy ? '支持' : '不支持' }}</template>
+      </el-table-column>
       <el-table-column prop="type" label="优惠券类型" width="100">
         <template #default="scope">
           {{ getTypeText(scope.row.type) }}
@@ -150,6 +153,9 @@
         </el-form-item>
         <el-form-item label="每人限领" prop="perLimit">
           <el-input-number v-model="form.perLimit" :min="1" style="width: 100%" placeholder="请输入每人限领数量" />
+        </el-form-item>
+        <el-form-item label="支持拼团">
+          <el-switch v-model="form.isSupportGroupBuy" active-text="支持" inactive-text="不支持" />
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
           <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" />
@@ -332,6 +338,7 @@ const form = reactive({
   minAmount: 0,
   totalCount: 100,
   perLimit: 1,
+  isSupportGroupBuy: false,
   startTime: '',
   endTime: '',
   useScope: '1',
@@ -410,6 +417,7 @@ function getList() {
         endTime: item.endTime,
         totalCount: item.quantity,
         perLimit: item.perLimit,
+        isSupportGroupBuy: Boolean(item.isSupportGroupBuy),
         receivedCount: item.received,
         usedCount: item.used,
         status: item.isEnabled ? '1' : '0',
@@ -448,6 +456,7 @@ function handleAdd() {
   form.minAmount = 0
   form.totalCount = 100
   form.perLimit = 1
+  form.isSupportGroupBuy = false
   form.startTime = ''
   form.endTime = ''
   form.useScope = '1'
@@ -469,6 +478,7 @@ function handleEdit(row) {
   form.minAmount = row.minAmount
   form.totalCount = row.totalCount
   form.perLimit = row.perLimit
+  form.isSupportGroupBuy = Boolean(row.isSupportGroupBuy)
   form.startTime = row.startTime
   form.endTime = row.endTime
   form.useScope = row.useScope || '1'
@@ -615,6 +625,7 @@ function handleSubmit() {
         received: 0,
         used: 0,
         perLimit: form.perLimit,
+        isSupportGroupBuy: form.isSupportGroupBuy,
         useRange: parseInt(form.useScope),
         targetId: targetIdValue,
         beginTime: form.startTime,

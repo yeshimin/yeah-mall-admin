@@ -8,7 +8,7 @@ export function queryConversationList(params) {
     method: 'get',
     params: {
       ...params,
-      shopId: parseInt(shopId)
+      shopId
     }
   })
 }

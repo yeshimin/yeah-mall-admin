@@ -18,6 +18,7 @@
             <el-option label="交易关闭" value="5"></el-option>
             <el-option label="退款" value="6"></el-option>
             <el-option label="售后" value="7"></el-option>
+            <el-option label="待成团" value="8"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="退款状态">
@@ -42,6 +43,7 @@
           <el-select v-model="searchForm.orderType" placeholder="请选择订单类型" clearable style="width: 200px;">
             <el-option label="普通订单" value="1"></el-option>
             <el-option label="秒杀订单" value="2"></el-option>
+            <el-option label="拼团订单" value="3"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="下单时间">
@@ -168,8 +170,33 @@
                 <el-tag :type="getStatusType(currentOrder.status)">{{ getStatusText(currentOrder.status) }}</el-tag>
               </div>
               <div class="detail-item">
+                <span class="label">订单类型：</span>
+                <el-tag :type="getOrderTypeTagType(currentOrder.orderType)">
+                  {{ getOrderTypeText(currentOrder.orderType) }}
+                </el-tag>
+              </div>
+              <div class="detail-item">
                 <span class="label">售后状态：</span>
                 <el-tag :type="getAfterSaleStatusType(currentOrder.afterSaleStatus)">{{ getAfterSaleStatusText(currentOrder.afterSaleStatus) }}</el-tag>
+              </div>
+            </div>
+            <div v-if="currentOrder.groupBuyInfo" class="detail-row">
+              <div class="detail-item">
+                <span class="label">拼团编号：</span>
+                <span class="value">{{ currentOrder.groupBuyInfo.groupNo || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">拼团状态：</span>
+                <el-tag :type="getGroupBuyStatusType(currentOrder.groupBuyInfo.groupStatus)">
+                  {{ getGroupBuyStatusText(currentOrder.groupBuyInfo.groupStatus) }}
+                </el-tag>
+              </div>
+              <div class="detail-item">
+                <span class="label">拼团人数：</span>
+                <span class="value">
+                  {{ currentOrder.groupBuyInfo.memberCount || 0 }}/{{ currentOrder.groupBuyInfo.minPeople || '-' }}
+                  {{ currentOrder.groupBuyInfo.leader ? '（团长）' : '' }}
+                </span>
               </div>
             </div>
             <div class="detail-row">
@@ -864,6 +891,7 @@ const handleOrderDetail = async (row) => {
     }
 
     const orderData = response.data.order;
+    orderData.groupBuyInfo = response.data.groupBuyInfo || null;
     const itemsData = response.data.shopProducts || [];
     const tracking = response.data.deliveryTracking;
 
@@ -945,7 +973,8 @@ const getStatusText = (status) => {
     '4': '交易成功',
     '5': '交易关闭',
     '6': '退款',
-    '7': '售后'
+    '7': '售后',
+    '8': '待成团'
   };
   return statusMap[status] || '-';
 };
@@ -958,7 +987,8 @@ const getStatusType = (status) => {
     '4': 'success',
     '5': 'danger',
     '6': 'warning',
-    '7': 'warning'
+    '7': 'warning',
+    '8': 'warning'
   };
   return typeMap[status] || 'info';
 };
@@ -966,7 +996,8 @@ const getStatusType = (status) => {
 const getOrderTypeText = (orderType) => {
   const typeMap = {
     '1': '普通订单',
-    '2': '秒杀订单'
+    '2': '秒杀订单',
+    '3': '拼团订单'
   };
   return typeMap[orderType] || '-';
 };
@@ -974,9 +1005,32 @@ const getOrderTypeText = (orderType) => {
 const getOrderTypeTagType = (orderType) => {
   const typeMap = {
     '1': 'info',
-    '2': 'danger'
+    '2': 'danger',
+    '3': 'success'
   };
   return typeMap[orderType] || 'info';
+};
+
+const getGroupBuyStatusText = (status) => {
+  const statusMap = {
+    '1': '待团长支付',
+    '2': '拼团中',
+    '3': '已成团',
+    '4': '拼团失败',
+    '5': '已关闭'
+  };
+  return statusMap[status] || '-';
+};
+
+const getGroupBuyStatusType = (status) => {
+  const typeMap = {
+    '1': 'warning',
+    '2': 'primary',
+    '3': 'success',
+    '4': 'danger',
+    '5': 'info'
+  };
+  return typeMap[status] || 'info';
 };
 
 const getRefundStatusText = (status) => {

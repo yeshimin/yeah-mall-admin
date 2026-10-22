@@ -32,9 +32,9 @@
           clearable
           style="width: 120px"
         >
+          <el-option label="未使用" value="0" />
           <el-option label="已使用" value="1" />
           <el-option label="已过期" value="2" />
-          <el-option label="已作废" value="3" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -63,7 +63,7 @@
       </el-table-column>
       <el-table-column prop="couponValue" label="优惠金额/折扣" width="120">
         <template #default="scope">
-          {{ scope.row.couponType === '2' ? scope.row.couponValue + '折' : '¥' + scope.row.couponValue }}
+          {{ Number(scope.row.couponType) === 2 ? scope.row.couponValue + '折' : '¥' + scope.row.couponValue }}
         </template>
       </el-table-column>
       <el-table-column prop="minAmount" label="使用条件" width="120">
@@ -71,7 +71,7 @@
           {{ scope.row.minAmount > 0 ? '满¥' + scope.row.minAmount : '无门槛' }}
         </template>
       </el-table-column>
-      <el-table-column prop="userName" label="使用用户" width="120" />
+      <el-table-column prop="memberName" label="使用用户" width="120" />
       <el-table-column prop="orderNo" label="订单号" min-width="180" />
       <el-table-column prop="orderAmount" label="订单金额" width="120">
         <template #default="scope">
@@ -113,6 +113,8 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import RightToolbar from '@/components/RightToolbar/index.vue'
+import { getMchCouponList, queryMchCouponRecord } from '@/api/mall/mchCoupon'
+import { getCurrentShop } from '@/utils/shop'
 
 // 路由
 const route = useRoute()
@@ -141,69 +143,6 @@ const recordList = ref([])
 // 优惠券列表
 const couponList = ref([])
 
-// 模拟优惠券列表数据
-const mockCouponList = [
-  { id: 1, name: '满100减20优惠券' },
-  { id: 2, name: '全场8折优惠券' },
-  { id: 3, name: '无门槛10元优惠券' }
-]
-
-// 模拟数据
-const mockRecordList = [
-  {
-    id: 1,
-    couponName: '满100减20优惠券',
-    couponType: '1',
-    couponValue: 20,
-    minAmount: 100,
-    userName: '张三',
-    orderNo: '2026031612345678',
-    orderAmount: 150,
-    discountAmount: 20,
-    useTime: '2026-03-16 10:30:00',
-    status: '1'
-  },
-  {
-    id: 2,
-    couponName: '全场8折优惠券',
-    couponType: '2',
-    couponValue: 8,
-    minAmount: 0,
-    userName: '李四',
-    orderNo: '2026031687654321',
-    orderAmount: 200,
-    discountAmount: 40,
-    useTime: '2026-03-16 11:15:00',
-    status: '1'
-  },
-  {
-    id: 3,
-    couponName: '无门槛10元优惠券',
-    couponType: '3',
-    couponValue: 10,
-    minAmount: 0,
-    userName: '王五',
-    orderNo: '2026031613579246',
-    orderAmount: 50,
-    discountAmount: 10,
-    useTime: '2026-03-16 12:45:00',
-    status: '1'
-  },
-  {
-    id: 4,
-    couponName: '满100减20优惠券',
-    couponType: '1',
-    couponValue: 20,
-    minAmount: 100,
-    userName: '赵六',
-    orderNo: '',
-    orderAmount: 0,
-    discountAmount: 0,
-    useTime: '',
-    status: '2'
-  }
-]
-
 // 初始化
 onMounted(() => {
   // 获取优惠券列表
@@ -220,46 +159,38 @@ onMounted(() => {
 
 // 获取优惠券列表
 function getCouponListData() {
-  // 模拟API调用
-  setTimeout(() => {
-    couponList.value = mockCouponList
-  }, 300)
+  const shopId = getCurrentShop()?.id
+  if (!shopId) {
+    ElMessage.warning('请先选择店铺')
+    return
+  }
+  getMchCouponList({ shopId, current: 1, size: 100 }).then((res) => {
+    couponList.value = res.data?.records || []
+  })
 }
 
 // 获取使用记录
 function getList() {
   loading.value = true
-  const params = {
-    conditions_: `sort:useTime:desc`,
-    size: pagination.size,
-    current: pagination.current
-  }
-
-  // 合并查询参数
-  if (queryParams.couponId) {
-    params.conditions_ += `,couponId:${queryParams.couponId}:eq`
-  }
-  if (queryParams.userInfo) {
-    params.conditions_ += `,userInfo:${queryParams.userInfo}:like`
-  }
-  if (queryParams.status) {
-    params.conditions_ += `,status:${queryParams.status}:eq`
-  }
-
-  // 模拟API调用
-  setTimeout(() => {
-    let filteredList = mockRecordList
-    if (queryParams.couponId) {
-      // 根据优惠券ID过滤
-      const coupon = couponList.value.find(c => c.id == queryParams.couponId)
-      if (coupon) {
-        filteredList = mockRecordList.filter(item => item.couponName === coupon.name)
-      }
-    }
-    recordList.value = filteredList
-    pagination.total = filteredList.length
+  const shopId = getCurrentShop()?.id
+  if (!shopId) {
     loading.value = false
-  }, 500)
+    ElMessage.warning('请先选择店铺')
+    return
+  }
+  queryMchCouponRecord({
+    shopId,
+    current: pagination.current,
+    size: pagination.size,
+    couponId: queryParams.couponId || undefined,
+    memberKeyword: queryParams.userInfo || undefined,
+    status: queryParams.status === '' ? undefined : queryParams.status
+  }).then((res) => {
+    recordList.value = res.data?.records || []
+    pagination.total = Number(res.data?.total || 0)
+  }).finally(() => {
+    loading.value = false
+  })
 }
 
 // 查询
@@ -303,9 +234,9 @@ function getTypeText(type) {
 // 获取状态文本
 function getStatusText(status) {
   const statusMap = {
+    '0': '未使用',
     '1': '已使用',
-    '2': '已过期',
-    '3': '已作废'
+    '2': '已过期'
   }
   return statusMap[status] || '未知'
 }
@@ -313,9 +244,9 @@ function getStatusText(status) {
 // 获取状态标签类型
 function getStatusTagType(status) {
   const typeMap = {
+    '0': 'info',
     '1': 'success',
-    '2': 'warning',
-    '3': 'danger'
+    '2': 'warning'
   }
   return typeMap[status] || 'info'
 }

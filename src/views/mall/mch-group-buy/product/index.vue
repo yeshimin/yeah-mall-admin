@@ -10,15 +10,16 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="商品状态">
+      <el-form-item label="审核状态">
         <el-select
-          v-model="queryParams.status"
-          placeholder="请选择商品状态"
+          v-model="queryParams.auditStatus"
+          placeholder="请选择审核状态"
           clearable
           style="width: 120px"
         >
-          <el-option label="启用" value="1" />
-          <el-option label="禁用" value="0" />
+          <el-option label="待审核" value="1" />
+          <el-option label="已通过" value="2" />
+          <el-option label="已驳回" value="3" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -57,36 +58,32 @@
           <el-empty v-else description="" style="width: 80px; height: 80px" />
         </template>
       </el-table-column>
-      <el-table-column prop="originPrice" label="原价" width="100">
+      <el-table-column prop="minOriginPrice" label="原价" width="100">
         <template #default="scope">
-          ¥{{ scope.row.originPrice }}
+          ¥{{ scope.row.minOriginPrice }}
         </template>
       </el-table-column>
-      <el-table-column prop="groupPrice" label="拼团价" width="100">
+      <el-table-column prop="minGroupPrice" label="拼团价" width="100">
         <template #default="scope">
-          ¥{{ scope.row.groupPrice }}
+          {{ formatPriceRange(scope.row.minGroupPrice, scope.row.maxGroupPrice) }}
         </template>
       </el-table-column>
-      <el-table-column prop="minPeople" label="最低成团人数" width="120" />
-      <el-table-column prop="stock" label="库存" width="100" />
+      <el-table-column prop="groupStock" label="报名库存" width="100" />
+      <el-table-column prop="minPeople" label="每团人数" width="120" />
       <el-table-column prop="sales" label="销量" width="100" />
-      <el-table-column prop="status" label="状态" width="100">
+      <el-table-column prop="auditStatus" label="审核状态" width="100">
         <template #default="scope">
-          <el-tag :type="getStatusTagType(scope.row.status)">
-            {{ getStatusText(scope.row.status) }}
+          <el-tag :type="getStatusTagType(scope.row.auditStatus)">
+            {{ getStatusText(scope.row.auditStatus) }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" width="180" />
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="100" fixed="right">
         <template #default="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope.row)" plain>
-            <el-icon><Edit /></el-icon>
-            编辑
-          </el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope.row.id)" plain>
-            <el-icon><Delete /></el-icon>
-            删除
+          <el-button type="primary" size="small" plain @click="handleView(scope.row)">
+            <el-icon><View /></el-icon>
+            查看
           </el-button>
         </template>
       </el-table-column>
@@ -103,24 +100,60 @@
         @current-change="handleCurrentChange"
       />
     </div>
+
+    <el-dialog title="拼团商品详情" v-model="detailDialogVisible" width="720px">
+      <el-form :model="detailProduct" label-width="100px">
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="活动名称"><el-input v-model="detailProduct.activityName" disabled /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="店铺"><el-input v-model="detailProduct.shopName" disabled /></el-form-item></el-col>
+        </el-row>
+        <el-form-item label="商品信息">
+          <div class="detail-product-summary">
+            <el-image v-if="detailProduct.mainImage" :src="getImagePreviewUrl(detailProduct.mainImage)" fit="cover" class="detail-product-image" />
+            <div>
+              <div class="detail-product-name">{{ detailProduct.name || '-' }}</div>
+              <div class="detail-product-meta">原价 {{ detailProduct.originPrice }}，拼团价 {{ detailProduct.groupPrice }}，库存 {{ detailProduct.groupStock }}</div>
+            </div>
+          </div>
+        </el-form-item>
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="每团人数"><el-input :model-value="String(detailProduct.minPeople || '-')" disabled /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="销量"><el-input :model-value="String(detailProduct.sales || 0)" disabled /></el-form-item></el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="创建时间"><el-input :model-value="detailProduct.createTime || '-'" disabled /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="更新时间"><el-input :model-value="detailProduct.updateTime || '-'" disabled /></el-form-item></el-col>
+        </el-row>
+        <el-form-item label="审核状态"><el-tag :type="getStatusTagType(detailProduct.auditStatus)">{{ getStatusText(detailProduct.auditStatus) }}</el-tag></el-form-item>
+        <el-form-item label="商品描述">
+          <Editor v-model="detailProduct.detailDesc" :height="240" readonly />
+        </el-form-item>
+      </el-form>
+      <template #footer><el-button @click="detailDialogVisible = false">关闭</el-button></template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, Edit, Delete, Picture } from '@element-plus/icons-vue'
+import { Search, Refresh, Picture, View } from '@element-plus/icons-vue'
+import { useRoute } from 'vue-router'
 import RightToolbar from '@/components/RightToolbar/index.vue'
+import { queryMchGroupBuyProductList } from '@/api/mall/groupBuy'
+import { getCurrentShop } from '@/utils/shop'
+import Editor from '@/components/Editor/index.vue'
 
 // 响应式数据
 const loading = ref(false)
 const showSearch = ref(true)
+const detailDialogVisible = ref(false)
+const route = useRoute()
 
 // 查询参数
 const queryParams = reactive({
   name: '',
-  status: ''
+  auditStatus: ''
 })
 
 // 分页参数
@@ -132,34 +165,10 @@ const pagination = reactive({
 
 // 商品列表
 const productList = ref([])
-
-// 模拟数据
-const mockProductList = [
-  {
-    id: 1,
-    name: '春季拼团商品1',
-    mainImage: 'product1.jpg',
-    originPrice: 199,
-    groupPrice: 99,
-    minPeople: 3,
-    stock: 100,
-    sales: 20,
-    status: '1',
-    createTime: '2026-03-01 00:00:00'
-  },
-  {
-    id: 2,
-    name: '春季拼团商品2',
-    mainImage: 'product2.jpg',
-    originPrice: 299,
-    groupPrice: 149,
-    minPeople: 2,
-    stock: 50,
-    sales: 15,
-    status: '1',
-    createTime: '2026-03-02 00:00:00'
-  }
-]
+const detailProduct = reactive({
+  activityName: '', shopName: '', name: '', mainImage: '', originPrice: '', groupPrice: '', groupStock: 0,
+  minPeople: 0, sales: 0, createTime: '', updateTime: '', auditStatus: '', detailDesc: '',
+})
 
 // 初始化
 onMounted(() => {
@@ -168,49 +177,25 @@ onMounted(() => {
 
 // 获取商品列表
 function getList() {
+  const currentShop = getCurrentShop()
+  if (!currentShop) {
+    productList.value = []
+    pagination.total = 0
+    return
+  }
   loading.value = true
-  const params = {
-    conditions_: `sort:sort:asc`,
+  queryMchGroupBuyProductList({
+    current: pagination.current,
     size: pagination.size,
-    current: pagination.current
-  }
-
-  // 合并查询参数
-  if (queryParams.name) {
-    params.conditions_ += `,name:${queryParams.name}:like`
-  }
-  if (queryParams.status) {
-    params.conditions_ += `,status:${queryParams.status}:eq`
-  }
-
-  // 模拟API调用
-  setTimeout(() => {
-    productList.value = mockProductList
-    pagination.total = mockProductList.length
+    activityId: route.query.activityId || undefined,
+    name: queryParams.name || undefined,
+    auditStatus: queryParams.auditStatus || undefined,
+    shopId: currentShop.id,
+  }).then((res) => {
+    productList.value = res.data?.records || []
+    pagination.total = Number(res.data?.total || 0)
+  }).finally(() => {
     loading.value = false
-  }, 500)
-}
-
-// 编辑商品
-function handleEdit(row) {
-  // 编辑逻辑
-  ElMessage.info('编辑功能开发中')
-}
-
-// 删除商品
-function handleDelete(id) {
-  ElMessageBox.confirm('确定要删除该商品吗？', '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    loading.value = true
-    // 模拟删除
-    setTimeout(() => {
-      ElMessage.success('删除成功')
-      getList()
-      loading.value = false
-    }, 500)
   })
 }
 
@@ -224,7 +209,7 @@ function handleQuery() {
 function resetQuery() {
   Object.assign(queryParams, {
     name: '',
-    status: ''
+    auditStatus: ''
   })
   handleQuery()
 }
@@ -246,11 +231,37 @@ function getImagePreviewUrl(fileKey) {
   return getStoragePreviewUrl(fileKey)
 }
 
+function handleView(row) {
+  Object.assign(detailProduct, {
+    activityName: row.activityName,
+    shopName: row.shopName,
+    name: row.name,
+    mainImage: row.mainImage,
+    originPrice: formatPriceRange(row.minOriginPrice, row.maxOriginPrice),
+    groupPrice: formatPriceRange(row.minGroupPrice, row.maxGroupPrice),
+    groupStock: row.groupStock ?? 0,
+    minPeople: row.minPeople,
+    sales: row.sales,
+    createTime: row.createTime,
+    updateTime: row.updateTime,
+    auditStatus: row.auditStatus,
+    detailDesc: row.detailDesc || '',
+  })
+  detailDialogVisible.value = true
+}
+
+function formatPriceRange(minPrice, maxPrice) {
+  const min = Number(minPrice || 0).toFixed(2)
+  const max = Number(maxPrice || 0).toFixed(2)
+  return min === max ? `¥${min}` : `¥${min} - ¥${max}`
+}
+
 // 获取状态文本
 function getStatusText(status) {
   const statusMap = {
-    '1': '启用',
-    '0': '禁用'
+    '1': '待审核',
+    '2': '已通过',
+    '3': '已驳回'
   }
   return statusMap[status] || '未知'
 }
@@ -258,8 +269,9 @@ function getStatusText(status) {
 // 获取状态标签类型
 function getStatusTagType(status) {
   const typeMap = {
-    '1': 'success',
-    '0': 'danger'
+    '1': 'warning',
+    '2': 'success',
+    '3': 'danger'
   }
   return typeMap[status] || 'info'
 }
@@ -288,4 +300,9 @@ function getStatusTagType(status) {
   height: 80px;
   background-color: #f5f7fa;
 }
+
+.detail-product-summary { display: flex; align-items: center; gap: 12px; }
+.detail-product-image { width: 72px; height: 72px; border-radius: 4px; }
+.detail-product-name { font-weight: 500; color: var(--el-text-color-primary); }
+.detail-product-meta { margin-top: 6px; color: var(--el-text-color-secondary); font-size: 13px; }
 </style>

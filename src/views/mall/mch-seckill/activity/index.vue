@@ -310,7 +310,7 @@
               <el-empty v-else description="无图片" style="width: 100px; height: 100px" />
               <el-upload
                 class="avatar-uploader"
-                action="/dev-api/mch/storage/upload"
+                :action="merchantStorageUploadUrl"
                 :show-file-list="false"
                 :on-success="handleMainImageUploadSuccess"
                 :before-upload="handleImageUploadBefore"
@@ -344,7 +344,7 @@
               <el-empty v-else description="无轮播图" class="carousel-empty" />
               <el-upload
                 class="carousel-uploader"
-                action="/dev-api/mch/storage/upload"
+                :action="merchantStorageUploadUrl"
                 :show-file-list="false"
                 :on-success="handleCarouselImageUploadSuccess"
                 :before-upload="handleImageUploadBefore"
@@ -416,7 +416,7 @@
                   <div class="image-upload">
                     <el-upload
                       class="avatar-uploader"
-                      action="/dev-api/mch/storage/upload"
+                      :action="merchantStorageUploadUrl"
                       :show-file-list="false"
                       :on-success="(response) => handleImageUploadSuccess(response, sku)"
                       :before-upload="handleImageUploadBefore"
@@ -524,6 +524,7 @@ import { Timer, Edit, Plus, Check, Delete, Search, Document, Goods } from '@elem
 import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { getToken } from '@/utils/auth'
+import { resolveApiUrl } from '@/utils/download'
 import RightToolbar from '@/components/RightToolbar/index.vue'
 import { queryMchSeckillActivityList, queryMchSeckillSessionList, submitSeckillApply, queryMchSpuList } from '@/api/mall/seckill'
 
@@ -535,6 +536,7 @@ const loading = ref(false)
 const activityList = ref([])
 const total = ref(0)
 const showSearch = ref(true)
+const merchantStorageUploadUrl = resolveApiUrl('/mch/storage/upload')
 
 // 查询参数
 const queryParams = reactive({

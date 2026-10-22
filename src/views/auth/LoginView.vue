@@ -163,6 +163,26 @@
         >
       </template>
     </el-dialog>
+
+    <el-dialog
+      v-model="shopSelectDialogVisible"
+      title="选择店铺"
+      width="440px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+    >
+      <el-alert title="请选择本次登录要操作的店铺。" type="info" :closable="false" show-icon />
+      <el-radio-group v-model="selectedShopId" class="shop-select-list">
+        <el-radio v-for="shop in merchantShops" :key="shop.id" :value="shop.id" class="shop-select-item">
+          {{ shop.shopName }}
+        </el-radio>
+      </el-radio-group>
+      <template #footer>
+        <el-button :disabled="shopSelectSubmitting" @click="cancelShopSelection">取消登录</el-button>
+        <el-button type="primary" :loading="shopSelectSubmitting" @click="confirmShopSelection">进入后台</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -174,8 +194,10 @@ import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import { getRegisterCaptcha, register } from '@/api/auth'
 import { getPublicSysConfigs } from '@/api/upms'
-import type { LoginSubject } from '@/utils/auth'
+import { getLoginSubjectPreference, type LoginSubject, setLoginSubjectPreference } from '@/utils/auth'
 import { sha256Hex } from '@/utils/crypto'
+import { clearCurrentShop, setCurrentShop } from '@/utils/shop'
+import { request } from '@/utils/request'
 
 const router = useRouter()
 const route = useRoute()
@@ -187,13 +209,17 @@ const loginFormRef = ref<FormInstance>()
 
 // 登录加载状态
 const loginLoading = ref(false)
-const loginSubject = ref<LoginSubject>(authStore.subject)
+const loginSubject = ref<LoginSubject>(getLoginSubjectPreference())
 const captchaEnabled = ref(false)
 const captchaImage = ref('')
 const registerDialogVisible = ref(false)
 const registerFormRef = ref<FormInstance>()
 const registerLoading = ref(false)
 const registerCaptchaImage = ref('')
+const shopSelectDialogVisible = ref(false)
+const shopSelectSubmitting = ref(false)
+const merchantShops = ref<Array<{ id: string; shopName: string }>>([])
+const selectedShopId = ref<string | null>(null)
 const loginPageOptions = reactive({
   noticeEnabled: false,
   noticeTitle: '',
@@ -278,6 +304,81 @@ const registerRules = reactive<FormRules>({
 const redirectPath = () => {
   const redirect = route.query.redirect
   return typeof redirect === 'string' && redirect ? redirect : authStore.firstAccessiblePath
+}
+
+/**
+ * 店铺确认完成后才进入商家后台，保证业务请求始终带有店铺上下文。
+ */
+const enterManagementConsole = async () => {
+  await router.push(redirectPath())
+  ElMessage.success('登录成功')
+}
+
+/**
+ * 查询当前商家的店铺。单店自动选中，多店交由用户确认。
+ */
+const prepareMerchantShop = async () => {
+  try {
+    const response = await request<{ records: Array<{ id: string; shopName: string }> }>({
+      url: '/mch/shop/crud/query',
+      method: 'get',
+      params: { current: 1, size: 100 },
+    })
+    const shops = response.data?.records || []
+    if (shops.length === 0) {
+      ElMessage.error('当前商家没有可操作的店铺')
+      await authStore.clearAuth()
+      return
+    }
+
+    merchantShops.value = shops
+    const firstShop = shops[0]
+    if (!firstShop) {
+      return
+    }
+    if (shops.length === 1) {
+      setCurrentShop({ id: firstShop.id, name: firstShop.shopName })
+      await enterManagementConsole()
+      return
+    }
+
+    selectedShopId.value = firstShop.id
+    shopSelectDialogVisible.value = true
+  } catch {
+    ElMessage.error('获取商家店铺失败，请重新登录')
+    await authStore.clearAuth()
+  }
+}
+
+/**
+ * 确认本次登录的操作店铺。
+ */
+const confirmShopSelection = async () => {
+  const selectedShop = merchantShops.value.find((shop) => shop.id === selectedShopId.value)
+  if (!selectedShop) {
+    ElMessage.warning('请选择店铺')
+    return
+  }
+
+  shopSelectSubmitting.value = true
+  try {
+    setCurrentShop({ id: selectedShop.id, name: selectedShop.shopName })
+    shopSelectDialogVisible.value = false
+    await enterManagementConsole()
+  } finally {
+    shopSelectSubmitting.value = false
+  }
+}
+
+/**
+ * 取消店铺选择即取消本次商家登录，避免存在无店铺上下文的会话。
+ */
+const cancelShopSelection = async () => {
+  shopSelectDialogVisible.value = false
+  merchantShops.value = []
+  selectedShopId.value = null
+  clearCurrentShop()
+  await authStore.clearAuth()
 }
 
 const loadCaptcha = async () => {
@@ -407,6 +508,12 @@ const saveRememberedUsername = () => {
 }
 
 const handleLoginSubjectChange = async () => {
+  // 登录端类型是界面偏好，不能随登出清理的会话身份一起丢失。
+  setLoginSubjectPreference(loginSubject.value)
+  shopSelectDialogVisible.value = false
+  merchantShops.value = []
+  selectedShopId.value = null
+  clearCurrentShop()
   loginForm.username = ''
   loginForm.password = ''
   loginForm.code = ''
@@ -436,8 +543,11 @@ const handleLogin = async () => {
       terminal: loginForm.terminal,
     }, loginSubject.value)
     saveRememberedUsername()
-    await router.push(redirectPath())
-    ElMessage.success('登录成功')
+    if (loginSubject.value === 'merchant') {
+      await prepareMerchantShop()
+      return
+    }
+    await enterManagementConsole()
   } catch {
     if (loginSubject.value === 'admin' && captchaEnabled.value) {
       await loadCaptcha()
@@ -567,5 +677,29 @@ onMounted(() => {
 
 .register-form {
   padding-top: 20px;
+}
+
+:deep(.shop-select-list) {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+:deep(.shop-select-list .shop-select-item) {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  margin-right: 0;
+  padding: 0 12px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 6px;
+}
+
+:deep(.shop-select-list .el-radio__label) {
+  flex: 1;
 }
 </style>

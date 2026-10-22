@@ -99,6 +99,15 @@ export function queryGroupBuyOrderList(params) {
   })
 }
 
+// 查询活动下的拼团概览
+export function queryGroupBuyGroupList(params) {
+  return request({
+    url: '/admin/groupBuy/group/query',
+    method: 'get',
+    params
+  })
+}
+
 // 查询拼团申请列表
 export function queryGroupBuyApplyList(params) {
   return request({
@@ -148,6 +157,15 @@ export function queryMchGroupBuyProductList(params) {
 export function queryMchGroupBuyOrderList(params) {
   return request({
     url: '/mch/groupBuy/order/query',
+    method: 'get',
+    params
+  })
+}
+
+// 查询当前店铺在活动下的拼团概览
+export function queryMchGroupBuyGroupList(params) {
+  return request({
+    url: '/mch/groupBuy/group/query',
     method: 'get',
     params
   })

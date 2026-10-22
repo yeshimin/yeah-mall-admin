@@ -57,13 +57,13 @@
     <pagination v-show="total > 0" :total="Number(total)" v-model:page="queryParams.current" v-model:limit="queryParams.size"
       @pagination="getList" />
 
-    <el-dialog v-model="createDialogVisible" title="创建商品" width="800px" @close="createDialogVisible = false">
-      <el-steps :active="createStep" finish-status="success" simple>
+    <el-dialog v-model="createDialogVisible" title="创建商品" width="960px" class="product-dialog" append-to-body destroy-on-close @close="createDialogVisible = false">
+      <el-steps :active="createStep" finish-status="success" simple class="product-steps">
         <el-step title="基本信息" />
         <el-step title="详细描述" />
         <el-step title="规格设置" />
       </el-steps>
-      <el-form :model="createForm" :rules="createFormRules" label-width="90px" v-show="createStep === 0">
+      <el-form :model="createForm" :rules="createFormRules" label-width="90px" class="product-form" v-show="createStep === 0">
         <el-form-item label="商品分类" prop="categoryId">
           <el-tree-select v-model="createForm.categoryId" :data="categoryTree"
             :props="{ label: 'name', value: 'id', children: 'children' }" placeholder="请选择商品分类" check-strictly
@@ -73,12 +73,18 @@
           <el-input v-model="createForm.name" placeholder="请输入商品名称" />
         </el-form-item>
       </el-form>
-      <el-form :model="createForm" :rules="createFormRules" label-width="90px" v-show="createStep === 1">
-        <el-form-item label="详细描述" prop="detailDesc">
-          <Editor v-model="createForm.detailDesc" :height="400" />
+      <el-form v-if="createStep === 1" :model="createForm" :rules="createFormRules" class="product-form product-editor-form">
+        <div class="detail-editor-heading">
+          <div>
+            <div class="detail-editor-title">商品详情</div>
+            <div class="detail-editor-hint">支持图文、链接和视频内容，图片会自动上传至当前商家存储空间。</div>
+          </div>
+        </div>
+        <el-form-item prop="detailDesc" class="detail-editor-item">
+          <Editor v-model="createForm.detailDesc" :height="420" />
         </el-form-item>
       </el-form>
-      <el-form :model="createForm" :rules="createFormRules" label-width="90px" v-show="createStep === 2">
+      <el-form :model="createForm" :rules="createFormRules" label-width="90px" class="product-form" v-show="createStep === 2">
         <el-form-item label="规格">
           <div class="spec-container">
             <div style="margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px;">
@@ -101,19 +107,19 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="createStep > 0 ? createStep-- : createDialogVisible = false">上一步</el-button>
+        <el-button @click="createStep > 0 ? createStep-- : createDialogVisible = false">{{ createStep > 0 ? '上一步' : '取消' }}</el-button>
         <el-button v-if="createStep < 2" type="primary" @click="createStep++">下一步</el-button>
         <el-button v-else type="primary" @click="handleCreateConfirm">确 定</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="editDialogVisible" title="编辑商品" width="800px" @close="editDialogVisible = false">
-      <el-steps :active="editStep" finish-status="success" simple>
+    <el-dialog v-model="editDialogVisible" title="编辑商品" width="960px" class="product-dialog" append-to-body destroy-on-close @close="editDialogVisible = false">
+      <el-steps :active="editStep" finish-status="success" simple class="product-steps">
         <el-step title="基本信息" />
         <el-step title="详细描述" />
         <el-step title="规格设置" />
       </el-steps>
-      <el-form :model="editForm" :rules="editFormRules" label-width="90px" v-show="editStep === 0">
+      <el-form :model="editForm" :rules="editFormRules" label-width="90px" class="product-form" v-show="editStep === 0">
         <el-form-item label="商品名称" prop="name">
           <el-input v-model="editForm.name" placeholder="请输入商品名称" />
         </el-form-item>
@@ -123,12 +129,18 @@
             :render-after-expand="false" style="width: 100%" />
         </el-form-item>
       </el-form>
-      <el-form :model="editForm" :rules="editFormRules" label-width="90px" v-show="editStep === 1">
-        <el-form-item label="详细描述" prop="detailDesc">
-          <Editor v-model="editForm.detailDesc" :height="400" />
+      <el-form v-if="editStep === 1" :model="editForm" :rules="editFormRules" class="product-form product-editor-form">
+        <div class="detail-editor-heading">
+          <div>
+            <div class="detail-editor-title">商品详情</div>
+            <div class="detail-editor-hint">支持图文、链接和视频内容，图片会自动上传至当前商家存储空间。</div>
+          </div>
+        </div>
+        <el-form-item prop="detailDesc" class="detail-editor-item">
+          <Editor v-model="editForm.detailDesc" :height="420" />
         </el-form-item>
       </el-form>
-      <el-form :model="editForm" :rules="editFormRules" label-width="90px" v-show="editStep === 2">
+      <el-form :model="editForm" :rules="editFormRules" label-width="90px" class="product-form" v-show="editStep === 2">
         <el-form-item label="规格">
           <div class="spec-container">
             <div style="margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px;">
@@ -152,7 +164,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editStep > 0 ? editStep-- : editDialogVisible = false">上一步</el-button>
+        <el-button @click="editStep > 0 ? editStep-- : editDialogVisible = false">{{ editStep > 0 ? '上一步' : '取消' }}</el-button>
         <el-button v-if="editStep < 2" type="primary" @click="editStep++">下一步</el-button>
         <el-button v-else type="primary" @click="handleEditConfirm">确 定</el-button>
       </template>
@@ -789,6 +801,69 @@ function handleImageManageClose() {
 }
 .mb8 {
   margin-bottom: 8px;
+}
+
+.detail-editor-item :deep(.el-form-item__content) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.product-dialog :deep(.el-dialog__header) {
+  margin-right: 0;
+  padding: 20px 26px 16px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.product-dialog :deep(.el-dialog__title) {
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.product-dialog :deep(.el-dialog__body) {
+  padding: 20px 26px 12px;
+  background: linear-gradient(180deg, #f8fafc 0, #ffffff 140px);
+}
+
+.product-dialog :deep(.el-dialog__footer) {
+  padding: 14px 26px 20px;
+  border-top: 1px solid #ebeef5;
+}
+
+.product-steps {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.product-form {
+  min-height: 330px;
+  padding: 14px 16px 0;
+}
+
+.product-editor-form {
+  padding-top: 4px;
+}
+
+.detail-editor-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.detail-editor-title {
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.detail-editor-hint {
+  margin-top: 5px;
+  color: #909399;
+  font-size: 13px;
 }
 /* 规格样式优化 */
 .el-tag:hover {

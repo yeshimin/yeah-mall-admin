@@ -188,9 +188,9 @@
         <el-form-item label="封面图片" prop="coverImage">
           <el-upload
             class="upload-demo"
-            action="/dev-api/basic/storage/upload"
+            :action="storageUploadUrl"
             :headers="{ Authorization: 'Bearer ' + getToken() }"
-            :data="{ storageType: '', isPublic: true, isUsed: false }"
+            :data="{ isPublic: true, isUsed: false }"
             :on-success="handleUploadSuccess"
             :on-error="handleUploadError"
             :auto-upload="true"
@@ -266,6 +266,7 @@ import { Plus, Search, Refresh, Edit, Delete, Timer, Upload, Picture, Check } fr
 import { querySeckillActivityList, createSeckillActivity, updateSeckillActivity, deleteSeckillActivity, updateSeckillActivityStatus, updateSeckillActivityEnabled } from '@/api/mall/seckill'
 import { useRouter } from 'vue-router'
 import { getToken } from '@/utils/auth'
+import { resolveApiUrl } from '@/utils/download'
 import RightToolbar from '@/components/RightToolbar/index.vue'
 
 // 响应式数据
@@ -275,6 +276,7 @@ const dialogTitle = ref('新增活动')
 const formRef = ref(null)
 const router = useRouter()
 const showSearch = ref(true)
+const storageUploadUrl = resolveApiUrl('/basic/storage/upload')
 
 // 上传成功处理
 function handleUploadSuccess(response) {
