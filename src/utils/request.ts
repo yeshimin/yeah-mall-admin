@@ -12,6 +12,41 @@ type RequestConfig = ApiEncryptionRequestConfig & {
   idempotencyKey?: string
 }
 
+const PAGE_NUMBER_KEYS = ['total', 'current', 'size', 'pages'] as const
+
+/**
+ * 兼容后端将 Long 序列化为字符串的分页响应。
+ *
+ * 仅处理标准 IPage 结构的元数据，不遍历 records，避免改变 UUID、雪花 ID 等业务字段。
+ */
+function normalizePageNumbers(payload: unknown) {
+  if (!payload || typeof payload !== 'object') {
+    return
+  }
+
+  const response = payload as { data?: unknown }
+  if (!response.data || typeof response.data !== 'object') {
+    return
+  }
+
+  const page = response.data as Record<string, unknown>
+  if (!Array.isArray(page.records)) {
+    return
+  }
+
+  for (const key of PAGE_NUMBER_KEYS) {
+    const rawValue = page[key]
+    if (typeof rawValue !== 'string') {
+      continue
+    }
+
+    const value = Number(rawValue)
+    if (Number.isSafeInteger(value) && value >= 0) {
+      page[key] = value
+    }
+  }
+}
+
 const service = axios.create({
   baseURL: apiBaseUrl,
   timeout: 10000,
@@ -76,6 +111,7 @@ service.interceptors.response.use(
   async (response) => {
     // 响应解密必须先于统一 R<T> 结构的业务处理。
     response.data = await decryptApiResponse(response.config as RequestConfig, response.data)
+    normalizePageNumbers(response.data)
     return response
   },
   (error: AxiosError) => {
