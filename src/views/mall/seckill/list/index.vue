@@ -338,66 +338,6 @@ const rules = reactive({
 // 活动列表
 const activityList = ref([])
 
-// 模拟数据
-const mockActivityList = [
-  {
-    id: 1,
-    name: '春节秒杀活动',
-    description: '春节期间限时秒杀活动，全场商品低至5折',
-    coverImage: 'spring-festival.jpg',
-    applyBeginTime: '2026-01-25 00:00:00',
-    applyEndTime: '2026-01-31 23:59:59',
-    activityBeginTime: '2026-02-01 00:00:00',
-    activityEndTime: '2026-02-15 23:59:59',
-    sort: 1,
-    remark: '春节重点活动',
-    status: '5',
-    isEnabled: true
-  },
-  {
-    id: 2,
-    name: '情人节秒杀',
-    description: '情人节特别秒杀活动，为心爱的TA准备惊喜',
-    coverImage: 'valentine.jpg',
-    applyBeginTime: '2026-02-01 00:00:00',
-    applyEndTime: '2026-02-09 23:59:59',
-    activityBeginTime: '2026-02-10 00:00:00',
-    activityEndTime: '2026-02-14 23:59:59',
-    sort: 2,
-    remark: '情人节特别活动',
-    status: '3',
-    isEnabled: true
-  },
-  {
-    id: 3,
-    name: '元宵节秒杀',
-    description: '元宵节限时秒杀，传统美食特惠',
-    coverImage: 'lantern-festival.jpg',
-    applyBeginTime: '2026-02-10 00:00:00',
-    applyEndTime: '2026-02-13 23:59:59',
-    activityBeginTime: '2026-02-14 00:00:00',
-    activityEndTime: '2026-02-17 23:59:59',
-    sort: 3,
-    remark: '元宵节活动',
-    status: '2',
-    isEnabled: false
-  },
-  {
-    id: 4,
-    name: '618秒杀活动',
-    description: '全场爆款限时秒杀',
-    coverImage: '96b8aee92f4b4982ab83eaf597152eb5',
-    applyBeginTime: '2026-06-01 10:00:00',
-    applyEndTime: '2026-06-05 23:59:59',
-    activityBeginTime: '2026-06-18 00:00:00',
-    activityEndTime: '2026-06-18 23:59:59',
-    sort: 1,
-    remark: '重点活动，优先展示',
-    status: '1',
-    isEnabled: true
-  }
-]
-
 // 初始化
 onMounted(() => {
   getList()

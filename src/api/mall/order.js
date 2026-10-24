@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+import { getCurrentShop } from '@/utils/shop'
 
 // 查询订单列表
 export function queryOrderList(params) {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getCurrentShop()?.id || '';
   return request({
     url: `/mch/order/query`,
     method: 'get',

@@ -56,3 +56,11 @@ a,
   min-width: 0;
   margin-left: 0;
 }
+
+/* 后台列表统一使用右侧分页栏，避免 Element Plus Flex 布局忽略 text-align。 */
+#app .pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 20px;
+}

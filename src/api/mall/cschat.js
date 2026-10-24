@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+import { getCurrentShop } from '@/utils/shop'
 
 // 查询会话列表
 export function queryConversationList(params) {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getCurrentShop()?.id || '';
   return request({
     url: `/mch/csConversation/query`,
     method: 'get',
@@ -60,11 +61,12 @@ export function uploadCsMessageFile(file) {
   })
 }
 
-// 发送消息
+// 发送客服消息
 export function sendMessage(data) {
   return request({
-    url: `/mch/csConversation/sendMessage`,
+    url: '/mch/csConversation/sendMessage',
     method: 'post',
-    data
+    data,
+    suppressErrorMessage: true
   })
 }

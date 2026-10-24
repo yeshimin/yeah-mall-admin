@@ -17,6 +17,7 @@ import {
 } from '@/utils/auth'
 import { resetUnauthorizedState } from '@/utils/session'
 import { clearCurrentShop } from '@/utils/shop'
+import wsService from '@/utils/websocket'
 import { useAppStore } from './app'
 
 const MENU_ROUTE_MAP: Record<string, string> = {
@@ -27,6 +28,8 @@ const MENU_ROUTE_MAP: Record<string, string> = {
   '/system/post': '/system/position',
   '/system/dict': '/system/dict',
   '/system/log': '/system/log',
+  '/system/log/operlog': '/system/log',
+  '/system/log/logininfor': '/system/log',
 }
 
 const RESOURCE_STATUS_DISABLED = '2'
@@ -171,6 +174,14 @@ export const useAuthStore = defineStore('auth', () => {
   })
   const firstAccessiblePath = computed(() => findFirstLeafPath(sidebarMenus.value) || PROFILE_PATH)
 
+  function syncRealtimeConnection() {
+    if (token.value && subject.value === 'merchant') {
+      wsService.init()
+      return
+    }
+    wsService.disconnect()
+  }
+
   async function refreshCaptcha() {
     const response = await getCaptchaApi()
     return response.data as CaptchaVo
@@ -202,6 +213,8 @@ export const useAuthStore = defineStore('auth', () => {
     permissions.value = mineData.permissions || []
     resources.value = resourceTree || []
     initialized.value = true
+    // 登录或刷新恢复商家身份后，全局建立客服长连接。
+    syncRealtimeConnection()
   }
 
   function fetchAuthContext() {
@@ -221,6 +234,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     if (initialized.value) {
+      syncRealtimeConnection()
       return
     }
 
@@ -255,6 +269,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function clearAuth() {
+    wsService.disconnect()
     token.value = ''
     subject.value = 'admin'
     mine.value = null

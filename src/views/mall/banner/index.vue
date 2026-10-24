@@ -99,6 +99,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
+import { getCurrentShop } from '@/utils/shop'
 import { getBannerDetail, deleteBanner, queryBannerList, createBannerWithFile, updateBannerWithFile } from '@/api/mall/banner'
 import RightToolbar from '@/components/RightToolbar/index.vue'
 import Pagination from '@/components/Pagination/index.vue'
@@ -360,7 +361,7 @@ function getList() {
 }
 // 获取当前商户ID
 function getShopId() {
-  return localStorage.getItem('shopId') || ''
+  return getCurrentShop()?.id || ''
 }
 
 onMounted(() => {

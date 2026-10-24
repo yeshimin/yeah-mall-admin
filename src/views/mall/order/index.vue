@@ -23,6 +23,7 @@
         </el-form-item>
         <el-form-item label="退款状态">
           <el-select v-model="searchForm.refundStatus" placeholder="请选择退款状态" clearable style="width: 200px;">
+            <el-option label="待处理（申请中、处理中）" value="pending"></el-option>
             <el-option label="无" value="0"></el-option>
             <el-option label="申请中" value="1"></el-option>
             <el-option label="处理中" value="2"></el-option>
@@ -48,12 +49,40 @@
         </el-form-item>
         <el-form-item label="下单时间">
           <el-date-picker
-            v-model="dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            style="width: 300px;"
+            v-model="createStartTime"
+            type="datetime"
+            placeholder="开始时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 190px;"
+          ></el-date-picker>
+          <span class="time-range-separator">至</span>
+          <el-date-picker
+            v-model="createEndTime"
+            type="datetime"
+            placeholder="结束时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 190px;"
+          ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="支付时间">
+          <el-date-picker
+            v-model="paySuccessStartTime"
+            type="datetime"
+            placeholder="开始时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 190px;"
+          ></el-date-picker>
+          <span class="time-range-separator">至</span>
+          <el-date-picker
+            v-model="paySuccessEndTime"
+            type="datetime"
+            placeholder="结束时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 190px;"
           ></el-date-picker>
         </el-form-item>
         <el-form-item>
@@ -671,12 +700,16 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { queryOrderList, getOrderDetail, deliverOrder, updateShipInfo, queryTracking, confirmRefund, rejectRefund, queryRefundRecords, getRefundDetail } from '@/api/mall/order';
 import { queryDeliveryProviderList } from '@/api/mall/shipping';
 import ImagePreview from '@/components/ImagePreview/index.vue';
+
+const route = useRoute();
+const router = useRouter();
 
 function getFullImageUrl(fileKey) {
   return getStoragePreviewUrl(fileKey)
@@ -694,12 +727,13 @@ const searchForm = reactive({
   status: '',
   refundStatus: '',
   afterSaleStatus: '',
-  orderType: '',
-  startDate: '',
-  endDate: ''
+  orderType: ''
 });
 
-const dateRange = ref([]);
+const createStartTime = ref('');
+const createEndTime = ref('');
+const paySuccessStartTime = ref('');
+const paySuccessEndTime = ref('');
 
 const pagination = reactive({
   current: 1,
@@ -816,12 +850,23 @@ const getOrderList = async () => {
     const sortOrder = sortConfig.order;
     const conditions_ = `${sortField}:sort:${sortOrder}`;
 
+    const isRefundPending = searchForm.refundStatus === 'pending';
     const params = {
       ...searchForm,
+      refundStatus: isRefundPending ? undefined : searchForm.refundStatus,
+      refundPending: isRefundPending ? true : undefined,
       current: pagination.current,
       size: pagination.pageSize,
       conditions_
     };
+    if (createStartTime.value && createEndTime.value) {
+      params['createTime[0]'] = createStartTime.value;
+      params['createTime[1]'] = createEndTime.value;
+    }
+    if (paySuccessStartTime.value && paySuccessEndTime.value) {
+      params['paySuccessTime[0]'] = paySuccessStartTime.value;
+      params['paySuccessTime[1]'] = paySuccessEndTime.value;
+    }
 
     const response = await queryOrderList(params);
     if (response.code === 0 && response.data) {
@@ -841,29 +886,69 @@ const getOrderList = async () => {
   }
 };
 
+const applyRouteFilters = () => {
+  Object.assign(searchForm, {
+    orderNo: '',
+    status: typeof route.query.status === 'string' ? route.query.status : '',
+    refundStatus: typeof route.query.refundStatus === 'string' ? route.query.refundStatus : '',
+    afterSaleStatus: '',
+    orderType: ''
+  });
+  const routeCreateStartTime = typeof route.query.createStartTime === 'string' ? route.query.createStartTime : '';
+  const routeCreateEndTime = typeof route.query.createEndTime === 'string' ? route.query.createEndTime : '';
+  const routePaySuccessStartTime = typeof route.query.paySuccessStartTime === 'string' ? route.query.paySuccessStartTime : '';
+  const routePaySuccessEndTime = typeof route.query.paySuccessEndTime === 'string' ? route.query.paySuccessEndTime : '';
+  createStartTime.value = routeCreateStartTime;
+  createEndTime.value = routeCreateEndTime;
+  paySuccessStartTime.value = routePaySuccessStartTime;
+  paySuccessEndTime.value = routePaySuccessEndTime;
+  sortConfig.prop = routePaySuccessStartTime && routePaySuccessEndTime ? 'paySuccessTime' : 'createTime';
+  sortConfig.order = 'desc';
+  pagination.current = 1;
+  getOrderList();
+};
+
 const handleSearch = () => {
-  if (dateRange.value && dateRange.value.length === 2) {
-    searchForm.startDate = dateRange.value[0];
-    searchForm.endDate = dateRange.value[1];
-  } else {
-    searchForm.startDate = '';
-    searchForm.endDate = '';
+  if (!validateTimeRange('下单时间', createStartTime.value, createEndTime.value)
+      || !validateTimeRange('支付时间', paySuccessStartTime.value, paySuccessEndTime.value)) {
+    return;
   }
   pagination.current = 1;
   getOrderList();
 };
 
+const validateTimeRange = (label, startTime, endTime) => {
+  if (!startTime && !endTime) {
+    return true;
+  }
+  if (!startTime || !endTime) {
+    ElMessage.warning(`请完整选择${label}`);
+    return false;
+  }
+  if (startTime > endTime) {
+    ElMessage.warning(`${label}开始时间不能晚于结束时间`);
+    return false;
+  }
+  return true;
+};
+
 const resetForm = () => {
+  if (route.query.status || route.query.refundStatus || route.query.createStartTime
+      || route.query.createEndTime || route.query.paySuccessStartTime || route.query.paySuccessEndTime) {
+    router.replace({ path: route.path });
+    return;
+  }
   Object.assign(searchForm, {
     orderNo: '',
     status: '',
     refundStatus: '',
     afterSaleStatus: '',
-    orderType: '',
-    startDate: '',
-    endDate: ''
+    orderType: ''
   });
-  dateRange.value = [];
+  createStartTime.value = '';
+  createEndTime.value = '';
+  paySuccessStartTime.value = '';
+  paySuccessEndTime.value = '';
   pagination.current = 1;
   getOrderList();
 };
@@ -1218,8 +1303,7 @@ const handleViewRefundRecords = async (row) => {
 
   try {
     const response = await queryRefundRecords({
-      orderId: row.id,
-      conditions_: 'id:sort:desc'
+      orderId: row.id
     });
 
     if (response.code === 0 && response.data) {
@@ -1322,8 +1406,13 @@ const handleSubmitProcessRefund = async () => {
   }
 };
 
-onMounted(async () => {
-  await getOrderList();
+watch(() => [route.query.status, route.query.refundStatus, route.query.createStartTime,
+  route.query.createEndTime, route.query.paySuccessStartTime, route.query.paySuccessEndTime], () => {
+  applyRouteFilters();
+});
+
+onMounted(() => {
+  applyRouteFilters();
 });
 </script>
 
@@ -1525,4 +1614,10 @@ onMounted(async () => {
   max-height: 500px;
   overflow-y: auto;
 }
+
+.time-range-separator {
+  margin: 0 8px;
+  color: #909399;
+}
+
 </style>

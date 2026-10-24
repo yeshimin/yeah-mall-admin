@@ -7,6 +7,9 @@
       <el-form-item label="规格编码" prop="specCode">
         <el-input v-model="queryParams.specCode" placeholder="请输入规格编码" clearable style="width: 200px" />
       </el-form-item>
+      <el-form-item label="库存上限" prop="stockMax">
+        <el-input-number v-model="queryParams.stockMax" :min="0" :precision="0" placeholder="不限制" style="width: 200px" />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -14,7 +17,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <el-col v-if="queryParams.spuId" :span="1.5">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
@@ -70,9 +73,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watchEffect } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getCurrentShop } from '@/utils/shop'
 import RightToolbar from '@/components/RightToolbar/index.vue'
 import Pagination from '@/components/Pagination/index.vue'
 import { getSkuList, saveSku, updateSku, deleteSku, getSkuDetail } from '@/api/mall/sku'
@@ -89,7 +93,8 @@ const queryParams = ref({
   size: 10,
   name: '',
   specCode: '',
-  spuId: ''
+  spuId: '',
+  stockMax: null
 })
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
@@ -131,33 +136,18 @@ const ids = ref([])
 const selectedRows = ref([])
 const queryRef = ref(null)
 
-onMounted(() => {
-  const spuId = route.query.spuId
-  if (spuId) {
-    queryParams.value.spuId = spuId
-    skuForm.value.spuId = spuId
-    getList()
-  }
-})
+const syncRouteFilter = () => {
+  const spuId = typeof route.query.spuId === 'string' ? route.query.spuId : ''
+  const stockMax = Number(route.query.stockMax)
+
+  queryParams.value.spuId = spuId
+  skuForm.value.spuId = spuId
+  queryParams.value.stockMax = Number.isInteger(stockMax) && stockMax >= 0 ? stockMax : null
+}
 
 const getList = () => {
   loading.value = true
-  // 构造conditions_参数支持模糊搜索
   const params = { ...queryParams.value, shopId: getShopId() }
-  const conditions = []
-  if (params.name) {
-    conditions.push(`name:like:${params.name}`)
-  }
-  if (params.specCode) {
-    conditions.push(`specCode:like:${params.specCode}`)
-  }
-  // 如果有条件查询，则使用conditions_参数
-  if (conditions.length > 0) {
-    params.conditions_ = conditions.join(';')
-    // 删除原有的查询参数
-    delete params.name
-    delete params.specCode
-  }
   getSkuList(params).then(res => {
     tableData.value = res.data.records
     total.value = res.data.total
@@ -174,8 +164,28 @@ const handleQuery = () => {
 
 const resetQuery = () => {
   queryRef.value.resetFields()
+  if (typeof route.query.stockMax === 'string') {
+    clearStockMaxFilter()
+    return
+  }
   handleQuery()
 }
+
+const clearStockMaxFilter = () => {
+  const { stockMax: ignored, ...query } = route.query
+  router.replace({ path: route.path, query })
+}
+
+watch(() => [route.query.spuId, route.query.stockMax], () => {
+  syncRouteFilter()
+  queryParams.value.current = 1
+  getList()
+})
+
+onMounted(() => {
+  syncRouteFilter()
+  getList()
+})
 
 const handleAdd = () => {
   dialogTitle.value = '新增SKU'
@@ -273,7 +283,7 @@ const handleDelete = (row) => {
 // })
 
 function getShopId() {
-  return localStorage.getItem('shopId') || ''
+  return getCurrentShop()?.id || ''
 }
 </script>
 
@@ -281,6 +291,7 @@ function getShopId() {
 .app-container {
   padding: 20px;
 }
+
 /* 新增规格样式 */
 .spec-loading,
 .spec-empty {

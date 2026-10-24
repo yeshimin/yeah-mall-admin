@@ -12,6 +12,28 @@ type RequestConfig = ApiEncryptionRequestConfig & {
   idempotencyKey?: string
 }
 
+function normalizePageNumbers(payload: unknown) {
+  if (!payload || typeof payload !== 'object') {
+    return
+  }
+  const response = payload as { data?: unknown }
+  if (!response.data || typeof response.data !== 'object') {
+    return
+  }
+  const page = response.data as Record<string, unknown>
+  if (!Array.isArray(page.records)) {
+    return
+  }
+  for (const key of ['total', 'current', 'size', 'pages']) {
+    if (typeof page[key] === 'string') {
+      const value = Number(page[key])
+      if (Number.isFinite(value)) {
+        page[key] = value
+      }
+    }
+  }
+}
+
 const service = axios.create({
   baseURL: apiBaseUrl,
   timeout: 10000,
@@ -76,6 +98,8 @@ service.interceptors.response.use(
   async (response) => {
     // 响应解密必须先于统一 R<T> 结构的业务处理。
     response.data = await decryptApiResponse(response.config as RequestConfig, response.data)
+    // 后端为保护雪花ID会将长整型序列化为字符串；分页元数据必须保持数值类型。
+    normalizePageNumbers(response.data)
     return response
   },
   (error: AxiosError) => {

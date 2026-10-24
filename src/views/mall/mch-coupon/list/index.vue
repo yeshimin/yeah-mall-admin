@@ -288,6 +288,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
+import { getCurrentShop } from '@/utils/shop'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, ElIcon } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete, Check, View } from '@element-plus/icons-vue'
@@ -437,7 +438,7 @@ function getList() {
 
 // 获取店铺ID
 function getShopId() {
-  return localStorage.getItem('shopId') || ''
+  return getCurrentShop()?.id || ''
 }
 
 // 获取分类树

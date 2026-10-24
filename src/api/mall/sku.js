@@ -2,7 +2,7 @@ import request from '@/utils/request';
 
 export function getSkuList(params) {
   return request({
-    url: '/mch/productSku/crud/query',
+    url: '/mch/productSku/query',
     method: 'get',
     params
   });

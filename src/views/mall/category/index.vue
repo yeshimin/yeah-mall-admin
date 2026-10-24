@@ -136,7 +136,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { getCategoryTree, createCategory, getCategoryDetail, updateCategory, deleteCategory, queryCategoryList } from '@/api/mall/category'
-import { queryShopList } from '@/api/mall/shop'
+import { getCurrentShop } from '@/utils/shop'
 import RightToolbar from '@/components/RightToolbar/index.vue'
 import Pagination from '@/components/Pagination/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -179,6 +179,7 @@ const editFormRules = {
 }
 
 const filteredTableData = computed(() => tableData.value)
+const getShopId = () => getCurrentShop()?.id || ''
 
 function handleQuery() {
   queryParams.value.current = 1
@@ -195,12 +196,12 @@ function handleSelectionChange(selection) {
   multiple.value = !selection.length
 }
 function handleAdd() {
-  createForm.value = { shopId: localStorage.getItem('shopId'), parentId: null, code: '', name: '', sort: 1, remark: '' }
+  createForm.value = { shopId: getShopId(), parentId: null, code: '', name: '', sort: 1, remark: '' }
   createDialogVisible.value = true
 }
 function handleCreateConfirm() {
   if (!createForm.value.shopId) {
-    createForm.value.shopId = localStorage.getItem('shopId')
+    createForm.value.shopId = getShopId()
   }
   // 只在提交参数时处理 parentId
   const payload = {
@@ -236,13 +237,13 @@ function handleUpdate(row) {
   }
   getCategoryDetail(target.id).then(res => {
     // 自动注入 shopId，parentId 为 0 时转为 null 以便下拉框显示为空
-    editForm.value = { ...res.data, shopId: localStorage.getItem('shopId'), parentId: (res.data.parentId === 0 ? null : res.data.parentId) }
+    editForm.value = { ...res.data, shopId: getShopId(), parentId: (res.data.parentId === 0 ? null : res.data.parentId) }
     editDialogVisible.value = true
   })
 }
 function handleEditConfirm() {
   if (!editForm.value.shopId) {
-    editForm.value.shopId = localStorage.getItem('shopId')
+    editForm.value.shopId = getShopId()
   }
   // 只在提交参数时处理 parentId
   const payload = {
@@ -294,7 +295,14 @@ function handleDelete(row) {
 }
 function getList() {
   loading.value = true
-  const shopId = localStorage.getItem('shopId')
+  const shopId = getShopId()
+  if (!shopId) {
+    tableData.value = []
+    categoryTree.value = []
+    total.value = 0
+    loading.value = false
+    return
+  }
   // 判断是否有搜索条件
   if (queryParams.value.name) {
     // 有分类名称搜索时，调用 query 接口
@@ -319,17 +327,7 @@ function getList() {
     })
   }
 }
-onMounted(async () => {
-  let shopId = localStorage.getItem('shopId')
-  if (!shopId) {
-    const res = await queryShopList({})
-    if (res.data && res.data.records && res.data.records.length > 0) {
-      shopId = res.data.records[0].id
-      localStorage.setItem('shopId', shopId)
-    }
-  }
-  getList()
-})
+onMounted(() => getList())
 // 弹窗关闭时重置 parentId
 watch(createDialogVisible, (val) => {
   if (!val) {

@@ -224,6 +224,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
+import { getCurrentShop } from '@/utils/shop'
 import { resolveApiUrl } from '@/utils/download'
 import { listSpu, createSpu, updateSpu, deleteSpu, getSpuDetail, setMainImage } from '@/api/mall/spu'
 import { setCarouselImages, listSpuImages, deleteSpuImage } from '@/api/mall/spuImage'
@@ -584,7 +585,7 @@ function handleDelete(row) {
   }).catch(() => {})
 }
 function getShopId() {
-  return localStorage.getItem('shopId') || ''
+  return getCurrentShop()?.id || ''
 }
 function getList() {
   loading.value = true

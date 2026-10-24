@@ -27,6 +27,18 @@ const props = defineProps<{
 
 const BACKEND_ICON_MAP: Record<string, string> = {
   system: 'Setting',
+  build: 'ShoppingBag',
+  color: 'Grid',
+  code: 'Lightning',
+  example: 'Connection',
+  form: 'ChatDotRound',
+  component: 'DocumentChecked',
+  education: 'Tickets',
+  edit: 'EditPen',
+  files: 'Files',
+  Files: 'Files',
+  location: 'Location',
+  Location: 'Location',
   user: 'User',
   peoples: 'Avatar',
   'tree-table': 'Menu',

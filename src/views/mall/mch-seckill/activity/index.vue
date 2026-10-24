@@ -17,9 +17,10 @@
           clearable
           style="width: 200px"
         >
-          <el-option label="未开始" value="0" />
-          <el-option label="进行中" value="1" />
-          <el-option label="已结束" value="2" />
+          <el-option label="已发布" value="2" />
+          <el-option label="报名中" value="3" />
+          <el-option label="报名结束" value="4" />
+          <el-option label="活动中" value="5" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -51,59 +52,9 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="applyStatus" label="申请状态" width="120">
-          <template #default="scope">
-            <el-tag :type="scope.row.applyStatus === 1 ? 'success' : scope.row.applyStatus === 0 ? 'warning' : 'info'">
-              {{ scope.row.applyStatus === 1 ? '已申请' : scope.row.applyStatus === 2 ? '已通过' : '未申请' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="hasSession" label="场次设置" width="120">
-          <template #default="scope">
-            <el-tag :type="scope.row.hasSession === 1 ? 'success' : 'info'">
-              {{ scope.row.hasSession === 1 ? '多场次' : '单场次' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="sessionCount" label="场次数量" width="100">
-          <template #default="scope">
-            {{ scope.row.sessionCount || 0 }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="description" label="活动描述" min-width="200" />
-      <el-table-column label="操作" width="500" fixed="right">
+      <el-table-column prop="description" label="活动描述" min-width="200" />
+      <el-table-column label="操作" width="320" fixed="right">
         <template #default="scope">
-          <el-button
-            v-if="scope.row.applyStatus === 0"
-            size="small"
-            type="primary"
-            icon="Edit"
-            @click="handleApply(scope.row)"
-            v-hasPermi="['mall:seckill:apply']"
-          >
-            申请
-          </el-button>
-          <el-button
-            v-else-if="scope.row.applyStatus === 1"
-            size="small"
-            type="info"
-            icon="View"
-            @click="handleView(scope.row)"
-            v-hasPermi="['mall:seckill:view']"
-          >
-            查看
-          </el-button>
-          <el-button
-            v-else
-            size="small"
-            type="success"
-            icon="Check"
-            @click="handleView(scope.row)"
-            v-hasPermi="['mall:seckill:view']"
-          >
-            已通过
-          </el-button>
-          <!-- 申请参加活动按钮 -->
           <el-button
             size="small"
             type="primary"
@@ -113,7 +64,6 @@
             申请参加
           </el-button>
 
-          <!-- 申请记录按钮 -->
           <el-button
             size="small"
             type="info"
@@ -123,7 +73,6 @@
             申请记录
           </el-button>
 
-          <!-- 秒杀商品按钮 -->
           <el-button
             size="small"
             type="success"
@@ -138,115 +87,17 @@
     </el-table>
 
     <!-- 分页 -->
-    <el-pagination
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      :page-sizes="[10, 20, 30, 50]"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="Number(total)"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
-
-    <!-- 活动详情对话框 -->
-    <el-dialog
-      :title="dialogTitle"
-      v-model="dialogVisible"
-      width="600px"
-    >
-      <el-form
-        ref="formRef"
-        :model="form"
-        label-width="100px"
-      >
-        <el-form-item label="活动名称">
-          <el-input
-            v-model="form.activityName"
-            placeholder="请输入活动名称"
-            maxlength="50"
-            readonly
-          />
-        </el-form-item>
-        <el-form-item label="开始时间">
-          <el-date-picker
-            v-model="form.startTime"
-            type="datetime"
-            placeholder="请选择开始时间"
-            style="width: 100%"
-            readonly
-          />
-        </el-form-item>
-        <el-form-item label="结束时间">
-          <el-date-picker
-            v-model="form.endTime"
-            type="datetime"
-            placeholder="请选择结束时间"
-            style="width: 100%"
-            readonly
-          />
-        </el-form-item>
-        <el-form-item label="活动状态">
-          <el-select
-            v-model="form.status"
-            placeholder="请选择活动状态"
-            style="width: 100%"
-            disabled
-          >
-            <el-option label="未开始" value="0" />
-            <el-option label="进行中" value="1" />
-            <el-option label="已结束" value="2" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="申请状态">
-          <el-select
-            v-model="form.applyStatus"
-            placeholder="请选择申请状态"
-            style="width: 100%"
-            disabled
-          >
-            <el-option label="未申请" value="0" />
-            <el-option label="已申请" value="1" />
-            <el-option label="已通过" value="2" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="场次设置">
-          <el-select
-            v-model="form.hasSession"
-            placeholder="请选择场次设置"
-            style="width: 100%"
-            disabled
-          >
-            <el-option label="单场次" value="0" />
-            <el-option label="多场次" value="1" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="场次数量">
-          <el-input
-            v-model="form.sessionCount"
-            placeholder="场次数量"
-            style="width: 100%"
-            disabled
-          />
-        </el-form-item>
-        <el-form-item label="活动备注">
-          <el-input
-            v-model="form.remark"
-            type="textarea"
-            placeholder="请输入活动备注"
-            :rows="3"
-            maxlength="200"
-            readonly
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">关闭</el-button>
-        </span>
-      </template>
-    </el-dialog>
-
-
+    <div class="pagination-container">
+      <el-pagination
+        v-model:current-page="queryParams.pageNum"
+        v-model:page-size="queryParams.pageSize"
+        :page-sizes="[10, 20, 30, 50]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="Number(total)"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
 
     <!-- 报名申请对话框 -->
     <el-dialog
@@ -519,6 +370,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
+import { getCurrentShop } from '@/utils/shop'
 import { ElMessage, ElMessageBox, ElIcon } from 'element-plus'
 import { Timer, Edit, Plus, Check, Delete, Search, Document, Goods } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
@@ -545,11 +397,6 @@ const queryParams = reactive({
   activityName: '',
   status: ''
 })
-
-// 对话框
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formRef = ref(null)
 
 // 场次选择相关
 const selectedActivity = ref({})
@@ -588,72 +435,6 @@ const applyForm = reactive({
   applyRemark: ''
 })
 
-// 表单数据
-const form = reactive({
-  id: '',
-  activityName: '',
-  startTime: '',
-  endTime: '',
-  status: 0,
-  applyStatus: 0,
-  hasSession: 0,
-  sessionCount: 0,
-  remark: ''
-})
-
-// 表单验证规则
-const rules = reactive({
-  activityName: [
-    { required: true, message: '请输入活动名称', trigger: 'blur' }
-  ],
-  startTime: [
-    { required: true, message: '请选择开始时间', trigger: 'blur' }
-  ],
-  endTime: [
-    { required: true, message: '请选择结束时间', trigger: 'blur' }
-  ],
-  status: [
-    { required: true, message: '请选择活动状态', trigger: 'blur' }
-  ]
-})
-
-// 模拟数据
-const mockActivityList = [
-  {
-    id: 1,
-    activityName: '春季秒杀活动',
-    startTime: '2026-02-10 10:00:00',
-    endTime: '2026-02-15 23:59:59',
-    status: 0,
-    applyStatus: 0,
-    hasSession: 1,
-    sessionCount: 3,
-    remark: '春季限时秒杀，全场商品低至5折'
-  },
-  {
-    id: 2,
-    activityName: '情人节秒杀',
-    startTime: '2026-02-14 00:00:00',
-    endTime: '2026-02-14 23:59:59',
-    status: 1,
-    applyStatus: 1,
-    hasSession: 1,
-    sessionCount: 2,
-    remark: '情人节特别秒杀活动'
-  },
-  {
-    id: 3,
-    activityName: '春节秒杀',
-    startTime: '2026-02-01 00:00:00',
-    endTime: '2026-02-07 23:59:59',
-    status: 2,
-    applyStatus: 2,
-    hasSession: 0,
-    sessionCount: 0,
-    remark: '春节期间限时秒杀'
-  }
-]
-
 // 加载活动列表
 const getActivityList = () => {
   loading.value = true
@@ -674,14 +455,7 @@ const getActivityList = () => {
   queryMchSeckillActivityList(params)
     .then(response => {
       const data = response.data
-      // 为每个活动添加默认的申请状态、场次设置和场次数量
-      const records = (data.records || []).map(activity => ({
-        ...activity,
-        applyStatus: 0, // 默认未申请
-        hasSession: 1, // 默认多场次
-        sessionCount: 2 // 默认2个场次
-      }))
-      activityList.value = records
+      activityList.value = data.records || []
       total.value = Number(data.total) || 0
     })
     .catch(error => {
@@ -778,7 +552,7 @@ const loadSessionList = (activityId) => {
 
 // 获取店铺ID
 function getShopId() {
-  return localStorage.getItem('shopId') || ''
+  return getCurrentShop()?.id || ''
 }
 
 // 获取图片预览URL
@@ -1093,26 +867,6 @@ const confirmApply = (row, selectedSessionIds = []) => {
     applyDialogVisible.value = true
     loadSpuList()
   }
-}
-
-// 查看活动详情
-const handleView = (row) => {
-  dialogTitle.value = '活动详情'
-  Object.assign(form, row)
-  dialogVisible.value = true
-}
-
-
-
-// 提交
-const handleSubmit = () => {
-  formRef.value.validate((valid) => {
-    if (valid) {
-      ElMessage.success('操作成功')
-      dialogVisible.value = false
-      getActivityList()
-    }
-  })
 }
 
 // 获取状态文本

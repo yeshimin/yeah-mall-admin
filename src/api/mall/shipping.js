@@ -1,8 +1,11 @@
 import request from '@/utils/request'
+import { getCurrentShop } from '@/utils/shop'
+
+const getShopId = () => getCurrentShop()?.id || ''
 
 // 获取商家发货信息
 export function getShippingInfo() {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getShopId();
   return request({
     url: `/mch/deliveryInfo/query`,
     method: 'get',
@@ -12,7 +15,7 @@ export function getShippingInfo() {
 
 // 保存商家发货信息
 export function saveShippingInfo(data) {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getShopId();
   const saveData = {
     shopId,
     name: data.senderName,
@@ -69,7 +72,7 @@ export function getAreaTree(maxLevel = 3) {
 
 // 创建物流服务商
 export function createDeliveryProvider(data) {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getShopId();
   return request({
     url: `/mch/deliveryProvider/create`,
     method: 'post',
@@ -82,7 +85,7 @@ export function createDeliveryProvider(data) {
 
 // 查询物流服务商列表
 export function queryDeliveryProviderList(params) {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getShopId();
   return request({
     url: `/mch/deliveryProvider/crud/query`,
     method: 'get',
@@ -104,7 +107,7 @@ export function getDeliveryProviderDetail(id) {
 
 // 更新物流服务商
 export function updateDeliveryProvider(data) {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getShopId();
   return request({
     url: `/mch/deliveryProvider/update`,
     method: 'post',
@@ -117,7 +120,7 @@ export function updateDeliveryProvider(data) {
 
 // 设置默认物流服务商
 export function setDefaultDeliveryProvider(id, isDefault = true) {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getShopId();
   return request({
     url: `/mch/deliveryProvider/setDefault`,
     method: 'post',
@@ -131,7 +134,7 @@ export function setDefaultDeliveryProvider(id, isDefault = true) {
 
 // 设置是否主流物流服务商
 export function setPopularDeliveryProvider(id, isPopular = true) {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getShopId();
   return request({
     url: `/mch/deliveryProvider/setPopular`,
     method: 'post',
@@ -154,7 +157,7 @@ export function deleteDeliveryProvider(ids) {
 
 // 同步快递公司
 export function syncExpCompany() {
-  const shopId = localStorage.getItem('shopId') || '';
+  const shopId = getShopId();
   return request({
     url: `/mch/deliveryProvider/syncExpCompany`,
     method: 'post',

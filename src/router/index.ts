@@ -60,6 +60,8 @@ const BACKEND_COMPONENT_MAP: Record<string, () => Promise<unknown>> = {
   'system/post/index': PositionManage,
   'system/dict/index': DictManage,
   'system/log/index': LogManage,
+  'monitor/operlog/index': LogManage,
+  'monitor/logininfor/index': LogManage,
   'system/config/index': ConfigManage,
   'system/area/index': AreaManage,
   'system/file/index': FileManage,

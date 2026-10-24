@@ -12,6 +12,63 @@
       </el-button>
     </section>
 
+    <template v-if="merchantDashboard">
+      <section class="merchant-heading">
+        <div>
+          <p>店铺经营</p>
+          <h2>{{ currentShop?.name }}</h2>
+        </div>
+        <el-button :loading="dashboardLoading" @click="loadMerchantDashboard">刷新数据</el-button>
+      </section>
+
+      <section class="merchant-grid">
+        <button type="button" class="merchant-card ship-card" @click="openOrderList({ status: '2' })">
+          <span>待发货</span>
+          <strong>{{ merchantDashboard.waitShipCount }}</strong>
+          <small>及时处理订单履约</small>
+        </button>
+        <button type="button" class="merchant-card refund-card" @click="openOrderList({ status: '6', refundStatus: 'pending' })">
+          <span>退款待处理</span>
+          <strong>{{ merchantDashboard.refundPendingCount }}</strong>
+          <small>申请中或处理中退款</small>
+        </button>
+        <button type="button" class="merchant-card stock-card" @click="openStockWarningList">
+          <span>库存预警</span>
+          <strong>{{ merchantDashboard.stockWarningCount }}</strong>
+          <small>库存不高于 {{ merchantDashboard.stockWarningThreshold }} 件</small>
+        </button>
+        <button type="button" class="merchant-card order-card" @click="openTodayOrderList">
+          <span>今日订单</span>
+          <strong>{{ merchantDashboard.todayOrderCount }}</strong>
+          <small>今日已支付有效订单</small>
+        </button>
+        <button type="button" class="merchant-card sales-card" @click="openTodayOrderList">
+          <span>今日销售额</span>
+          <strong>¥{{ formatAmount(merchantDashboard.todaySalesAmount) }}</strong>
+          <small>按优惠后应付金额统计</small>
+        </button>
+      </section>
+
+      <el-card shadow="never" class="stock-warning-card">
+        <template #header>
+          <div class="card-header">
+            <h2>低库存商品</h2>
+            <p>展示库存最低的 {{ merchantDashboard.stockWarnings?.length || 0 }} 个 SKU</p>
+          </div>
+        </template>
+        <el-table :data="merchantDashboard.stockWarnings || []" size="small">
+          <el-table-column prop="spuName" label="商品名称" min-width="180" />
+          <el-table-column prop="skuName" label="SKU" min-width="160" />
+          <el-table-column prop="stock" label="当前库存" width="110">
+            <template #default="{ row }">
+              <el-tag type="danger">{{ row.stock }}</el-tag>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-if="!merchantDashboard.stockWarnings?.length" description="暂无库存预警" :image-size="70" />
+      </el-card>
+    </template>
+
     <section class="overview-grid">
       <el-card shadow="never" class="overview-card">
         <div class="overview-icon role-icon"><Key /></div>
@@ -62,11 +119,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowRight, Grid, Key, OfficeBuilding, User } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import type { ResourceTreeNode } from '@/types/upms'
+import { getCurrentShop, type CurrentShop } from '@/utils/shop'
+import { queryMerchantDashboard } from '@/api/mall/dashboard'
 
 interface QuickEntry {
   id: number
@@ -76,6 +135,9 @@ interface QuickEntry {
 
 const router = useRouter()
 const authStore = useAuthStore()
+const currentShop = ref<CurrentShop | null>(getCurrentShop())
+const dashboardLoading = ref(false)
+const merchantDashboard = ref<any>(null)
 
 const currentDate = new Intl.DateTimeFormat('zh-CN', {
   year: 'numeric',
@@ -127,6 +189,56 @@ function openProfile() {
 function openEntry(path: string) {
   router.push(path)
 }
+
+function formatAmount(value: unknown) {
+  return Number(value || 0).toFixed(2)
+}
+
+async function loadMerchantDashboard() {
+  currentShop.value = getCurrentShop()
+  if (!currentShop.value) {
+    merchantDashboard.value = null
+    return
+  }
+  dashboardLoading.value = true
+  try {
+    const response = await queryMerchantDashboard(currentShop.value.id)
+    merchantDashboard.value = response.data
+  } finally {
+    dashboardLoading.value = false
+  }
+}
+
+function openOrderList(query: Record<string, string>) {
+  router.push({
+    path: '/mall/order',
+    query,
+  })
+}
+
+function openStockWarningList() {
+  const threshold = Number(merchantDashboard.value?.stockWarningThreshold)
+  router.push({
+    path: '/mall/sku',
+    query: Number.isFinite(threshold) ? { stockMax: String(threshold) } : {},
+  })
+}
+
+function openTodayOrderList() {
+  const beginTime = merchantDashboard.value?.todayBeginTime
+  const endTime = merchantDashboard.value?.todayEndTime
+  if (!beginTime || !endTime) {
+    return
+  }
+  openOrderList({
+    paySuccessStartTime: String(beginTime).replace('T', ' '),
+    paySuccessEndTime: String(endTime).replace('T', ' '),
+  })
+}
+
+onMounted(() => {
+  void loadMerchantDashboard()
+})
 </script>
 
 <style scoped>
@@ -171,6 +283,56 @@ function openEntry(path: string) {
   gap: 16px;
   margin-top: 20px;
 }
+
+.merchant-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.merchant-heading p {
+  margin: 0 0 6px;
+  color: #909399;
+  font-size: 13px;
+}
+
+.merchant-heading h2 {
+  margin: 0;
+  color: #303133;
+  font-size: 20px;
+}
+
+.merchant-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.merchant-card {
+  display: flex;
+  min-height: 122px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  text-align: left;
+}
+
+button.merchant-card { cursor: pointer; }
+button.merchant-card:hover { transform: translateY(-2px); filter: brightness(1.03); }
+.merchant-card span { font-size: 14px; opacity: .9; }
+.merchant-card strong { margin: 10px 0 8px; font-size: 30px; line-height: 1; }
+.merchant-card small { font-size: 12px; opacity: .78; }
+.ship-card { background: linear-gradient(135deg, #3478f6, #5ba2ff); }
+.refund-card { background: linear-gradient(135deg, #ed7b4a, #f5a26e); }
+.stock-card { background: linear-gradient(135deg, #d65b53, #ed8a7e); }
+.order-card { background: linear-gradient(135deg, #4f9b79, #79b895); }
+.sales-card { background: linear-gradient(135deg, #7867b7, #a28bda); }
+.stock-warning-card { margin-top: 16px; }
 
 .overview-card :deep(.el-card__body) {
   display: flex;
@@ -270,6 +432,9 @@ function openEntry(path: string) {
 }
 
 @media (max-width: 960px) {
+  .merchant-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .quick-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -287,6 +452,7 @@ function openEntry(path: string) {
   }
 
   .overview-grid,
+  .merchant-grid,
   .quick-grid {
     grid-template-columns: 1fr;
   }

@@ -6,15 +6,14 @@
 
     <el-card class="search-card">
       <el-form ref="searchFormRef" :model="searchForm" label-position="left" label-width="80px" inline>
-        <el-form-item label="会话状态">
-          <el-select v-model="searchForm.status" placeholder="请选择会话状态" clearable style="width: 200px;">
-            <el-option label="全部" value=""></el-option>
-            <el-option label="活跃" value="active"></el-option>
-            <el-option label="已结束" value="ended"></el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item label="关键词">
-          <el-input v-model="searchForm.keyword" placeholder="请输入用户昵称或会话内容" clearable style="width: 300px;"></el-input>
+          <el-input
+            v-model="searchForm.keyword"
+            placeholder="请输入用户昵称或消息内容"
+            clearable
+            style="width: 300px;"
+            @keyup.enter="handleSearch"
+          ></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
@@ -29,9 +28,9 @@
           <h3>会话列表</h3>
         </div>
       </template>
-      <el-table v-loading="loading" :data="conversationList" style="width: 100%" @sort-change="handleSortChange">
-        <el-table-column prop="id" label="会话ID" min-width="180" sortable="custom"></el-table-column>
-        <el-table-column prop="memberId" label="用户ID" min-width="120" sortable="custom"></el-table-column>
+      <el-table v-loading="loading" :data="conversationList" style="width: 100%">
+        <el-table-column prop="id" label="会话ID" min-width="180"></el-table-column>
+        <el-table-column prop="memberId" label="用户ID" min-width="120"></el-table-column>
         <el-table-column label="用户信息" min-width="200">
           <template #default="scope">
             <div class="user-info">
@@ -62,7 +61,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="180" sortable="custom"></el-table-column>
+        <el-table-column prop="createTime" label="创建时间" min-width="180"></el-table-column>
         <el-table-column label="操作" min-width="120" fixed="right">
           <template #default="scope">
             <el-button size="small" type="primary" @click="handleViewConversation(scope.row)">查看聊天</el-button>
@@ -84,7 +83,7 @@
     </el-card>
 
     <!-- 聊天对话框 -->
-    <el-dialog v-model="chatDialogVisible" :title="chatTitle" width="800px" height="70vh" :close-on-press-escape="false" @keydown.esc="handleDialogKeydown">
+    <el-dialog v-model="chatDialogVisible" :title="chatTitle" width="800px" height="70vh" :close-on-press-escape="false" @keydown.esc="handleDialogKeydown" @closed="handleDialogClosed">
       <div class="chat-dialog">
         <!-- 聊天记录 -->
         <div class="chat-messages" ref="chatMessagesRef" v-loading="messagesLoading">
@@ -176,6 +175,8 @@
               type="textarea"
               placeholder="请输入消息内容"
               :rows="3"
+              maxlength="255"
+              show-word-limit
               :disabled="inputDisabled"
               @input="handleTextInput"
               @keyup.enter.exact="handleSendMessage"
@@ -190,11 +191,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from 'vue';
+import { ref, reactive, onBeforeUnmount, onMounted, nextTick } from 'vue';
 import { ElMessage, ElIcon } from 'element-plus';
 import { PictureFilled, Close, User } from '@element-plus/icons-vue';
 import wsService from '@/utils/websocket';
-import { initConversation, queryConversationList, queryConversationMessages, uploadCsMessageFile } from '@/api/mall/cschat';
+import { initConversation, queryConversationList, queryConversationMessages, sendMessage, uploadCsMessageFile } from '@/api/mall/cschat';
 import { resolveApiUrl } from '@/utils/download';
 
 const loading = ref(false);
@@ -223,7 +224,6 @@ const conversationDetail = ref({
 });
 
 const searchForm = reactive({
-  status: '',
   keyword: ''
 });
 
@@ -231,11 +231,6 @@ const pagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0
-});
-
-const sortConfig = reactive({
-  prop: 'createTime',
-  order: 'desc'
 });
 
 const conversationList = ref([]);
@@ -275,6 +270,31 @@ const scrollToBottom = () => {
   });
 };
 
+const updateConversationSummary = (conversationId, content, msgType, messageTime) => {
+  if (searchForm.keyword.trim()) {
+    // 搜索结果是否仍匹配取决于最新消息内容，交给后端重新筛选。
+    getConversationList();
+    return;
+  }
+
+  const conversationIndex = conversationList.value.findIndex(
+    item => String(item.id) === String(conversationId)
+  );
+  if (conversationIndex < 0) {
+    getConversationList();
+    return;
+  }
+
+  // 更新会话摘要，并将最近有消息的会话移动到列表顶部。
+  const conversation = {
+    ...conversationList.value[conversationIndex],
+    lastMessage: msgType === 2 ? '[图片]' : content,
+    lastMessageTime: messageTime
+  };
+  conversationList.value.splice(conversationIndex, 1);
+  conversationList.value.unshift(conversation);
+};
+
 // 获取会话列表
 const getConversationList = async () => {
   try {
@@ -283,8 +303,7 @@ const getConversationList = async () => {
     const params = {
       current: pagination.current,
       size: pagination.pageSize,
-      // 可以根据需要添加其他参数，如memberNickname、lastMessage等
-      // 这里暂时只传递分页参数
+      keyword: searchForm.keyword.trim()
     };
 
     const response = await queryConversationList(params);
@@ -426,7 +445,7 @@ const handleSendMessage = async () => {
     }
   } catch (error) {
     console.error('发送消息失败:', error);
-    ElMessage.error('发送消息失败');
+    ElMessage.error(error instanceof Error ? error.message : '发送消息失败');
   } finally {
     sending.value = false;
   }
@@ -434,76 +453,77 @@ const handleSendMessage = async () => {
 
 // 发送文本消息
 const sendTextMessage = async () => {
-  // 构造WebSocket消息
-  const wsMessage = {
+  const conversationId = currentConversation.value.id;
+  const content = messageInput.value.trim();
+  // HTTP 与 WebSocket 使用同一命令格式，由服务端统一鉴权、落库并推送给买家。
+  const message = {
     category: 'biz-handle',
     command: 'cs-chat.mch',
     subCmd: 'msg.mch2mem',
     payload: {
-      conversationId: currentConversation.value.id,
-      content: messageInput.value,
+      conversationId,
+      content,
       type: 1 // 1表示文本消息
     }
   };
 
-  // 通过WebSocket发送消息
-  const success = wsService.send(wsMessage);
+  await sendMessage(message);
 
-  if (success) {
-    // 本地添加消息
-    const newMessage = {
-      id: Date.now().toString(),
-      conversationId: currentConversation.value.id,
-      content: messageInput.value,
-      type: 'send',
-      msgType: 1, // 消息类型：1-文本
-      createTime: new Date().toISOString()
-    };
-
-    chatMessages.value.push(newMessage);
+  // 服务端确认成功后再显示消息，发送失败时输入内容保持不变。
+  const createTime = new Date().toISOString();
+  chatMessages.value.push({
+    id: Date.now().toString(),
+    conversationId,
+    content,
+    type: 'send',
+    msgType: 1,
+    createTime
+  });
+  updateConversationSummary(conversationId, content, 1, createTime);
+  if (messageInput.value.trim() === content) {
     messageInput.value = '';
-    scrollToBottom();
-  } else {
-    ElMessage.error('发送消息失败，请检查网络连接');
   }
+  scrollToBottom();
 };
 
 // 发送图片消息
 const sendImageMessage = async () => {
+  const conversationId = currentConversation.value.id;
   const file = selectedImageFile.value;
   const result = await uploadCsMessageFile(file.raw);
 
   if (result.code === 0 && result.data && result.data.fileKey) {
     const fileKey = result.data.fileKey;
+    const message = {
+      category: 'biz-handle',
+      command: 'cs-chat.mch',
+      subCmd: 'msg.mch2mem',
+      payload: {
+        conversationId,
+        content: fileKey,
+        type: 2
+      }
+    };
+    await sendMessage(message);
 
-    // 本地添加消息
+    // 上传和发送都成功后再显示图片。
+    const createTime = new Date().toISOString();
     const newMessage = {
       id: Date.now().toString(),
-      conversationId: currentConversation.value.id,
+      conversationId,
       content: fileKey, // 使用fileKey作为内容
       type: 'send',
       msgType: 2, // 消息类型：2-图片
-      createTime: new Date().toISOString()
+      createTime
     };
 
     chatMessages.value.push(newMessage);
+    updateConversationSummary(conversationId, fileKey, 2, createTime);
     selectedImageFile.value = null; // 清空选中的图片
     imagePreviewUrl.value = ''; // 清空图片预览
     inputDisabled.value = false; // 重新启用输入框
     scrollToBottom();
 
-    // 通过WebSocket发送图片消息
-    const wsMessage = {
-      category: 'biz-handle',
-      command: 'cs-chat.mch',
-      subCmd: 'msg.mch2mem',
-      payload: {
-        conversationId: currentConversation.value.id,
-        content: fileKey, // 使用fileKey作为内容
-        type: 2 // 2表示图片消息
-      }
-    };
-    wsService.send(wsMessage);
   } else {
     ElMessage.error('图片上传失败');
   }
@@ -558,6 +578,12 @@ const handleDialogKeydown = (event) => {
   }
 };
 
+const handleDialogClosed = () => {
+  chatMessagesRef.value?.removeEventListener('scroll', handleMessageScroll);
+  currentConversation.value = null;
+  chatMessages.value = [];
+};
+
 // 搜索
 const handleSearch = () => {
   pagination.current = 1;
@@ -566,19 +592,9 @@ const handleSearch = () => {
 
 // 重置
 const resetForm = () => {
-  searchForm.status = '';
   searchForm.keyword = '';
   pagination.current = 1;
   getConversationList();
-};
-
-// 排序
-const handleSortChange = ({ prop, order }) => {
-  if (prop && order) {
-    sortConfig.prop = prop;
-    sortConfig.order = order === 'ascending' ? 'asc' : 'desc';
-    getConversationList();
-  }
 };
 
 // 分页
@@ -594,48 +610,46 @@ const handleCurrentChange = (current) => {
 
 // 注册WebSocket消息处理器
 const handleWebSocketMessage = (message) => {
-  console.log('收到WebSocket消息:', message);
-
   // 处理买家发送给商家的消息
   if (message.category === 'biz-handle' && message.command === 'cs-chat.mem' && message.subCmd === 'msg.mem2mch') {
     const payload = message.payload;
-    console.log('处理买家消息，payload:', payload);
-    console.log('当前会话:', currentConversation.value);
+    if (!payload) return;
 
-    if (payload && currentConversation.value) {
-      console.log('payload.conversationId:', payload.conversationId);
-      console.log('currentConversation.id:', currentConversation.value.id);
+    const receiveTime = new Date().toISOString();
+    updateConversationSummary(payload.conversationId, payload.content, payload.type, receiveTime);
 
-      // 检查是否是当前会话的消息（通过会话ID匹配，注意类型转换）
-      if (String(payload.conversationId) === String(currentConversation.value.id)) {
-        console.log('会话ID匹配，添加消息到对话框');
-        // 本地添加消息
-            const newMessage = {
-              id: Date.now().toString(),
-              conversationId: payload.conversationId,
-              content: payload.content,
-              type: 'receive', // 买家发送的消息，显示为接收
-              msgType: payload.type, // 消息类型：1-文本，2-图片
-              createTime: new Date().toISOString()
-            };
-
-        chatMessages.value.push(newMessage);
-        scrollToBottom();
-      } else {
-        console.log('会话ID不匹配，忽略消息');
-      }
-    } else {
-      console.log('payload或currentConversation为空，忽略消息');
+    if (currentConversation.value && String(payload.conversationId) === String(currentConversation.value.id)) {
+      chatMessages.value.push({
+        id: Date.now().toString(),
+        conversationId: payload.conversationId,
+        content: payload.content,
+        type: 'receive',
+        msgType: payload.type,
+        createTime: receiveTime
+      });
+      scrollToBottom();
     }
   }
+};
 
-  // 处理其他类型的消息...
+const handleWebSocketReconnect = () => {
+  // 重连后补拉断线期间的消息，并同步最新会话摘要。
+  getConversationList();
+  if (currentConversation.value) {
+    getChatMessages(currentConversation.value.id);
+  }
 };
 
 onMounted(() => {
   getConversationList();
   // 注册WebSocket消息处理器
   wsService.onMessage(handleWebSocketMessage);
+  wsService.onReconnect(handleWebSocketReconnect);
+});
+
+onBeforeUnmount(() => {
+  wsService.offMessage(handleWebSocketMessage);
+  wsService.offReconnect(handleWebSocketReconnect);
 });
 </script>
 

@@ -185,40 +185,6 @@ const rules = reactive({
 // 场次列表
 const sessionList = ref([])
 
-// 模拟数据
-const mockSessionList = [
-  {
-    id: 1,
-    activityId: activityId.value,
-    name: '上午场',
-    startTime: '2026-02-14 10:00:00',
-    endTime: '2026-02-14 12:00:00',
-    sort: 1,
-    status: 1,
-    description: '上午10点-12点场次'
-  },
-  {
-    id: 2,
-    activityId: activityId.value,
-    name: '下午场',
-    startTime: '2026-02-14 14:00:00',
-    endTime: '2026-02-14 16:00:00',
-    sort: 2,
-    status: 1,
-    description: '下午14点-16点场次'
-  },
-  {
-    id: 3,
-    activityId: activityId.value,
-    name: '晚上场',
-    startTime: '2026-02-14 19:00:00',
-    endTime: '2026-02-14 21:00:00',
-    sort: 3,
-    status: 0,
-    description: '晚上19点-21点场次'
-  }
-]
-
 // 初始化
 onMounted(() => {
   getList()

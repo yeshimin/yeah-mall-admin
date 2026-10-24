@@ -106,6 +106,7 @@ import { ref, computed, onMounted } from 'vue'
 import RightToolbar from '@/components/RightToolbar/index.vue'
 import Pagination from '@/components/Pagination/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getCurrentShop } from '@/utils/shop'
 import { listSpecDef, createSpecDef, updateSpecDef, deleteSpecDef, listSpecOptDef, createSpecOptDef, deleteSpecOptDef, updateSpecOptDef } from '@/api/mall/specDef'
 
 const tableData = ref([])
@@ -127,7 +128,7 @@ const formRules = {
 const filteredTableData = computed(() => tableData.value)
 
 function getShopId() {
-  return localStorage.getItem('shopId') || ''
+  return getCurrentShop()?.id || ''
 }
 
 function handleQuery() {

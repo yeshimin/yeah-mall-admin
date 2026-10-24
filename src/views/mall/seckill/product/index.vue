@@ -116,15 +116,17 @@
     </el-table>
 
     <!-- 分页 -->
-    <el-pagination
-      v-model:current-page="queryParams.current"
-      v-model:page-size="queryParams.size"
-      :page-sizes="[10, 20, 30, 50]"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="Number(total)"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
+    <div class="pagination-container">
+      <el-pagination
+        v-model:current-page="queryParams.current"
+        v-model:page-size="queryParams.size"
+        :page-sizes="[10, 20, 30, 50]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="Number(total)"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
 
     <!-- 查看详情对话框 -->
     <el-dialog title="商品详情" v-model="viewDialogVisible" width="800px">
