@@ -72,6 +72,16 @@
         </template>
       </el-table-column>
       <el-table-column prop="memberName" label="使用用户" width="120" />
+      <el-table-column label="领取渠道" width="110">
+        <template #default="scope">
+          <el-tag type="info">
+            {{ scope.row.receiveChannelName || '-' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="sourcePointsOrderNo" label="积分订单号" min-width="160">
+        <template #default="scope">{{ scope.row.sourcePointsOrderNo || '-' }}</template>
+      </el-table-column>
       <el-table-column prop="orderNo" label="订单号" min-width="180" />
       <el-table-column prop="orderAmount" label="订单金额" width="120">
         <template #default="scope">

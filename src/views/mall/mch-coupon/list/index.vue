@@ -58,6 +58,9 @@
       <el-table-column label="支持拼团" width="100">
         <template #default="scope">{{ scope.row.isSupportGroupBuy ? '支持' : '不支持' }}</template>
       </el-table-column>
+      <el-table-column label="积分兑换" width="100">
+        <template #default="scope">{{ scope.row.isPointsExchangeEnabled ? '开放' : '不开放' }}</template>
+      </el-table-column>
       <el-table-column prop="type" label="优惠券类型" width="100">
         <template #default="scope">
           {{ getTypeText(scope.row.type) }}
@@ -156,6 +159,10 @@
         </el-form-item>
         <el-form-item label="支持拼团">
           <el-switch v-model="form.isSupportGroupBuy" active-text="支持" inactive-text="不支持" />
+        </el-form-item>
+        <el-form-item label="积分兑换">
+          <el-switch v-model="form.isPointsExchangeEnabled" active-text="开放" inactive-text="不开放" />
+          <span style="margin-left: 16px; color: #909399; font-size: 12px">开放后平台可将该券配置为积分商品</span>
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
           <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" />
@@ -340,6 +347,7 @@ const form = reactive({
   totalCount: 100,
   perLimit: 1,
   isSupportGroupBuy: false,
+  isPointsExchangeEnabled: false,
   startTime: '',
   endTime: '',
   useScope: '1',
@@ -419,6 +427,7 @@ function getList() {
         totalCount: item.quantity,
         perLimit: item.perLimit,
         isSupportGroupBuy: Boolean(item.isSupportGroupBuy),
+        isPointsExchangeEnabled: Boolean(item.isPointsExchangeEnabled),
         receivedCount: item.received,
         usedCount: item.used,
         status: item.isEnabled ? '1' : '0',
@@ -458,6 +467,7 @@ function handleAdd() {
   form.totalCount = 100
   form.perLimit = 1
   form.isSupportGroupBuy = false
+  form.isPointsExchangeEnabled = false
   form.startTime = ''
   form.endTime = ''
   form.useScope = '1'
@@ -480,6 +490,7 @@ function handleEdit(row) {
   form.totalCount = row.totalCount
   form.perLimit = row.perLimit
   form.isSupportGroupBuy = Boolean(row.isSupportGroupBuy)
+  form.isPointsExchangeEnabled = Boolean(row.isPointsExchangeEnabled)
   form.startTime = row.startTime
   form.endTime = row.endTime
   form.useScope = row.useScope || '1'
@@ -627,6 +638,7 @@ function handleSubmit() {
         used: 0,
         perLimit: form.perLimit,
         isSupportGroupBuy: form.isSupportGroupBuy,
+        isPointsExchangeEnabled: form.isPointsExchangeEnabled,
         useRange: parseInt(form.useScope),
         targetId: targetIdValue,
         beginTime: form.startTime,
