@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch">
       <el-form-item label="活动名称">
         <el-select
@@ -49,8 +49,8 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
+    <el-row :gutter="10" class="mall-action-row">
+      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
     <el-table v-loading="loading" :data="applyList" style="width: 100%">
@@ -154,7 +154,7 @@
 import { computed, ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, View } from '@element-plus/icons-vue'
-import RightToolbar from '@/components/RightToolbar/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
 import { auditGroupBuyApply, queryGroupBuyActivityList, queryGroupBuyApplyList } from '@/api/mall/groupBuy'
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { useRoute } from 'vue-router'
@@ -353,11 +353,11 @@ function formatPriceRange(minPrice, maxPrice) {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 24px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

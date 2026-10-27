@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
       <el-form-item label="活动名称" prop="activityName">
         <el-input
@@ -29,8 +29,8 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getActivityList" />
+    <el-row :gutter="10" class="mall-action-row">
+      <MallListTools v-model:showSearch="showSearch" @refresh="getActivityList" />
     </el-row>
 
     <!-- 活动列表 -->
@@ -377,7 +377,7 @@ import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { getToken } from '@/utils/auth'
 import { resolveApiUrl } from '@/utils/download'
-import RightToolbar from '@/components/RightToolbar/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
 import { queryMchSeckillActivityList, queryMchSeckillSessionList, submitSeckillApply, queryMchSpuList } from '@/api/mall/seckill'
 
 // 路由
@@ -926,11 +926,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 20px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

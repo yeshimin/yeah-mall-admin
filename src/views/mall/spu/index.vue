@@ -1,6 +1,5 @@
-// 迁移自 spu/index.vue，风格与 banner/specDef 保持一致
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" @submit.prevent>
       <el-form-item label="商品名称" prop="name">
         <el-input v-model="queryParams.name" placeholder="请输入商品名称" clearable style="width: 200px"
@@ -17,7 +16,7 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mall-action-row">
       <el-col :span="1.5">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
       </el-col>
@@ -27,7 +26,7 @@
       <el-col :span="1.5">
         <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
       </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
+      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
     <el-table v-loading="loading" :data="filteredTableData" @selection-change="handleSelectionChange" row-key="id">
@@ -35,7 +34,7 @@
       <el-table-column prop="id" label="ID" align="center" />
       <el-table-column prop="mainImage" label="主图" align="center">
         <template #default="scope">
-          <ImagePreview :src="getFullImageUrl(scope.row.mainImage)" :width="40" :height="40" />
+          <StorageImage :src="getFullImageUrl(scope.row.mainImage)" :width="40" :height="40" />
         </template>
       </el-table-column>
       <el-table-column prop="name" label="商品名称" align="center" />
@@ -44,7 +43,7 @@
       <el-table-column prop="createTime" label="创建时间" align="center" />
       <el-table-column prop="updateBy" label="更新人" align="center" />
       <el-table-column prop="updateTime" label="更新时间" align="center" />
-      <el-table-column label="操作" width="320" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" width="320" align="center" class-name="mall-actions-column">
   <template #default="scope">
     <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
     <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
@@ -54,7 +53,7 @@
 </el-table-column>
     </el-table>
 
-    <pagination v-show="total > 0" :total="Number(total)" v-model:page="queryParams.current" v-model:limit="queryParams.size"
+    <MallPagination v-show="total > 0" :total="Number(total)" v-model:page="queryParams.current" v-model:limit="queryParams.size"
       @pagination="getList" />
 
     <el-dialog v-model="createDialogVisible" title="创建商品" width="960px" class="product-dialog" append-to-body destroy-on-close @close="createDialogVisible = false">
@@ -81,7 +80,7 @@
           </div>
         </div>
         <el-form-item prop="detailDesc" class="detail-editor-item">
-          <Editor v-model="createForm.detailDesc" :height="420" />
+          <RichTextEditor v-model="createForm.detailDesc" :height="420" />
         </el-form-item>
       </el-form>
       <el-form :model="createForm" :rules="createFormRules" label-width="90px" class="product-form" v-show="createStep === 2">
@@ -137,7 +136,7 @@
           </div>
         </div>
         <el-form-item prop="detailDesc" class="detail-editor-item">
-          <Editor v-model="editForm.detailDesc" :height="420" />
+          <RichTextEditor v-model="editForm.detailDesc" :height="420" />
         </el-form-item>
       </el-form>
       <el-form :model="editForm" :rules="editFormRules" label-width="90px" class="product-form" v-show="editStep === 2">
@@ -177,7 +176,7 @@
         <el-tab-pane label="主图" name="main">
           <!-- 主图展示 -->
           <div class="main-image-container">
-            <ImagePreview v-if="mainImageUrl" :src="mainImageUrl" :width="200" :height="200" />
+            <StorageImage v-if="mainImageUrl" :src="mainImageUrl" :width="200" :height="200" />
             <i v-else class="el-icon-plus main-image-uploader-icon"></i>
           </div>
 
@@ -197,13 +196,13 @@
           <!-- 滚动图列表 -->
           <div class="carousel-images" style="margin-bottom: 20px;">
             <div v-for="(image, index) in carouselImages" :key="index" class="carousel-image-item">
-              <ImagePreview :src="image.url" :width="100" :height="100" />
+              <StorageImage :src="image.url" :width="100" :height="100" />
               <el-button type="danger" icon="Delete" circle @click="handleDeleteCarouselImage(index)"></el-button>
             </div>
           </div>
 
           <!-- 分页 -->
-          <pagination v-show="imageTotal > 0" :total="imageTotal" v-model:page="imageQueryParamsRef.current" v-model:limit="imageQueryParamsRef.size"
+          <MallPagination v-show="imageTotal > 0" :total="imageTotal" v-model:page="imageQueryParamsRef.current" v-model:limit="imageQueryParamsRef.size"
             @pagination="handleImageManage(currentProduct)" style="margin-bottom: 20px;" />
 
           <!-- 滚动图上传 -->
@@ -230,13 +229,13 @@ import { listSpu, createSpu, updateSpu, deleteSpu, getSpuDetail, setMainImage } 
 import { setCarouselImages, listSpuImages, deleteSpuImage } from '@/api/mall/spuImage'
 import { getCategoryTree } from '@/api/mall/category'
 import { listSpecDef, listSpecOptDef } from '@/api/mall/specDef'
-import RightToolbar from '@/components/RightToolbar/index.vue'
-import Pagination from '@/components/Pagination/index.vue'
-import ImagePreview from '@/components/ImagePreview/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
+import MallPagination from '@/components/mall/MallPagination.vue'
+import StorageImage from '@/components/mall/StorageImage.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Close, CircleCheck, PriceTag } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
-import Editor from '@/components/Editor/index.vue'
+import RichTextEditor from '@/components/mall/RichTextEditor.vue'
 
 const tableData = ref([])
 const loading = ref(false)
@@ -797,10 +796,10 @@ function handleImageManageClose() {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 24px;
 }
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container member-page">
+  <div class="mall-page member-page">
     <el-form :inline="true" class="filter-form">
       <el-form-item label="会员ID">
         <el-input v-model="query.memberId" clearable placeholder="会员ID" />
@@ -52,7 +52,7 @@
       </el-table-column>
     </el-table>
 
-    <Pagination
+    <MallPagination
       :total="page.total"
       :page="page.current"
       :limit="page.size"
@@ -88,7 +88,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowDown } from '@element-plus/icons-vue'
-import Pagination from '@/components/Pagination/index.vue'
+import MallPagination from '@/components/mall/MallPagination.vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { queryMembers } from '@/api/mall/member'
 import { getMemberGenderText, MEMBER_ACTION } from '@/constants/member'

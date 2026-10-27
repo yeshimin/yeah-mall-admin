@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch">
       <el-form-item label="拼团活动">
         <el-select
@@ -49,8 +49,8 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
+    <el-row :gutter="10" class="mall-action-row">
+      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
     <el-table v-loading="loading" :data="productList" style="width: 100%">
@@ -141,7 +141,7 @@
         </el-row>
         <el-form-item label="审核状态"><el-tag :type="getStatusTagType(detailProduct.auditStatus)">{{ getStatusText(detailProduct.auditStatus) }}</el-tag></el-form-item>
         <el-form-item label="商品描述">
-          <Editor v-model="detailProduct.detailDesc" :height="240" readonly />
+          <RichTextEditor v-model="detailProduct.detailDesc" :height="240" readonly />
         </el-form-item>
       </el-form>
       <template #footer><el-button @click="detailDialogVisible = false">关闭</el-button></template>
@@ -154,9 +154,9 @@ import { ref, reactive, onMounted, watch } from 'vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { Search, Refresh, Picture, View } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
-import RightToolbar from '@/components/RightToolbar/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
 import { queryGroupBuyActivityList, queryGroupBuyProductList } from '@/api/mall/groupBuy'
-import Editor from '@/components/Editor/index.vue'
+import RichTextEditor from '@/components/mall/RichTextEditor.vue'
 
 // 响应式数据
 const loading = ref(false)
@@ -307,11 +307,11 @@ function getStatusTagType(status) {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 24px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

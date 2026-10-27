@@ -706,7 +706,7 @@ import { getStoragePreviewUrl } from '@/utils/storage'
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { queryOrderList, getOrderDetail, deliverOrder, updateShipInfo, queryTracking, confirmRefund, rejectRefund, queryRefundRecords, getRefundDetail } from '@/api/mall/order';
 import { queryDeliveryProviderList } from '@/api/mall/shipping';
-import ImagePreview from '@/components/ImagePreview/index.vue';
+import StorageImage from '@/components/mall/StorageImage.vue';
 
 const route = useRoute();
 const router = useRouter();

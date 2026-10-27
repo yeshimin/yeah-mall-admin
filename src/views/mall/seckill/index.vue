@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <router-view />
   </div>
 </template>
@@ -9,7 +9,7 @@
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 20px;
 }
 </style>

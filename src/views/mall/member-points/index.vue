@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container points-manage">
+  <div class="mall-page points-manage">
     <el-tabs v-model="activeTab" @tab-change="loadCurrentTab">
       <el-tab-pane label="积分流水" name="ledger">
         <el-form :inline="true">
@@ -36,7 +36,7 @@
           <el-table-column prop="createTime" label="创建时间" width="180" />
         </el-table>
 
-        <Pagination
+        <MallPagination
           :total="ledgerPage.total"
           :page="ledgerPage.current"
           :limit="ledgerPage.size"
@@ -106,7 +106,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoute } from 'vue-router'
-import Pagination from '@/components/Pagination/index.vue'
+import MallPagination from '@/components/mall/MallPagination.vue'
 import { queryPointsLedger, queryPointsRules, updatePointsRule } from '@/api/mall/memberPoints'
 import { MEMBER_POINTS_BIZ_TYPE_OPTIONS, MEMBER_POINTS_RULE_CALC_TYPE } from '@/constants/memberPoints'
 

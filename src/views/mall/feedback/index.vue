@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :inline="true" class="query-form">
       <el-form-item label="处理状态">
         <el-select v-model="query.status" placeholder="全部" clearable>

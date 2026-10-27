@@ -1,7 +1,7 @@
 <template>
   <div class="seckill-manage">
     <!-- 查询条件 -->
-    <el-form :inline="true" :model="queryParams" class="mb8">
+    <el-form :inline="true" :model="queryParams" class="mall-action-row">
         <el-form-item label="申请商家" prop="merchantName">
           <el-input v-model="queryParams.merchantName" placeholder="请输入商家名称" clearable style="width: 200px" />
         </el-form-item>
@@ -571,7 +571,7 @@ function handleCurrentChange(current) {
   padding: 20px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

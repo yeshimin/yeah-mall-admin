@@ -1,5 +1,5 @@
 <template>
-  <div class="seckill-monitor app-container">
+  <div class="seckill-monitor mall-page">
     <div class="toolbar">
       <el-select v-model="selectedActivityId" placeholder="选择秒杀活动" style="width: 240px" @change="loadDashboard">
         <el-option v-for="activity in activityList" :key="activity.id" :label="activity.name" :value="activity.id" />

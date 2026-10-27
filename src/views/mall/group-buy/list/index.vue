@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch">
       <el-form-item label="活动名称">
         <el-input
@@ -37,11 +37,11 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mall-action-row">
       <el-col :span="1.5">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增活动</el-button>
       </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
+      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
     <el-table v-loading="loading" :data="activityList" style="width: 100%">
@@ -290,7 +290,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete, Goods, Upload, Picture, Check, View } from '@element-plus/icons-vue'
 import { getToken } from '@/utils/auth'
 import { resolveApiUrl } from '@/utils/download'
-import RightToolbar from '@/components/RightToolbar/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
 import { useRouter } from 'vue-router'
 import { createGroupBuyActivity, deleteGroupBuyActivity, queryGroupBuyActivityList, queryGroupBuyGroupList, updateGroupBuyActivity, updateGroupBuyActivityEnabled, updateGroupBuyActivityStatus } from '@/api/mall/groupBuy'
 
@@ -766,11 +766,11 @@ function handleEnabledChange(row) {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 24px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

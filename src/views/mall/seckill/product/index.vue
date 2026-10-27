@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
       <el-form-item label="活动名称" prop="activityId">
         <el-select
@@ -65,8 +65,8 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getProductList" />
+    <el-row :gutter="10" class="mall-action-row">
+      <MallListTools v-model:showSearch="showSearch" @refresh="getProductList" />
     </el-row>
 
     <!-- 商品列表 -->
@@ -217,7 +217,7 @@ import { ElMessage } from 'element-plus'
 import { Search, Refresh, View } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
 import request from '@/utils/request'
-import RightToolbar from '@/components/RightToolbar/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
 
 // 路由
 const route = useRoute()
@@ -483,11 +483,11 @@ function getStatusTagType(status) {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 24px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

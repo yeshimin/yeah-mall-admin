@@ -1,6 +1,6 @@
 <template>
   <div class="seckill-session-manage">
-    <el-form ref="searchFormRef" :model="queryParams" label-position="left" label-width="80px" inline class="mb8">
+    <el-form ref="searchFormRef" :model="queryParams" label-position="left" label-width="80px" inline class="mall-action-row">
       <el-form-item label="场次名称">
         <el-input
           v-model="queryParams.name"
@@ -383,7 +383,7 @@ function handleCurrentChange(current) {
   padding: 20px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

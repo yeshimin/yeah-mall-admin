@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
       <el-form-item label="活动名称" prop="activityName">
         <el-input
@@ -29,8 +29,8 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getActivityList" />
+    <el-row :gutter="10" class="mall-action-row">
+      <MallListTools v-model:showSearch="showSearch" @refresh="getActivityList" />
     </el-row>
 
     <!-- 活动列表 -->
@@ -268,7 +268,7 @@
             </div>
           </el-form-item>
           <el-form-item label="商品描述" required>
-            <Editor v-model="applyForm.detailDesc" :height="300" />
+            <RichTextEditor v-model="applyForm.detailDesc" :height="300" />
           </el-form-item>
 
           <el-form-item label="SKU 拼团设置" required>
@@ -448,8 +448,8 @@ import { resolveApiUrl } from '@/utils/download'
 import { getCurrentShop } from '@/utils/shop'
 import request from '@/utils/request'
 import { queryMchGroupBuyActivityList, queryMchGroupBuyGroupList, submitGroupBuyApply } from '@/api/mall/groupBuy'
-import RightToolbar from '@/components/RightToolbar/index.vue'
-import Editor from '@/components/Editor/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
+import RichTextEditor from '@/components/mall/RichTextEditor.vue'
 
 // 路由
 const router = useRouter()
@@ -1075,11 +1075,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 24px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

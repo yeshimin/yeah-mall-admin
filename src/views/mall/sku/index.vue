@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" @submit.prevent>
       <el-form-item label="名称" prop="name">
         <el-input v-model="queryParams.name" placeholder="请输入名称" clearable style="width: 200px" />
@@ -16,11 +16,11 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mall-action-row">
       <el-col v-if="queryParams.spuId" :span="1.5">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
       </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
+      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
     <el-table v-loading="loading" :data="tableData" @selection-change="handleSelectionChange" row-key="id">
@@ -30,7 +30,7 @@
       <el-table-column prop="specCode" label="规格编码" align="center" />
       <el-table-column prop="price" label="销售价格" align="center" />
       <el-table-column prop="stock" label="库存数量" align="center" />
-      <el-table-column label="操作" width="200" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" width="200" align="center" class-name="mall-actions-column">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
@@ -38,7 +38,7 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total > 0" :total="total" v-model:page="queryParams.current" v-model:limit="queryParams.size" @pagination="getList" />
+    <MallPagination v-show="total > 0" :total="total" v-model:page="queryParams.current" v-model:limit="queryParams.size" @pagination="getList" />
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" @close="handleClose">
       <el-form :model="skuForm" :rules="formRules" label-width="90px">
@@ -77,8 +77,8 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getCurrentShop } from '@/utils/shop'
-import RightToolbar from '@/components/RightToolbar/index.vue'
-import Pagination from '@/components/Pagination/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
+import MallPagination from '@/components/mall/MallPagination.vue'
 import { getSkuList, saveSku, updateSku, deleteSku, getSkuDetail } from '@/api/mall/sku'
 import { querySpec } from '@/api/mall/spu'
 
@@ -288,7 +288,7 @@ function getShopId() {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 20px;
 }
 

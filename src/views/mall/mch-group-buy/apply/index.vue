@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch">
       <el-form-item label="活动名称">
         <el-input
@@ -43,8 +43,8 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
+    <el-row :gutter="10" class="mall-action-row">
+      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
     <el-table v-loading="loading" :data="applyList" style="width: 100%">
@@ -144,7 +144,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh, View } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
 import { queryMchGroupBuyApplyList } from '@/api/mall/groupBuy'
-import RightToolbar from '@/components/RightToolbar/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { getCurrentShop } from '@/utils/shop'
 
@@ -295,11 +295,11 @@ function getImagePreviewUrl(fileKey) {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 24px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

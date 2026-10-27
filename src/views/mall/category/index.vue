@@ -1,352 +1,318 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" @submit.prevent>
-      <el-form-item label="分类名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入分类名称"
-          clearable
-          style="width: 200px"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+  <div class="category-page">
+    <div v-show="showSearch" class="search-bar">
+      <el-form class="search-form" :inline="true" :model="search" @submit.prevent="handleSearch">
+        <el-form-item label="分类名称">
+          <el-input v-model="search.name" clearable placeholder="请输入分类名称" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" native-type="submit">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate">修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
-      </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
-    </el-row>
+    <div class="action-bar">
+      <div class="action-buttons">
+        <el-button type="primary" @click="openCreateDialog">新增分类</el-button>
+        <el-button type="danger" :disabled="selectedRows.length === 0" @click="removeCategories()">批量删除</el-button>
+      </div>
+      <MallListTools v-model:showSearch="showSearch" @refresh="refreshPage" />
+    </div>
 
-    <el-table
-      v-loading="loading"
-      :data="filteredTableData"
-      @selection-change="handleSelectionChange"
-      row-key="id"
-      default-expand-all
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-    >
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column prop="name" label="分类名称" align="left" />
-      <el-table-column prop="code" label="分类编码" align="center" />
-      <el-table-column prop="sort" label="排序" align="center" />
-      <el-table-column prop="level" label="层级" align="center" />
-      <el-table-column prop="path" label="路径" align="center" />
-      <el-table-column prop="remark" label="备注" align="center" />
-      <el-table-column prop="createBy" label="创建人" align="center" />
-      <el-table-column prop="createTime" label="创建时间" align="center" />
-      <el-table-column prop="updateBy" label="更新人" align="center" />
-      <el-table-column prop="updateTime" label="更新时间" align="center" />
-      <el-table-column label="操作" width="180" align="center" class-name="small-padding fixed-width">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div class="table-container">
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        :data="categories"
+        row-key="id"
+        stripe
+        height="100%"
+        default-expand-all
+        :tree-props="{ children: 'children' }"
+        @selection-change="selectedRows = $event"
+      >
+        <el-table-column type="selection" width="55" />
+        <el-table-column prop="name" label="分类名称" min-width="180" />
+        <el-table-column prop="code" label="分类编码" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="level" label="层级" width="80" />
+        <el-table-column prop="sort" label="排序" width="80" />
+        <el-table-column prop="remark" label="备注" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="updateTime" label="更新时间" width="170" />
+        <el-table-column label="操作" width="140" fixed="right">
+          <template #default="{ row }">
+            <div class="table-row-actions">
+              <el-button link type="primary" @click="openEditDialog(row)">编辑</el-button>
+              <el-button link type="danger" @click="removeCategories(row)">删除</el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      v-model:page="queryParams.current"
-      v-model:limit="queryParams.size"
-      @pagination="getList"
+    <MallPagination
+      v-if="search.name && page.total > 0"
+      :total="page.total"
+      :page="page.current"
+      :limit="page.size"
+      @pagination="handlePageChange"
     />
 
-    <el-dialog v-model="createDialogVisible" title="创建分类" width="400px" @close="createDialogVisible = false">
-      <el-form :model="createForm" :rules="createFormRules" label-width="90px">
+    <el-dialog
+      v-model="dialogVisible"
+      :title="form.id ? '编辑分类' : '新增分类'"
+      width="560px"
+      :close-on-click-modal="!submitting"
+      :close-on-press-escape="!submitting"
+      :show-close="!submitting"
+      @closed="resetForm"
+    >
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="96px">
         <el-form-item label="上级分类" prop="parentId">
           <el-tree-select
-            v-model="createForm.parentId"
-            :data="categoryTree"
-            :props="{ value: 'id', label: 'name', children: 'children' }"
-            value-key="id"
-            placeholder="选择上级分类"
+            v-model="form.parentId"
+            :data="parentOptions"
+            :props="treeProps"
+            node-key="id"
             check-strictly
             clearable
-            style="width: 100%"
-            allow-clear
-          />
-        </el-form-item>
-        <el-form-item label="分类名称" prop="name">
-          <el-input v-model="createForm.name" placeholder="请输入分类名称" />
-        </el-form-item>
-        <el-form-item label="分类编码" prop="code">
-          <el-input v-model="createForm.code" placeholder="请输入分类编码" />
-        </el-form-item>
-        <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="createForm.sort" :min="1" placeholder="请输入排序" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="createForm.remark" placeholder="请输入备注" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="createDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleCreateConfirm">确 定</el-button>
-      </template>
-    </el-dialog>
-
-    <el-dialog v-model="editDialogVisible" title="编辑分类" width="400px" @close="editDialogVisible = false">
-      <el-form :model="editForm" :rules="editFormRules" label-width="90px">
-        <el-form-item label="上级分类" prop="parentId">
-          <el-tree-select
-            v-model="editForm.parentId"
-            :data="categoryTree"
-            :props="{ value: 'id', label: 'name', children: 'children' }"
-            value-key="id"
-            placeholder="选择上级分类"
-            check-strictly
-            clearable
+            placeholder="不选择表示一级分类"
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="分类编码" prop="code">
-          <el-input v-model="editForm.code" placeholder="请输入分类编码" />
-        </el-form-item>
         <el-form-item label="分类名称" prop="name">
-          <el-input v-model="editForm.name" placeholder="请输入分类名称" />
+          <el-input v-model="form.name" maxlength="64" placeholder="请输入分类名称" />
+        </el-form-item>
+        <el-form-item label="分类编码" prop="code">
+          <el-input v-model="form.code" maxlength="64" placeholder="请输入分类编码" />
         </el-form-item>
         <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="editForm.sort" :min="1" placeholder="请输入排序" style="width: 100%" />
+          <el-input-number v-model="form.sort" :min="1" :max="999" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
-          <el-input v-model="editForm.remark" placeholder="请输入备注" />
+          <el-input v-model="form.remark" type="textarea" :rows="3" maxlength="255" show-word-limit />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleEditConfirm">确 定</el-button>
+        <el-button :disabled="submitting" @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitting" @click="submitForm">保存</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { getCategoryTree, createCategory, getCategoryDetail, updateCategory, deleteCategory, queryCategoryList } from '@/api/mall/category'
-import { getCurrentShop } from '@/utils/shop'
-import RightToolbar from '@/components/RightToolbar/index.vue'
-import Pagination from '@/components/Pagination/index.vue'
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref } from 'vue'
+import type { FormInstance, FormRules, TableInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import MallListTools from '@/components/mall/MallListTools.vue'
+import MallPagination from '@/components/mall/MallPagination.vue'
+import {
+  createCategory,
+  deleteCategory,
+  getCategoryDetail,
+  getCategoryTree,
+  queryCategoryList,
+  updateCategory,
+  type ProductCategoryRecord,
+} from '@/api/mall/category'
+import { getCurrentShop } from '@/utils/shop'
+import { buildConditions } from '@/utils/query'
+import { getRequestErrorMessage, isUserCancel } from '@/utils/error'
 
-const tableData = ref([])
-const categoryTree = ref([])
+defineOptions({ name: 'ProductCategoryPage' })
+
+type CategoryRecord = Omit<ProductCategoryRecord, 'parentId' | 'children'> & {
+  parentId: string | number | null
+  children?: CategoryRecord[]
+  disabled?: boolean
+}
+
+const treeProps = { value: 'id', label: 'name', children: 'children', disabled: 'disabled' }
 const loading = ref(false)
+const submitting = ref(false)
 const showSearch = ref(true)
-const ids = ref([])
-const selectedRows = ref([])
-const single = ref(true)
-const multiple = ref(true)
-const total = ref(0)
-const queryParams = ref({
-  name: '',
-  current: 1,
-  size: 10
-})
+const dialogVisible = ref(false)
+const tableRef = ref<TableInstance>()
+const formRef = ref<FormInstance>()
+const categories = ref<CategoryRecord[]>([])
+const categoryTree = ref<CategoryRecord[]>([])
+const selectedRows = ref<CategoryRecord[]>([])
+const search = reactive({ name: '' })
+const page = reactive({ current: 1, size: 10, total: 0 })
+const form = reactive<CategoryRecord>(createEmptyForm())
 
-const createDialogVisible = ref(false)
-const createForm = ref({ shopId: '', parentId: null, code: '', name: '', sort: 1, remark: '' })
-const createFormRules = {
-  shopId: [ { required: true, message: '请选择店铺', trigger: 'blur' } ],
-  parentId: [ ],
-  code: [ { required: true, message: '请输入分类编码', trigger: 'blur' } ],
-  name: [ { required: true, message: '请输入分类名称', trigger: 'blur' } ],
-  sort: [ { required: true, message: '请输入排序', trigger: 'blur' } ],
-  remark: [ ]
+const rules: FormRules = {
+  name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }],
+  code: [{ required: true, message: '请输入分类编码', trigger: 'blur' }],
+  sort: [{ required: true, message: '请输入排序', trigger: 'change' }],
 }
 
-const editDialogVisible = ref(false)
-const editForm = ref({ id: '', shopId: '', parentId: null, code: '', name: '', sort: 1, remark: '' })
-const editFormRules = {
-  shopId: [ { required: true, message: '请选择店铺', trigger: 'blur' } ],
-  parentId: [ ],
-  code: [ { required: true, message: '请输入分类编码', trigger: 'blur' } ],
-  name: [ { required: true, message: '请输入分类名称', trigger: 'blur' } ],
-  sort: [ { required: true, message: '请输入排序', trigger: 'blur' } ],
-  remark: [ ]
+const parentOptions = computed(() => disableCurrentBranch(categoryTree.value, form.id))
+
+function createEmptyForm(): CategoryRecord {
+  return { id: '', parentId: null, code: '', name: '', sort: 1, remark: '' }
 }
 
-const filteredTableData = computed(() => tableData.value)
-const getShopId = () => getCurrentShop()?.id || ''
+function currentShopId() {
+  return getCurrentShop()?.id || ''
+}
 
-function handleQuery() {
-  queryParams.value.current = 1
-  getList()
-}
-function resetQuery() {
-  queryParams.value.name = ''
-  handleQuery()
-}
-function handleSelectionChange(selection) {
-  ids.value = selection.map(item => item.id)
-  selectedRows.value = selection
-  single.value = selection.length !== 1
-  multiple.value = !selection.length
-}
-function handleAdd() {
-  createForm.value = { shopId: getShopId(), parentId: null, code: '', name: '', sort: 1, remark: '' }
-  createDialogVisible.value = true
-}
-function handleCreateConfirm() {
-  if (!createForm.value.shopId) {
-    createForm.value.shopId = getShopId()
-  }
-  // 只在提交参数时处理 parentId
-  const payload = {
-    shopId: createForm.value.shopId,
-    parentId: (createForm.value.parentId === null || createForm.value.parentId === undefined || createForm.value.parentId === '') ? 0 : createForm.value.parentId,
-    code: createForm.value.code,
-    name: createForm.value.name,
-    sort: createForm.value.sort,
-    remark: createForm.value.remark
-  }
-  if (!payload.shopId || !payload.code || !payload.name || !payload.sort) {
-    ElMessage.warning('请填写完整信息')
-    return
-  }
-  createCategory(payload).then(res => {
-    ElMessage.success('创建成功')
-    createDialogVisible.value = false
-    // 重置表单，避免 parentId 残留 0
-    createForm.value.parentId = null
-    getList()
-  }).catch(() => {
-    ElMessage.error('创建失败')
+function disableCurrentBranch(nodes: CategoryRecord[], currentId: string, parentBlocked = false): CategoryRecord[] {
+  return nodes.map((node) => {
+    const blocked = parentBlocked || Boolean(currentId && String(node.id) === String(currentId))
+    return {
+      ...node,
+      disabled: blocked,
+      children: node.children ? disableCurrentBranch(node.children, currentId, blocked) : undefined,
+    }
   })
 }
-function handleUpdate(row) {
-  let target = row
-  if (!target) {
-    if (selectedRows.value.length !== 1) {
-      ElMessage.warning('请选择一个要编辑的分类')
-      return
-    }
-    target = selectedRows.value[0]
-  }
-  getCategoryDetail(target.id).then(res => {
-    // 自动注入 shopId，parentId 为 0 时转为 null 以便下拉框显示为空
-    editForm.value = { ...res.data, shopId: getShopId(), parentId: (res.data.parentId === 0 ? null : res.data.parentId) }
-    editDialogVisible.value = true
-  })
-}
-function handleEditConfirm() {
-  if (!editForm.value.shopId) {
-    editForm.value.shopId = getShopId()
-  }
-  // 只在提交参数时处理 parentId
-  const payload = {
-    id: editForm.value.id,
-    shopId: editForm.value.shopId,
-    parentId: (editForm.value.parentId === null || editForm.value.parentId === undefined || editForm.value.parentId === '') ? 0 : editForm.value.parentId,
-    code: editForm.value.code,
-    name: editForm.value.name,
-    sort: editForm.value.sort,
-    remark: editForm.value.remark
-  }
-  if (!payload.shopId || !payload.code || !payload.name || !payload.sort) {
-    ElMessage.warning('请填写完整信息')
-    return
-  }
-  updateCategory(payload).then(() => {
-    ElMessage.success('修改成功')
-    editDialogVisible.value = false
-    // 重置 parentId，避免下次弹窗残留 0
-    editForm.value.parentId = null
-    getList()
-  }).catch(() => ElMessage.error('修改失败'))
-}
-function handleDelete(row) {
-  let targets = []
-  if (row && row.id) {
-    targets = [row.id]
-  } else {
-    if (!ids.value.length) {
-      ElMessage.warning('请选择要删除的分类')
-      return
-    }
-    targets = ids.value
-  }
-  ElMessageBox.confirm(
-    `确认要删除选中的分类吗？`,
-    '提示',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  ).then(() => {
-    deleteCategory(targets).then(() => {
-      ElMessage.success('删除成功')
-      getList()
-    }).catch(() => {})
-  }).catch(() => {})
-}
-function getList() {
-  loading.value = true
-  const shopId = getShopId()
+
+async function loadCategoryTree() {
+  const shopId = currentShopId()
   if (!shopId) {
-    tableData.value = []
     categoryTree.value = []
-    total.value = 0
-    loading.value = false
     return
   }
-  // 判断是否有搜索条件
-  if (queryParams.value.name) {
-    // 有分类名称搜索时，调用 query 接口
-    const conditions = `name:like:${queryParams.value.name}`
-    queryCategoryList({ shopId, conditions_: conditions, current: queryParams.value.current, size: queryParams.value.size }).then(res => {
-      tableData.value = res.data?.records || []
-      total.value = res.data?.total || 0
-      categoryTree.value = [] // 搜索时不展示树
-      loading.value = false
-    }).catch(() => {
-      loading.value = false
-    })
-  } else {
-    // 无搜索条件时，展示树
-    getCategoryTree({ shopId }).then(res => {
-      tableData.value = res.data || []
-      categoryTree.value = res.data || []
-      total.value = 0 // 树形结构无需分页
-      loading.value = false
-    }).catch(() => {
-      loading.value = false
-    })
+  const response = await getCategoryTree({ shopId })
+  categoryTree.value = response.data || []
+}
+
+async function loadCategories() {
+  const shopId = currentShopId()
+  if (!shopId) {
+    categories.value = []
+    page.total = 0
+    return
+  }
+
+  loading.value = true
+  try {
+    if (search.name.trim()) {
+      const response = await queryCategoryList({
+        shopId,
+        current: page.current,
+        size: page.size,
+        conditions_: buildConditions([
+          { field: 'name', operator: 'like', value: search.name.trim() },
+          { field: 'sort', operator: 'sort', value: 'asc' },
+        ]),
+      })
+      categories.value = response.data?.records || []
+      page.total = Number(response.data?.total || 0)
+    } else {
+      await loadCategoryTree()
+      categories.value = categoryTree.value
+      page.total = 0
+    }
+    selectedRows.value = []
+    tableRef.value?.clearSelection()
+  } finally {
+    loading.value = false
   }
 }
-onMounted(() => getList())
-// 弹窗关闭时重置 parentId
-watch(createDialogVisible, (val) => {
-  if (!val) {
-    createForm.value.parentId = null
+
+async function refreshPage() {
+  await loadCategoryTree()
+  await loadCategories()
+}
+
+function handleSearch() {
+  page.current = 1
+  void loadCategories()
+}
+
+function handleReset() {
+  search.name = ''
+  handleSearch()
+}
+
+function handlePageChange(value: { page: number; limit: number }) {
+  page.current = value.page
+  page.size = value.limit
+  void loadCategories()
+}
+
+function openCreateDialog() {
+  resetForm()
+  dialogVisible.value = true
+}
+
+async function openEditDialog(row: CategoryRecord) {
+  const response = await getCategoryDetail(row.id)
+  Object.assign(form, createEmptyForm(), response.data, {
+    parentId: Number(response.data.parentId) === 0 ? null : response.data.parentId,
+  })
+  dialogVisible.value = true
+}
+
+function resetForm() {
+  Object.assign(form, createEmptyForm())
+  formRef.value?.clearValidate()
+}
+
+async function submitForm() {
+  if (!formRef.value || submitting.value) return
+  const shopId = currentShopId()
+  if (!shopId) {
+    ElMessage.warning('请先选择店铺')
+    return
   }
-})
-// 弹窗关闭时重置 parentId
-watch(editDialogVisible, (val) => {
-  if (!val) {
-    editForm.value.parentId = null
+
+  submitting.value = true
+  try {
+    await formRef.value.validate()
+    const payload = {
+      shopId,
+      parentId: form.parentId || 0,
+      code: form.code.trim(),
+      name: form.name.trim(),
+      sort: form.sort,
+      remark: form.remark.trim(),
+    }
+    if (form.id) await updateCategory({ ...payload, id: form.id })
+    else await createCategory(payload)
+    ElMessage.success('保存成功')
+    dialogVisible.value = false
+    await refreshPage()
+  } catch (error) {
+    const message = getRequestErrorMessage(error)
+    if (message) ElMessage.error(message)
+  } finally {
+    submitting.value = false
   }
-})
+}
+
+async function removeCategories(row?: CategoryRecord) {
+  const ids = row ? [row.id] : selectedRows.value.map((item) => item.id)
+  if (!ids.length) return
+  try {
+    await ElMessageBox.confirm(`确定删除选中的 ${ids.length} 个商品分类吗？`, '删除确认', { type: 'warning' })
+    await deleteCategory(ids)
+    ElMessage.success('删除成功')
+    await refreshPage()
+  } catch (error) {
+    if (!isUserCancel(error)) ElMessage.error(getRequestErrorMessage(error) || '删除失败')
+  }
+}
+
+onMounted(() => void refreshPage())
 </script>
 
 <style scoped>
-.app-container {
-  padding: 24px;
+.category-page {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background: #fff;
 }
-.mb8 {
-  margin-bottom: 8px;
-}
+
+.search-bar { margin-bottom: 20px; }
+.action-bar { display: flex; justify-content: space-between; align-items: center; }
+.action-buttons { display: flex; gap: 12px; }
+.table-container { flex: 1; min-height: 0; margin-top: 20px; }
 </style>

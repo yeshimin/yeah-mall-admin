@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
       <el-form-item label="审核状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择审核状态" clearable style="width: 120px">
@@ -30,8 +30,8 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
+    <el-row :gutter="10" class="mall-action-row">
+      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
       <!-- 申请记录列表 -->
@@ -140,7 +140,7 @@ import { ElMessage } from 'element-plus'
 import { Search, Refresh, View } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
 import request from '@/utils/request'
-import RightToolbar from '@/components/RightToolbar/index.vue'
+import MallListTools from '@/components/mall/MallListTools.vue'
 import { querySeckillActivityList } from '@/api/mall/seckill'
 
 // 路由
@@ -392,11 +392,11 @@ function handleCurrentChange(current) {
 </script>
 
 <style scoped>
-.app-container {
+.mall-page {
   padding: 24px;
 }
 
-.mb8 {
+.mall-action-row {
   margin-bottom: 8px;
 }
 

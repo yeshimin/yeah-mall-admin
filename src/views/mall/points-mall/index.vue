@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container points-mall-page">
+  <div class="mall-page points-mall-page">
     <el-tabs v-model="activeTab" class="content-tabs" @tab-change="loadActiveTab">
       <el-tab-pane label="商品分类" name="category">
         <div class="toolbar-row">
@@ -99,7 +99,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <Pagination
+        <MallPagination
           :total="productPage.total"
           :page="productPage.current"
           :limit="productPage.size"
@@ -160,7 +160,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <Pagination
+        <MallPagination
           :total="orderPage.total"
           :page="orderPage.current"
           :limit="orderPage.size"
@@ -363,7 +363,7 @@
 <script setup lang="ts">
 import { computed, defineComponent, h, onMounted, reactive, ref } from 'vue'
 import { ElButton, ElImage, ElMessage, ElMessageBox, ElUpload, type FormInstance } from 'element-plus'
-import Pagination from '@/components/Pagination/index.vue'
+import MallPagination from '@/components/mall/MallPagination.vue'
 import { uploadStorageFile } from '@/api/storage'
 import { getStoragePreviewUrl } from '@/utils/storage'
 import {

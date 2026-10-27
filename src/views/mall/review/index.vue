@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="mall-page">
     <el-form :inline="true" class="query-form">
       <el-form-item label="商品 SPU"><el-input v-model="query.spuId" placeholder="请输入 SPU ID" clearable /></el-form-item>
       <el-form-item label="店铺 ID"><el-input v-model="query.shopId" placeholder="请输入店铺 ID" clearable /></el-form-item>
