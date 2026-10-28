@@ -6,6 +6,7 @@ export interface ProductCategoryRecord {
   parentId: string | number
   code: string
   name: string
+  image?: string
   sort: number
   level?: number
   path?: string
@@ -21,6 +22,7 @@ export interface ProductCategorySaveRequest {
   parentId: string | number
   code: string
   name: string
+  image?: string
   sort: number
   remark: string
 }

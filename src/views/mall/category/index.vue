@@ -1,26 +1,22 @@
 <template>
   <div class="category-page mall-page">
-    <div v-show="showSearch" class="search-bar">
-      <el-form class="search-form" :inline="true" :model="search" @submit.prevent="handleSearch">
-        <el-form-item label="分类名称">
-          <el-input v-model="search.name" clearable placeholder="请输入分类名称" />
+    <section class="mall-filter-panel">
+      <el-form class="mall-query-form" :inline="true" :model="search" @submit.prevent="handleSearch">
+        <el-form-item label="店铺分类名称">
+          <el-input v-model="search.name" clearable placeholder="请输入店铺分类名称" />
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" native-type="submit">搜索</el-button>
+        <el-form-item class="mall-query-actions">
           <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" native-type="submit">查询</el-button>
         </el-form-item>
       </el-form>
-    </div>
-
-    <div class="action-bar">
-      <div class="action-buttons">
-        <el-button type="primary" @click="openCreateDialog">新增分类</el-button>
+      <div class="mall-business-actions">
         <el-button type="danger" :disabled="selectedRows.length === 0" @click="removeCategories()">批量删除</el-button>
+        <el-button type="primary" @click="openCreateDialog">新增店铺分类</el-button>
       </div>
-      <MallListTools v-model:showSearch="showSearch" @refresh="refreshPage" />
-    </div>
+    </section>
 
-    <div class="table-container">
+    <section class="mall-table-panel category-table-panel">
       <el-table
         ref="tableRef"
         v-loading="loading"
@@ -33,7 +29,12 @@
         @selection-change="selectedRows = $event"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="name" label="分类名称" min-width="180" />
+        <el-table-column label="分类图片" width="96" align="center">
+          <template #default="{ row }">
+            <StorageImage :src="row.image" :width="48" :height="48" :preview="Boolean(row.image)" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" label="店铺分类名称" min-width="180" />
         <el-table-column prop="code" label="分类编码" min-width="150" show-overflow-tooltip />
         <el-table-column prop="level" label="层级" width="80" />
         <el-table-column prop="sort" label="排序" width="80" />
@@ -48,19 +49,19 @@
           </template>
         </el-table-column>
       </el-table>
-    </div>
 
-    <MallPagination
-      v-if="search.name && page.total > 0"
-      :total="page.total"
-      :page="page.current"
-      :limit="page.size"
-      @pagination="handlePageChange"
-    />
+      <MallPagination
+        v-if="search.name && page.total > 0"
+        :total="page.total"
+        :page="page.current"
+        :limit="page.size"
+        @pagination="handlePageChange"
+      />
+    </section>
 
     <el-dialog
       v-model="dialogVisible"
-      :title="form.id ? '编辑分类' : '新增分类'"
+      :title="form.id ? '编辑店铺分类' : '新增店铺分类'"
       width="560px"
       :close-on-click-modal="!submitting"
       :close-on-press-escape="!submitting"
@@ -81,10 +82,13 @@
           />
         </el-form-item>
         <el-form-item label="分类名称" prop="name">
-          <el-input v-model="form.name" maxlength="64" placeholder="请输入分类名称" />
+          <el-input v-model="form.name" maxlength="64" placeholder="请输入店铺分类名称" />
         </el-form-item>
         <el-form-item label="分类编码" prop="code">
           <el-input v-model="form.code" maxlength="64" placeholder="请输入分类编码" />
+        </el-form-item>
+        <el-form-item label="分类图片">
+          <StorageFileUpload v-model="form.image" :file-type="imageTypes" :file-size="2" />
         </el-form-item>
         <el-form-item label="排序" prop="sort">
           <el-input-number v-model="form.sort" :min="1" :max="999" />
@@ -105,8 +109,9 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { FormInstance, FormRules, TableInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import MallListTools from '@/components/mall/MallListTools.vue'
 import MallPagination from '@/components/mall/MallPagination.vue'
+import StorageFileUpload from '@/components/mall/StorageFileUpload.vue'
+import StorageImage from '@/components/mall/StorageImage.vue'
 import {
   createCategory,
   deleteCategory,
@@ -120,7 +125,7 @@ import { getCurrentShop } from '@/utils/shop'
 import { buildConditions } from '@/utils/query'
 import { getRequestErrorMessage, isUserCancel } from '@/utils/error'
 
-defineOptions({ name: 'ProductCategoryPage' })
+defineOptions({ name: 'ShopProductCategoryPage' })
 
 type CategoryRecord = Omit<ProductCategoryRecord, 'parentId' | 'children'> & {
   parentId: string | number | null
@@ -129,9 +134,9 @@ type CategoryRecord = Omit<ProductCategoryRecord, 'parentId' | 'children'> & {
 }
 
 const treeProps = { value: 'id', label: 'name', children: 'children', disabled: 'disabled' }
+const imageTypes = ['jpg', 'jpeg', 'png', 'webp', 'gif']
 const loading = ref(false)
 const submitting = ref(false)
-const showSearch = ref(true)
 const dialogVisible = ref(false)
 const tableRef = ref<TableInstance>()
 const formRef = ref<FormInstance>()
@@ -143,7 +148,7 @@ const page = reactive({ current: 1, size: 10, total: 0 })
 const form = reactive<CategoryRecord>(createEmptyForm())
 
 const rules: FormRules = {
-  name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }],
+  name: [{ required: true, message: '请输入店铺分类名称', trigger: 'blur' }],
   code: [{ required: true, message: '请输入分类编码', trigger: 'blur' }],
   sort: [{ required: true, message: '请输入排序', trigger: 'change' }],
 }
@@ -151,7 +156,7 @@ const rules: FormRules = {
 const parentOptions = computed(() => disableCurrentBranch(categoryTree.value, form.id))
 
 function createEmptyForm(): CategoryRecord {
-  return { id: '', parentId: null, code: '', name: '', sort: 1, remark: '' }
+  return { id: '', parentId: null, code: '', name: '', image: '', sort: 1, remark: '' }
 }
 
 function currentShopId() {
@@ -268,6 +273,7 @@ async function submitForm() {
       parentId: form.parentId || 0,
       code: form.code.trim(),
       name: form.name.trim(),
+      image: form.image || '',
       sort: form.sort,
       remark: form.remark.trim(),
     }
@@ -288,7 +294,7 @@ async function removeCategories(row?: CategoryRecord) {
   const ids = row ? [row.id] : selectedRows.value.map((item) => item.id)
   if (!ids.length) return
   try {
-    await ElMessageBox.confirm(`确定删除选中的 ${ids.length} 个商品分类吗？`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm(`确定删除选中的 ${ids.length} 个店铺商品分类吗？`, '删除确认', { type: 'warning' })
     await deleteCategory(ids)
     ElMessage.success('删除成功')
     await refreshPage()
@@ -301,18 +307,14 @@ onMounted(() => void refreshPage())
 </script>
 
 <style scoped>
-.category-page {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
+.category-table-panel {
   display: flex;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
-  padding: 20px;
-  background: #fff;
 }
 
-.search-bar { margin-bottom: 20px; }
-.action-bar { display: flex; justify-content: space-between; align-items: center; }
-.action-buttons { display: flex; gap: 12px; }
-.table-container { flex: 1; min-height: 0; margin-top: 20px; }
+.category-table-panel :deep(.el-table) {
+  flex: 1;
+}
 </style>

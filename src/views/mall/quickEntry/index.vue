@@ -90,7 +90,11 @@
           <el-input v-model="form.target" maxlength="255" placeholder="例如 /pages/points-mall/list" />
         </el-form-item>
         <el-form-item label="入口图标" prop="icon">
-          <StorageFileUpload v-model="form.icon" :file-type="imageTypes" :file-size="2" />
+          <div class="entry-icon-field">
+            <StorageFileUpload v-model="form.icon" :file-type="imageTypes" :file-size="2" />
+            <el-button v-if="form.icon" link type="primary" @click="form.icon = ''">使用默认图标</el-button>
+            <span class="form-tip">不上传时使用对应业务的内置默认图标</span>
+          </div>
         </el-form-item>
         <el-form-item label="排序" prop="sort">
           <el-input-number v-model="form.sort" :min="1" :max="999" />
@@ -145,7 +149,6 @@ const form = reactive<QuickEntryRecord>(createEmptyForm())
 
 const rules: FormRules = {
   name: [{ required: true, message: '请输入入口名称', trigger: 'blur' }],
-  icon: [{ required: true, message: '请上传入口图标', trigger: 'change' }],
   sort: [{ required: true, message: '请输入排序', trigger: 'change' }],
 }
 
@@ -268,4 +271,6 @@ onMounted(() => void loadEntries())
 .action-buttons { display: flex; gap: 12px; }
 .table-container { flex: 1; min-height: 0; margin-top: 20px; }
 .entry-name { display: flex; align-items: center; gap: 12px; }
+.entry-icon-field { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+.form-tip { width: 100%; color: var(--mall-muted); font-size: 12px; }
 </style>
