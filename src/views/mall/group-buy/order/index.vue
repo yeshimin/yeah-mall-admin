@@ -1,6 +1,7 @@
 <template>
   <div class="mall-page">
-    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch">
+    <section class="mall-filter-panel">
+    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch" class="mall-query-form">
       <el-form-item label="订单号">
         <el-input
           v-model="queryParams.orderNo"
@@ -34,22 +35,24 @@
           <el-option label="退款失败" value="6" />
         </el-select>
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <el-icon><Search /></el-icon>
-          查询
-        </el-button>
+      <el-form-item class="mall-query-actions">
         <el-button @click="resetQuery">
           <el-icon><Refresh /></el-icon>
           重置
         </el-button>
+        <el-button type="primary" @click="handleQuery">
+          <el-icon><Search /></el-icon>
+          查询
+        </el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mall-action-row">
+    <div class="mall-business-actions">
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
-    </el-row>
+    </div>
+    </section>
 
+    <section class="mall-table-panel">
     <el-table v-loading="loading" :data="orderList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="orderNo" label="订单号" min-width="180" />
@@ -83,17 +86,18 @@
       <el-table-column prop="createTime" label="创建时间" width="180" />
     </el-table>
 
-    <div class="pagination-container" style="margin-top: 20px; text-align: right;">
+    <div class="pagination-container">
       <el-pagination
         v-model:current-page="pagination.current"
         v-model:page-size="pagination.size"
         :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
+        layout="sizes, prev, pager, next, jumper"
         :total="Number(pagination.total)"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
     </div>
+    </section>
   </div>
 </template>
 

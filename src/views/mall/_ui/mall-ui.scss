@@ -1,0 +1,228 @@
+.mall-page {
+  --mall-ink: #17251f;
+  --mall-ink-secondary: #30423a;
+  --mall-brand: #24634f;
+  --mall-brand-soft: #e8f2ed;
+  --mall-paper: #f4f6f3;
+  --mall-line: #dce4de;
+  --mall-line-strong: #c8d4cc;
+  --mall-muted: #65726a;
+  --mall-price: #be412b;
+  --el-color-primary: var(--mall-brand);
+  --el-color-primary-light-3: #5f8b79;
+  --el-color-primary-light-5: #8eafa0;
+  --el-color-primary-light-7: #bfd2c8;
+  --el-color-primary-light-8: #d8e5de;
+  --el-color-primary-light-9: var(--mall-brand-soft);
+  --el-color-primary-dark-2: #174b3b;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 18px 22px 28px;
+  color: var(--mall-ink);
+  background: var(--mall-paper);
+}
+
+.mall-filter-panel {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fafcfa;
+}
+
+/* Transitional coverage for mall pages that have not adopted the shared shell yet. */
+.mall-page > .search-bar,
+.mall-page > .query-form,
+.mall-page > .filter-form {
+  box-sizing: border-box;
+  margin-bottom: 14px;
+  padding: 16px;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fafcfa;
+}
+
+.mall-page > .search-bar .el-form-item,
+.mall-page > .query-form.el-form--inline .el-form-item,
+.mall-page > .filter-form.el-form--inline .el-form-item {
+  margin-bottom: 0;
+}
+
+.mall-page > .action-bar,
+.mall-page > .mall-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.mall-page > .el-table,
+.mall-page > .table-container {
+  overflow: hidden;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mall-page > .pagination-container,
+.mall-page > .pagination-wrapper {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 9px 14px;
+  border: 1px solid var(--mall-line);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+}
+
+.mall-page > .el-tabs {
+  padding: 0 16px 16px;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mall-query-form {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: flex-end;
+  gap: 0 14px;
+  flex-wrap: wrap;
+}
+
+.mall-query-form.el-form--inline .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+.mall-query-form .el-form-item__label {
+  color: var(--mall-ink-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mall-query-actions {
+  flex: 0 0 auto;
+}
+
+.mall-business-actions {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding-left: 18px;
+}
+
+.mall-business-actions::before {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 1px;
+  background: var(--mall-line-strong);
+  content: '';
+}
+
+.mall-filter-panel .el-input__wrapper,
+.mall-filter-panel .el-select__wrapper,
+.mall-filter-panel .el-date-editor.el-input__wrapper {
+  min-height: 38px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--mall-line-strong) inset;
+}
+
+.mall-filter-panel .el-button {
+  min-height: 38px;
+  border-radius: 6px;
+}
+
+.mall-table-panel {
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mall-table-panel .el-table {
+  --el-table-border-color: #edf1ee;
+  --el-table-header-bg-color: #f5f8f5;
+  --el-table-row-hover-bg-color: #fbfdfb;
+  color: var(--mall-ink-secondary);
+}
+
+.mall-table-panel .el-table th.el-table__cell {
+  height: 46px;
+  padding: 0;
+  color: var(--mall-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mall-table-panel .el-table td.el-table__cell {
+  height: 60px;
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.mall-table-panel .el-table .cell {
+  padding: 0 12px;
+}
+
+.mall-table-panel .el-table__inner-wrapper::before {
+  display: none;
+}
+
+.mall-table-panel .pagination-container,
+.mall-table-panel .pagination-wrapper,
+.mall-table-panel > .el-pagination {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 9px 14px;
+  border-top: 1px solid var(--mall-line);
+}
+
+.mall-table-panel .el-pagination {
+  --el-pagination-button-bg-color: #fff;
+  --el-pagination-hover-color: var(--mall-brand);
+}
+
+.mall-table-panel .el-tag {
+  border-radius: 4px;
+}
+
+.mall-page .table-row-actions,
+.mall-page .mall-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.mall-page .el-dialog {
+  border-radius: 10px;
+}
+
+@media (max-width: 1180px) {
+  .mall-filter-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mall-business-actions {
+    align-self: flex-end;
+  }
+}

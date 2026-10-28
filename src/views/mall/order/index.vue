@@ -1,11 +1,7 @@
 <template>
-  <div class="order-manage">
-    <div class="page-header">
-      <h2>订单管理</h2>
-    </div>
-
-    <el-card class="search-card">
-      <el-form ref="searchFormRef" :model="searchForm" label-position="left" label-width="80px" inline>
+  <div class="order-manage mall-page">
+    <section class="mall-filter-panel order-filter-panel">
+      <el-form ref="searchFormRef" :model="searchForm" label-position="left" label-width="80px" inline class="mall-query-form">
         <el-form-item label="订单编号">
           <el-input v-model="searchForm.orderNo" placeholder="请输入订单编号" clearable style="width: 200px;"></el-input>
         </el-form-item>
@@ -85,19 +81,14 @@
             style="width: 190px;"
           ></el-date-picker>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        <el-form-item class="mall-query-actions">
           <el-button @click="resetForm">重置</el-button>
+          <el-button type="primary" @click="handleSearch">查询</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </section>
 
-    <el-card class="list-card">
-      <template #header>
-        <div class="card-header">
-          <h3>订单列表</h3>
-        </div>
-      </template>
+    <section class="mall-table-panel">
       <el-table v-loading="loading" :data="orderList" style="width: 100%" @sort-change="handleSortChange">
         <el-table-column prop="orderNo" label="订单编号" min-width="180"></el-table-column>
         <el-table-column prop="createTime" label="下单时间" min-width="180" sortable="custom"></el-table-column>
@@ -158,18 +149,18 @@
         </el-table-column>
       </el-table>
 
-      <div class="pagination-container" style="margin-top: 20px; text-align: right;">
+      <div class="pagination-container">
         <el-pagination
           v-model:current-page="pagination.current"
           v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
+          layout="sizes, prev, pager, next, jumper"
           :total="pagination.total"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
       </div>
-    </el-card>
+    </section>
 
     <el-dialog v-model="detailDialogVisible" title="订单详情" width="900px">
       <el-collapse v-model="activeCollapseNames">
@@ -1417,16 +1408,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.order-manage {
-  padding: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .buyer-info {
   display: flex;
   flex-direction: column;

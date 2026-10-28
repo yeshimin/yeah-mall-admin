@@ -1,18 +1,21 @@
 <template>
   <div class="mall-page member-page">
-    <el-form :inline="true" class="filter-form">
+    <section class="mall-filter-panel">
+    <el-form :inline="true" class="mall-query-form">
       <el-form-item label="会员ID">
         <el-input v-model="query.memberId" clearable placeholder="会员ID" />
       </el-form-item>
       <el-form-item label="会员关键词">
         <el-input v-model="query.keyword" clearable placeholder="昵称、账号或手机号" @keyup.enter="loadMembers(true)" />
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="loadMembers(true)">查询</el-button>
+      <el-form-item class="mall-query-actions">
         <el-button @click="resetQuery">重置</el-button>
+        <el-button type="primary" @click="loadMembers(true)">查询</el-button>
       </el-form-item>
     </el-form>
+    </section>
 
+    <section class="mall-table-panel">
     <el-table v-loading="loading" :data="members">
       <el-table-column label="会员" min-width="210">
         <template #default="{ row }">
@@ -58,6 +61,7 @@
       :limit="page.size"
       @pagination="changePage"
     />
+    </section>
 
     <el-drawer v-model="detail.visible" title="会员详情" size="520px">
       <el-descriptions v-if="detail.member" :column="1" border>
@@ -174,10 +178,8 @@ onMounted(() => loadMembers())
 </script>
 
 <style scoped>
-.filter-form { padding: 14px 16px 0; margin-bottom: 16px; border-radius: 8px; background: #f7f8fa; }
 .member-cell { display: flex; align-items: center; gap: 12px; }
 .member-cell strong { color: #303133; font-weight: 600; }
 .member-cell p { margin: 4px 0 0; color: #909399; font-size: 12px; }
 :deep(.el-dropdown) { margin-left: 12px; vertical-align: middle; }
-:deep(.el-pagination) { justify-content: flex-end; margin-top: 20px; }
 </style>

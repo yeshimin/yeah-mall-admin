@@ -1,6 +1,7 @@
 <template>
   <div class="mall-page">
-    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch">
+    <section class="mall-filter-panel">
+    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch" class="mall-query-form">
       <el-form-item label="活动名称">
         <el-select
           v-model="queryParams.activityId"
@@ -37,22 +38,24 @@
           <el-option label="审核驳回" value="3" />
         </el-select>
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <el-icon><Search /></el-icon>
-          查询
-        </el-button>
+      <el-form-item class="mall-query-actions">
         <el-button @click="resetQuery">
           <el-icon><Refresh /></el-icon>
           重置
         </el-button>
+        <el-button type="primary" @click="handleQuery">
+          <el-icon><Search /></el-icon>
+          查询
+        </el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mall-action-row">
+    <div class="mall-business-actions">
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
-    </el-row>
+    </div>
+    </section>
 
+    <section class="mall-table-panel">
     <el-table v-loading="loading" :data="applyList" style="width: 100%">
       <el-table-column label="序号" type="index" width="70" />
       <el-table-column prop="activityName" label="活动名称" min-width="160" show-overflow-tooltip />
@@ -96,17 +99,18 @@
       </el-table-column>
     </el-table>
 
-    <div class="pagination-container" style="margin-top: 20px; text-align: right;">
+    <div class="pagination-container">
       <el-pagination
         v-model:current-page="pagination.current"
         v-model:page-size="pagination.size"
         :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
+        layout="sizes, prev, pager, next, jumper"
         :total="Number(pagination.total)"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
     </div>
+    </section>
 
     <!-- 申请详情与审核对话框 -->
     <el-dialog :title="canAudit ? '查看并审核申请' : '申请详情'" v-model="auditDialogVisible" width="760px">

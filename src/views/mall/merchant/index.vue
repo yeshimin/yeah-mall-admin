@@ -1,49 +1,50 @@
 <template>
   <div class="mall-page">
-    <section class="search-bar">
-      <el-form :inline="true" :model="searchForm" class="search-form" @submit.prevent="handleSearch">
+    <section class="mall-filter-panel">
+      <el-form :inline="true" :model="searchForm" class="mall-query-form" @submit.prevent="handleSearch">
         <el-form-item label="商家账号">
           <el-input v-model="searchForm.loginAccount" placeholder="请输入商家账号" clearable />
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" native-type="submit">查询</el-button>
+        <el-form-item class="mall-query-actions">
           <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" native-type="submit">查询</el-button>
         </el-form-item>
       </el-form>
+      <div class="mall-business-actions">
+        <el-button type="danger" plain :disabled="selectedIds.length === 0" @click="handleDelete()">批量删除</el-button>
+        <el-button type="primary" @click="openCreateDialog">新增商家</el-button>
+      </div>
     </section>
 
-    <section class="action-bar">
-      <el-button type="primary" @click="openCreateDialog">新增商家</el-button>
-      <el-button type="danger" :disabled="selectedIds.length === 0" @click="handleDelete()">批量删除</el-button>
+    <section class="mall-table-panel">
+      <el-table v-loading="loading" :data="merchantList" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="52" />
+        <el-table-column prop="id" label="ID" width="110" />
+        <el-table-column prop="loginAccount" label="商家账号" min-width="200" />
+        <el-table-column prop="createTime" label="创建时间" width="190" />
+        <el-table-column prop="updateTime" label="更新时间" width="190" />
+        <el-table-column label="操作" width="160" fixed="right" align="right">
+          <template #default="{ row }">
+            <div class="table-row-actions">
+              <el-button link type="primary" @click="openEditDialog(row)">编辑</el-button>
+              <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="pagination.current"
+          v-model:page-size="pagination.size"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="sizes, prev, pager, next, jumper"
+          :total="pagination.total"
+          @current-change="loadMerchants"
+          @size-change="handlePageSizeChange"
+        />
+      </div>
     </section>
-
-    <el-table v-loading="loading" :data="merchantList" border stripe @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="52" />
-      <el-table-column prop="id" label="ID" width="90" />
-      <el-table-column prop="loginAccount" label="商家账号" min-width="180" />
-      <el-table-column prop="createTime" label="创建时间" width="176" />
-      <el-table-column prop="updateTime" label="更新时间" width="176" />
-      <el-table-column label="操作" width="160" fixed="right">
-        <template #default="{ row }">
-          <div class="table-row-actions">
-            <el-button link type="primary" @click="openEditDialog(row)">编辑</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="pagination.current"
-        v-model:page-size="pagination.size"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="pagination.total"
-        @current-change="loadMerchants"
-        @size-change="handlePageSizeChange"
-      />
-    </div>
 
     <el-dialog v-model="dialogVisible" :title="editingId ? '编辑商家' : '新增商家'" width="460px" @closed="resetForm">
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="88px">
@@ -215,18 +216,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 20px;
-}
-
-.search-bar,
-.action-bar {
-  margin-bottom: 16px;
-}
-
 .pagination-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
 }
 </style>

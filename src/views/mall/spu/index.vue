@@ -1,6 +1,7 @@
 <template>
   <div class="mall-page">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" @submit.prevent>
+    <section class="mall-filter-panel">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" class="mall-query-form" @submit.prevent>
       <el-form-item label="商品名称" prop="name">
         <el-input v-model="queryParams.name" placeholder="请输入商品名称" clearable style="width: 200px"
           @keyup.enter="handleQuery" />
@@ -10,25 +11,21 @@
           :props="{ label: 'name', value: 'id', children: 'children' }" placeholder="请选择商品分类" check-strictly
           :render-after-expand="false" style="width: 200px" />
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+      <el-form-item class="mall-query-actions">
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="Search" @click="handleQuery">查询</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mall-action-row">
-      <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate">修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
-      </el-col>
+    <div class="mall-business-actions">
+      <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate">修改</el-button>
+      <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">删除</el-button>
+      <el-button type="primary" icon="Plus" @click="handleAdd">新增商品</el-button>
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
-    </el-row>
+    </div>
+    </section>
 
+    <section class="mall-table-panel">
     <el-table v-loading="loading" :data="filteredTableData" @selection-change="handleSelectionChange" row-key="id">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column prop="id" label="ID" align="center" />
@@ -55,6 +52,7 @@
 
     <MallPagination v-show="total > 0" :total="Number(total)" v-model:page="queryParams.current" v-model:limit="queryParams.size"
       @pagination="getList" />
+    </section>
 
     <el-dialog v-model="createDialogVisible" title="创建商品" width="960px" class="product-dialog" append-to-body destroy-on-close @close="createDialogVisible = false">
       <el-steps :active="createStep" finish-status="success" simple class="product-steps">
@@ -796,13 +794,6 @@ function handleImageManageClose() {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 24px;
-}
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .detail-editor-item :deep(.el-form-item__content) {
   display: block;
   width: 100%;

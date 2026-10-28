@@ -13,7 +13,7 @@
       >
         <el-menu-item index="/home">
           <el-icon><House /></el-icon>
-          <template #title>首页</template>
+          <template #title>经营概览</template>
         </el-menu-item>
         <LayoutMenuNode v-for="menu in menuList" :key="menu.id" :node="menu" />
       </el-menu>

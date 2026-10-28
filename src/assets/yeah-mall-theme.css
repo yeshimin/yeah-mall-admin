@@ -1,0 +1,227 @@
+:root {
+  --ym-ink: #17251f;
+  --ym-ink-secondary: #30423a;
+  --ym-brand: #24634f;
+  --ym-brand-strong: #174b3b;
+  --ym-brand-soft: #e8f2ed;
+  --ym-price: #be412b;
+  --ym-paper: #f4f6f3;
+  --ym-line: #dce4de;
+  --ym-line-strong: #c8d4cc;
+  --ym-muted: #65726a;
+  --el-color-primary: var(--ym-brand);
+  --el-color-primary-light-3: #5f8b79;
+  --el-color-primary-light-5: #8eafa0;
+  --el-color-primary-light-7: #bfd2c8;
+  --el-color-primary-light-8: #d8e5de;
+  --el-color-primary-light-9: var(--ym-brand-soft);
+  --el-color-primary-dark-2: var(--ym-brand-strong);
+  --el-border-radius-base: 6px;
+  --el-border-color: var(--ym-line);
+  --el-border-color-light: #e7ece8;
+  --el-fill-color-light: #f5f8f5;
+  --el-text-color-primary: var(--ym-ink);
+  --el-text-color-regular: var(--ym-ink-secondary);
+  --el-text-color-secondary: var(--ym-muted);
+}
+
+body {
+  color: var(--ym-ink);
+  background: var(--ym-paper);
+}
+
+#app .content-wrapper {
+  background-color: var(--ym-paper) !important;
+}
+
+#app .sidebar-container {
+  background-color: #18352a !important;
+}
+
+#app .sidebar-container .el-menu {
+  background-color: #18352a !important;
+}
+
+#app .sidebar-container .el-menu-item,
+#app .sidebar-container .el-sub-menu__title {
+  height: 44px !important;
+  color: #b5c8bf !important;
+  line-height: 44px !important;
+}
+
+#app .sidebar-container .el-menu-item:hover,
+#app .sidebar-container .el-sub-menu__title:hover {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+#app .sidebar-container .el-menu-item.is-active {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: inset -3px 0 0 #d0a05d;
+}
+
+#app .sidebar-logo {
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+#app .header-container {
+  border-bottom: 1px solid var(--ym-line);
+  box-shadow: none !important;
+}
+
+#app .header-collapse-btn {
+  color: var(--ym-muted) !important;
+  background-color: var(--ym-paper) !important;
+}
+
+#app .header-collapse-btn:hover {
+  color: var(--ym-brand) !important;
+  background-color: var(--ym-brand-soft) !important;
+}
+
+#app .el-card {
+  border-color: var(--ym-line);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+#app .el-button {
+  border-radius: 6px;
+}
+
+#app .el-input__wrapper,
+#app .el-select__wrapper,
+#app .el-textarea__inner,
+#app .el-date-editor.el-input__wrapper,
+#app .el-date-editor.el-range-editor {
+  border-radius: 6px;
+}
+
+#app .el-table {
+  --el-table-border-color: #edf1ee;
+  --el-table-header-bg-color: #f5f8f5;
+  --el-table-row-hover-bg-color: #fbfdfb;
+}
+
+#app .el-table th.el-table__cell {
+  color: var(--ym-muted);
+  font-weight: 600;
+}
+
+#app .el-dialog {
+  border-radius: 10px;
+}
+
+#app .el-dialog__header {
+  border-bottom-color: var(--ym-line);
+}
+
+#app .el-pagination {
+  --el-pagination-hover-color: var(--ym-brand);
+}
+
+#app .el-tag {
+  border-radius: 4px;
+}
+
+/* Yeahboot pages keep their behavior; this layer only aligns their visual shell. */
+#app [class$='-manage-container'] {
+  box-sizing: border-box;
+  padding: 18px 22px 28px;
+  background: var(--ym-paper);
+}
+
+#app [class$='-manage-container'] > .search-bar {
+  box-sizing: border-box;
+  margin-bottom: 14px;
+  padding: 16px;
+  border: 1px solid var(--ym-line);
+  border-radius: 8px;
+  background: #fafcfa;
+}
+
+#app [class$='-manage-container'] > .search-bar .el-form-item {
+  margin-bottom: 0;
+}
+
+#app [class$='-manage-container'] > .action-bar {
+  margin-bottom: 14px;
+}
+
+#app [class$='-manage-container'] > .table-container {
+  overflow: hidden;
+  margin-top: 0;
+  border: 1px solid var(--ym-line);
+  border-radius: 8px 8px 0 0;
+  background: #fff;
+}
+
+#app [class$='-manage-container'] > .table-container + .pagination-container {
+  min-height: 52px;
+  box-sizing: border-box;
+  margin-top: 0;
+  padding: 9px 14px;
+  border: 1px solid var(--ym-line);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+}
+
+#app [class$='-manage-container'] > .el-tabs,
+#app [class$='-manage-container'] > [class$='-layout'] {
+  border-color: var(--ym-line);
+}
+
+#app :focus-visible {
+  outline-color: rgba(36, 99, 79, 0.28);
+}
+
+#app .login-container {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(112, 157, 136, 0.28), transparent 30%),
+    radial-gradient(circle at 82% 76%, rgba(190, 65, 43, 0.12), transparent 26%),
+    linear-gradient(145deg, #10271e 0%, #1c4b3b 52%, #2f6b55 100%) !important;
+}
+
+#app .login-container::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 36px 36px;
+  content: '';
+}
+
+#app .login-panel {
+  position: relative;
+  z-index: 1;
+  width: min(420px, calc(100vw - 32px)) !important;
+}
+
+#app .login-box {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px !important;
+  box-shadow: 0 28px 70px rgba(5, 18, 12, 0.3) !important;
+}
+
+#app .login-header h2 {
+  color: var(--ym-ink) !important;
+}
+
+#app .login-header p {
+  color: var(--ym-muted) !important;
+}
+
+#app .login-notice {
+  filter: drop-shadow(0 12px 28px rgba(5, 18, 12, 0.18)) !important;
+}
+
+#app .captcha-trigger {
+  border-color: var(--ym-line-strong) !important;
+  border-radius: 6px !important;
+}

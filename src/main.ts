@@ -11,6 +11,8 @@ import { useAuthStore } from '@/stores/auth'
 import { registerUnauthorizedHandler } from '@/utils/session'
 
 import './assets/main.css'
+import './assets/yeah-mall-theme.css'
+import './views/mall/_ui/mall-ui.scss'
 
 const app = createApp(App)
 

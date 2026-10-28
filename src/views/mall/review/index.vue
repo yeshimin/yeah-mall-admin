@@ -1,6 +1,7 @@
 <template>
   <div class="mall-page">
-    <el-form :inline="true" class="query-form">
+    <section class="mall-filter-panel">
+    <el-form :inline="true" class="mall-query-form query-form">
       <el-form-item label="商品 SPU"><el-input v-model="query.spuId" placeholder="请输入 SPU ID" clearable /></el-form-item>
       <el-form-item label="店铺 ID"><el-input v-model="query.shopId" placeholder="请输入店铺 ID" clearable /></el-form-item>
       <el-form-item label="评价等级">
@@ -26,10 +27,14 @@
       <el-form-item label="评价时间">
         <el-date-picker v-model="query.timeRange" type="datetimerange" value-format="YYYY-MM-DD HH:mm:ss" start-placeholder="开始时间" end-placeholder="结束时间" />
       </el-form-item>
-      <el-button type="primary" @click="load(true)">查询</el-button>
-      <el-button @click="reset">重置</el-button>
+      <el-form-item class="mall-query-actions">
+        <el-button @click="reset">重置</el-button>
+        <el-button type="primary" @click="load(true)">查询</el-button>
+      </el-form-item>
     </el-form>
+    </section>
 
+    <section class="mall-table-panel">
     <el-table v-loading="loading" :data="records">
       <el-table-column label="商品" width="82">
         <template #default="{ row }">
@@ -63,8 +68,9 @@
     </el-table>
 
     <div class="pagination-container">
-      <el-pagination v-model:current-page="page.current" v-model:page-size="page.size" :page-sizes="[10, 20, 50, 100]" :total="page.total" layout="total, sizes, prev, pager, next, jumper" @size-change="load(true)" @current-change="load()" />
+      <el-pagination v-model:current-page="page.current" v-model:page-size="page.size" :page-sizes="[10, 20, 50, 100]" :total="page.total" layout="sizes, prev, pager, next, jumper" @size-change="load(true)" @current-change="load()" />
     </div>
+    </section>
 
     <el-dialog v-model="dialog.visible" title="评价详情" width="640px">
       <el-descriptions v-if="dialog.review" :column="2" border>
@@ -182,11 +188,11 @@ onMounted(() => load())
 
 <style scoped>
 .query-form :deep(.el-select) { width: 120px; }
-.product-image { width: 52px; height: 52px; border-radius: 4px; }
-.pagination-container { display: flex; justify-content: flex-end; margin-top: 20px; }
+.product-image { width: 52px; height: 52px; border-radius: 8px; }
+.pagination-container { display: flex; justify-content: flex-end; }
 .review-images { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-.review-image { width: 96px; height: 96px; border-radius: 4px; }
+.review-image { width: 96px; height: 96px; border-radius: 8px; }
 .review-replies { margin-top: 16px; }
-.review-reply-item { padding: 10px 12px; margin-top: 8px; background: #f7f7f7; border-radius: 4px; line-height: 1.6; }
+.review-reply-item { padding: 10px 12px; margin-top: 8px; background: #f4f6f3; border-radius: 8px; line-height: 1.6; }
 .review-reply-item span { display: block; margin-top: 4px; color: #909399; font-size: 12px; }
 </style>

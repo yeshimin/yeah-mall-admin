@@ -88,7 +88,7 @@ const asyncRoutes = [
         name: 'home',
         component: HomeView,
         meta: {
-          title: '首页',
+          title: '经营概览',
           ignoreAccessControl: true,
         },
       },

@@ -1,6 +1,7 @@
 <template>
   <div class="mall-page">
-    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch">
+    <section class="mall-filter-panel">
+    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch" class="mall-query-form">
       <el-form-item label="活动名称">
         <el-input
           v-model="queryParams.name"
@@ -25,25 +26,25 @@
           <el-option label="活动结束" value="6" />
         </el-select>
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <el-icon><Search /></el-icon>
-          查询
-        </el-button>
+      <el-form-item class="mall-query-actions">
         <el-button @click="resetQuery">
           <el-icon><Refresh /></el-icon>
           重置
         </el-button>
+        <el-button type="primary" @click="handleQuery">
+          <el-icon><Search /></el-icon>
+          查询
+        </el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mall-action-row">
-      <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增活动</el-button>
-      </el-col>
+    <div class="mall-business-actions">
+      <el-button type="primary" icon="Plus" @click="handleAdd">新增活动</el-button>
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
-    </el-row>
+    </div>
+    </section>
 
+    <section class="mall-table-panel">
     <el-table v-loading="loading" :data="activityList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="name" label="活动名称" width="200" />
@@ -120,17 +121,18 @@
       </el-table-column>
     </el-table>
 
-    <div class="pagination-container" style="margin-top: 20px; text-align: right;">
+    <div class="pagination-container">
       <el-pagination
         v-model:current-page="pagination.current"
         v-model:page-size="pagination.size"
         :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
+        layout="sizes, prev, pager, next, jumper"
         :total="Number(pagination.total)"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
     </div>
+    </section>
 
     <!-- 新增/编辑对话框 -->
     <el-dialog :title="dialogTitle" v-model="dialogVisible" width="900px">

@@ -2,7 +2,8 @@
   <div class="mall-page points-manage">
     <el-tabs v-model="activeTab" @tab-change="loadCurrentTab">
       <el-tab-pane label="积分流水" name="ledger">
-        <el-form :inline="true">
+        <section class="mall-filter-panel points-filter-panel">
+        <el-form :inline="true" class="mall-query-form">
           <el-form-item label="会员ID">
             <el-input v-model="ledgerQuery.memberId" clearable />
           </el-form-item>
@@ -16,10 +17,14 @@
               />
             </el-select>
           </el-form-item>
-          <el-button type="primary" @click="loadLedger(true)">查询</el-button>
-          <el-button @click="resetLedger">重置</el-button>
+          <el-form-item class="mall-query-actions">
+            <el-button @click="resetLedger">重置</el-button>
+            <el-button type="primary" @click="loadLedger(true)">查询</el-button>
+          </el-form-item>
         </el-form>
+        </section>
 
+        <section class="mall-table-panel">
         <el-table v-loading="loading" :data="ledger">
           <el-table-column prop="memberId" label="会员ID" min-width="180" />
           <el-table-column prop="description" label="说明" min-width="160" />
@@ -42,9 +47,11 @@
           :limit="ledgerPage.size"
           @pagination="onLedgerPageChange"
         />
+        </section>
       </el-tab-pane>
 
       <el-tab-pane label="积分规则" name="rule">
+        <section class="mall-table-panel points-rule-table">
         <el-table v-loading="loading" :data="rules">
           <el-table-column prop="name" label="规则" width="130" />
           <el-table-column prop="code" label="编码" width="160" />
@@ -72,6 +79,7 @@
             </template>
           </el-table-column>
         </el-table>
+        </section>
       </el-tab-pane>
     </el-tabs>
 
@@ -211,6 +219,14 @@ onMounted(() => {
 <style scoped>
 .points-manage :deep(.el-select) {
   width: 150px;
+}
+
+.points-filter-panel {
+  margin-top: 2px;
+}
+
+.points-rule-table {
+  margin-top: 2px;
 }
 
 .plus {

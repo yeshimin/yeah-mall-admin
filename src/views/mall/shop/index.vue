@@ -1,7 +1,7 @@
 <template>
   <div class="mall-page">
-    <section class="search-bar">
-      <el-form :inline="true" :model="searchForm" class="search-form" @submit.prevent="handleSearch">
+    <section class="mall-filter-panel">
+      <el-form :inline="true" :model="searchForm" class="mall-query-form" @submit.prevent="handleSearch">
         <el-form-item label="商家">
           <el-select v-model="searchForm.mchId" clearable filterable placeholder="全部商家">
             <el-option v-for="merchant in merchantOptions" :key="merchant.id" :label="merchant.loginAccount" :value="merchant.id" />
@@ -10,19 +10,19 @@
         <el-form-item label="店铺名称">
           <el-input v-model="searchForm.shopName" placeholder="请输入店铺名称" clearable />
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" native-type="submit">查询</el-button>
+        <el-form-item class="mall-query-actions">
           <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" native-type="submit">查询</el-button>
         </el-form-item>
       </el-form>
+      <div class="mall-business-actions">
+        <el-button type="danger" plain :disabled="selectedIds.length === 0" @click="handleDelete()">批量删除</el-button>
+        <el-button type="primary" @click="openCreateDialog">新增店铺</el-button>
+      </div>
     </section>
 
-    <section class="action-bar">
-      <el-button type="primary" @click="openCreateDialog">新增店铺</el-button>
-      <el-button type="danger" :disabled="selectedIds.length === 0" @click="handleDelete()">批量删除</el-button>
-    </section>
-
-    <el-table v-loading="loading" :data="shopList" border stripe @selection-change="handleSelectionChange">
+    <section class="mall-table-panel">
+    <el-table v-loading="loading" :data="shopList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="52" />
       <el-table-column prop="id" label="ID" width="90" />
       <el-table-column prop="shopNo" label="店铺编号" min-width="140" />
@@ -44,12 +44,13 @@
         v-model:current-page="pagination.current"
         v-model:page-size="pagination.size"
         :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
+        layout="sizes, prev, pager, next, jumper"
         :total="pagination.total"
         @current-change="loadShops"
         @size-change="handlePageSizeChange"
       />
     </div>
+    </section>
 
     <el-dialog v-model="dialogVisible" :title="editingId ? '编辑店铺' : '新增店铺'" width="460px" @closed="resetForm">
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="88px">
@@ -226,18 +227,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 20px;
-}
-
-.search-bar,
-.action-bar {
-  margin-bottom: 16px;
-}
-
 .pagination-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
 }
 </style>
