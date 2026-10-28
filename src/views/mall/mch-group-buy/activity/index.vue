@@ -268,7 +268,7 @@
             </div>
           </el-form-item>
           <el-form-item label="商品描述" required>
-            <RichTextEditor v-model="applyForm.detailDesc" :height="300" />
+            <RichTextEditor v-model="applyForm.detailDesc" :height="300" upload-scope="merchant" />
           </el-form-item>
 
           <el-form-item label="SKU 拼团设置" required>

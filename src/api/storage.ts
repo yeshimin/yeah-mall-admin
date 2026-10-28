@@ -33,6 +33,20 @@ export function uploadStorageFile(payload: UploadStorageRequest) {
   })
 }
 
+/**
+ * 上传商家业务文件
+ */
+export function uploadMerchantStorageFile(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return request<UploadStorageResponse>({
+    url: '/mch/storage/upload',
+    method: 'post',
+    data: formData,
+  })
+}
+
 export function getStoragePreviewUrl(fileKey: string) {
   return resolveApiUrl(`/public/storage/preview?fileKey=${encodeURIComponent(fileKey)}`)
 }

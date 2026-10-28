@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { uploadStorageFile } from '@/api/storage'
+import { uploadMerchantStorageFile, uploadStorageFile } from '@/api/storage'
 import { getRequestErrorMessage } from '@/utils/error'
 import { getStoragePreviewUrl } from '@/utils/storage'
 
@@ -24,11 +24,13 @@ const props = withDefaults(defineProps<{
   fileSize?: number
   fileType?: string[]
   isUsed?: boolean
+  uploadScope?: 'platform' | 'merchant'
 }>(), {
   modelValue: '',
   fileSize: 5,
   fileType: () => [],
   isUsed: true,
+  uploadScope: 'platform',
 })
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
@@ -53,7 +55,9 @@ function validate(file: File) {
 async function upload(options: { file: File; onSuccess: (value: unknown) => void; onError: (error: Error) => void }) {
   uploading.value = true
   try {
-    const response = await uploadStorageFile({ file: options.file, isPublic: true, isUsed: props.isUsed })
+    const response = props.uploadScope === 'merchant'
+      ? await uploadMerchantStorageFile(options.file)
+      : await uploadStorageFile({ file: options.file, isPublic: true, isUsed: props.isUsed })
     emit('update:modelValue', response.data.fileKey)
     options.onSuccess(response.data)
     ElMessage.success('上传成功')

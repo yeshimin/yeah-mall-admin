@@ -88,7 +88,12 @@
           <el-input v-model="form.code" maxlength="64" placeholder="请输入分类编码" />
         </el-form-item>
         <el-form-item label="分类图片">
-          <StorageFileUpload v-model="form.image" :file-type="imageTypes" :file-size="2" />
+          <StorageFileUpload
+            v-model="form.image"
+            :file-type="imageTypes"
+            :file-size="2"
+            upload-scope="merchant"
+          />
         </el-form-item>
         <el-form-item label="排序" prop="sort">
           <el-input-number v-model="form.sort" :min="1" :max="999" />

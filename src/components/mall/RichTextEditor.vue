@@ -18,7 +18,7 @@ import { ref, watch } from 'vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import type Quill from 'quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
-import { uploadStorageFile } from '@/api/storage'
+import { uploadMerchantStorageFile, uploadStorageFile } from '@/api/storage'
 import { getStoragePreviewUrl } from '@/utils/storage'
 
 const props = withDefaults(defineProps<{
@@ -26,11 +26,13 @@ const props = withDefaults(defineProps<{
   height?: number
   readonly?: boolean
   placeholder?: string
+  uploadScope?: 'platform' | 'merchant'
 }>(), {
   modelValue: '',
   height: 360,
   readonly: false,
   placeholder: '请输入内容',
+  uploadScope: 'platform',
 })
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
@@ -66,7 +68,9 @@ function selectAndUploadImage(editor: Quill) {
   input.onchange = async () => {
     const file = input.files?.[0]
     if (!file) return
-    const response = await uploadStorageFile({ file, isPublic: true, isUsed: false })
+    const response = props.uploadScope === 'merchant'
+      ? await uploadMerchantStorageFile(file)
+      : await uploadStorageFile({ file, isPublic: true, isUsed: false })
     const range = editor.getSelection(true)
     editor.insertEmbed(range.index, 'image', getStoragePreviewUrl(response.data.fileKey), 'user')
     editor.setSelection(range.index + 1, 0, 'silent')

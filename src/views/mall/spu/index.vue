@@ -78,7 +78,7 @@
           </div>
         </div>
         <el-form-item prop="detailDesc" class="detail-editor-item">
-          <RichTextEditor v-model="createForm.detailDesc" :height="420" />
+          <RichTextEditor v-model="createForm.detailDesc" :height="420" upload-scope="merchant" />
         </el-form-item>
       </el-form>
       <el-form :model="createForm" :rules="createFormRules" label-width="90px" class="product-form" v-show="createStep === 2">
@@ -134,7 +134,7 @@
           </div>
         </div>
         <el-form-item prop="detailDesc" class="detail-editor-item">
-          <RichTextEditor v-model="editForm.detailDesc" :height="420" />
+          <RichTextEditor v-model="editForm.detailDesc" :height="420" upload-scope="merchant" />
         </el-form-item>
       </el-form>
       <el-form :model="editForm" :rules="editFormRules" label-width="90px" class="product-form" v-show="editStep === 2">
