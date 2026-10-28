@@ -1,10 +1,6 @@
 <template>
-  <div class="basic-settings">
-    <div class="page-header">
-      <h2>基础设置</h2>
-    </div>
-
-    <el-card class="settings-card">
+  <div class="basic-settings mall-page">
+    <el-card class="settings-card" shadow="never">
       <template #header>
         <div class="card-header">
           <h3>店铺信息设置</h3>

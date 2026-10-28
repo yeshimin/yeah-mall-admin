@@ -1,10 +1,6 @@
 <template>
-  <div class="chat-manage">
-    <div class="page-header">
-      <h2>客服消息</h2>
-    </div>
-
-    <el-card class="search-card">
+  <div class="chat-manage mall-page">
+    <el-card class="search-card mall-filter-card" shadow="never">
       <el-form ref="searchFormRef" :model="searchForm" label-position="left" label-width="80px" inline>
         <el-form-item label="关键词">
           <el-input
@@ -22,12 +18,7 @@
       </el-form>
     </el-card>
 
-    <el-card class="list-card">
-      <template #header>
-        <div class="card-header">
-          <h3>会话列表</h3>
-        </div>
-      </template>
+    <el-card class="list-card mall-table-card" shadow="never">
       <el-table v-loading="loading" :data="conversationList" style="width: 100%">
         <el-table-column prop="id" label="会话ID" min-width="180"></el-table-column>
         <el-table-column prop="memberId" label="用户ID" min-width="120"></el-table-column>
@@ -83,7 +74,7 @@
     </el-card>
 
     <!-- 聊天对话框 -->
-    <el-dialog v-model="chatDialogVisible" :title="chatTitle" width="800px" height="70vh" :close-on-press-escape="false" @keydown.esc="handleDialogKeydown" @closed="handleDialogClosed">
+    <el-dialog v-model="chatDialogVisible" :title="chatTitle" width="800px" class="cs-chat-dialog" :close-on-press-escape="false" @keydown.esc="handleDialogKeydown" @closed="handleDialogClosed">
       <div class="chat-dialog">
         <!-- 聊天记录 -->
         <div class="chat-messages" ref="chatMessagesRef" v-loading="messagesLoading">
@@ -147,7 +138,9 @@
             :show-file-list="false"
             accept="image/*"
           >
-            <el-button size="small" type="primary" icon="el-icon-picture-outline"></el-button>
+            <el-button class="image-upload-button" aria-label="发送图片">
+              <el-icon><PictureFilled /></el-icon>
+            </el-button>
           </el-upload>
 
           <div class="input-container">
@@ -859,5 +852,94 @@ textarea:focus {
   text-align: center;
   padding: 40px 0;
   color: #909399;
+}
+
+.chat-manage {
+  min-height: 100%;
+}
+
+.message-content {
+  color: var(--mall-ink-secondary);
+}
+
+.message-time,
+.message-nickname,
+.no-messages {
+  color: var(--mall-muted);
+}
+
+.chat-dialog {
+  min-height: 520px;
+  max-height: calc(100vh - 190px);
+}
+
+.chat-messages {
+  min-height: 330px;
+  max-height: calc(100vh - 350px);
+  padding: 20px 22px;
+  background: #eef2ef;
+}
+
+.message-bubble {
+  border: 1px solid var(--mall-line);
+  border-radius: 10px;
+  line-height: 1.55;
+}
+
+.message-bubble.send {
+  color: #fff;
+  border-color: var(--mall-brand);
+  border-bottom-right-radius: 3px;
+  background: var(--mall-brand);
+}
+
+.message-bubble.receive {
+  color: var(--mall-ink-secondary);
+  border-bottom-left-radius: 3px;
+  background: #fff;
+}
+
+.chat-input {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 88px;
+  align-items: end;
+  gap: 10px;
+  padding: 14px 18px 18px;
+  border-top-color: var(--mall-line);
+}
+
+.image-upload,
+.image-upload-button {
+  width: 40px;
+  height: 40px;
+}
+
+.image-upload-button {
+  padding: 0;
+  color: var(--mall-brand);
+  border-color: var(--mall-line-strong);
+  background: var(--mall-brand-soft);
+}
+
+.input-container {
+  display: flex;
+  min-width: 0;
+  min-height: 80px;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.image-preview-in-input {
+  position: relative;
+  top: auto;
+  left: auto;
+  align-self: flex-start;
+  margin: 0;
+}
+
+.chat-input > .el-button:last-child {
+  width: 88px;
+  height: 40px;
+  margin: 0;
 }
 </style>

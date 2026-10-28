@@ -1,5 +1,5 @@
 <template>
-  <div class="banner-page">
+  <div class="banner-page mall-page">
     <div class="action-bar">
       <div class="action-buttons">
         <el-button type="primary" @click="openForm()">新增 Banner</el-button>

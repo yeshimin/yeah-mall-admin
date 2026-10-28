@@ -608,12 +608,14 @@ onMounted(loadCategories)
 </script>
 
 <style scoped>
-.points-mall-page { --ink: #2b2925; --sand: #f3eee4; --orange: #c95f32; color: var(--ink); }
-.content-tabs { padding: 8px 22px 22px; border: 1px solid #ece7df; border-radius: 14px; background: #fff; }
-.toolbar-row { display: flex; justify-content: flex-end; margin: 8px 0 16px; }.filter-form { margin-top: 8px; padding: 14px 16px 0; border-radius: 10px; background: #f8f6f2; }
-.product-cell { display: flex; align-items: center; gap: 12px; }.product-cell p { margin: 4px 0 0; color: #8a847b; font-size: 12px; }.product-cell.compact { gap: 8px; }
+.points-mall-page { --ink: var(--mall-ink); --sand: var(--mall-paper); --orange: var(--mall-price); color: var(--mall-ink); }
+.content-tabs { padding: 8px 22px 22px; border: 1px solid var(--mall-line); border-radius: 8px; background: #fff; }
+.toolbar-row { display: flex; justify-content: flex-end; margin: 8px 0 16px; }.filter-form { margin-top: 8px; padding: 14px 16px 0; border: 1px solid var(--mall-line); border-radius: 8px; background: #fafcfa; }
+.filter-form + .toolbar-row { margin: -1px 0 16px; padding: 0 16px 14px; border: 1px solid var(--mall-line); border-top: 0; border-radius: 0 0 8px 8px; background: #fafcfa; }
+.filter-form:has(+ .toolbar-row) { border-bottom: 0; border-radius: 8px 8px 0 0; }
+.product-cell { display: flex; align-items: center; gap: 12px; }.product-cell p { margin: 4px 0 0; color: var(--mall-muted); font-size: 12px; }.product-cell.compact { gap: 8px; }
 .product-image { width: 58px; height: 58px; border-radius: 9px; background: var(--sand); }.table-image { width: 44px; height: 44px; border-radius: 7px; background: var(--sand); }
-.muted { color: #989188; font-size: 12px; }.form-tip { margin-left: 12px; color: #989188; font-size: 12px; }.dialog-form { margin-top: 18px; }
+.muted { color: var(--mall-muted); font-size: 12px; }.form-tip { margin-left: 12px; color: var(--mall-muted); font-size: 12px; }.dialog-form { margin-top: 18px; }
 .timeline-title { margin: 26px 0 18px; font-size: 16px; }.image-uploader { display: flex; align-items: center; gap: 12px; }.upload-preview { width: 72px; height: 72px; border-radius: 9px; background: var(--sand); }
 :deep(.el-pagination) { justify-content: flex-end; margin-top: 20px; }
 </style>

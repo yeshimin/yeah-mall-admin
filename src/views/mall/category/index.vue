@@ -1,5 +1,5 @@
 <template>
-  <div class="category-page">
+  <div class="category-page mall-page">
     <div v-show="showSearch" class="search-bar">
       <el-form class="search-form" :inline="true" :model="search" @submit.prevent="handleSearch">
         <el-form-item label="分类名称">

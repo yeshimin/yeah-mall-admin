@@ -1,6 +1,6 @@
 <template>
-  <div class="seckill-session-manage">
-    <el-form ref="searchFormRef" :model="queryParams" label-position="left" label-width="80px" inline class="mall-action-row">
+  <div class="seckill-session-manage mall-page">
+    <el-form ref="searchFormRef" :model="queryParams" label-position="left" label-width="80px" inline class="mall-filter-panel mall-query-form">
       <el-form-item label="场次名称">
         <el-input
           v-model="queryParams.name"
@@ -36,6 +36,7 @@
       </el-form-item>
     </el-form>
 
+    <section class="mall-table-panel">
     <el-table v-loading="loading" :data="sessionList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="name" label="场次名称" width="200" />
@@ -76,6 +77,7 @@
         @current-change="handleCurrentChange"
       />
     </div>
+    </section>
 
     <!-- 新增/编辑对话框 -->
     <el-dialog :title="dialogTitle" v-model="dialogVisible" width="600px">

@@ -1,7 +1,7 @@
 <template>
-  <div class="seckill-manage">
+  <div class="seckill-manage mall-page">
     <!-- 查询条件 -->
-    <el-form :inline="true" :model="queryParams" class="mall-action-row">
+    <el-form :inline="true" :model="queryParams" class="mall-filter-panel mall-query-form">
         <el-form-item label="申请商家" prop="merchantName">
           <el-input v-model="queryParams.merchantName" placeholder="请输入商家名称" clearable style="width: 200px" />
         </el-form-item>
@@ -35,6 +35,7 @@
       </el-form>
 
       <!-- 审核列表 -->
+      <section class="mall-table-panel">
       <el-table v-loading="loading" :data="auditList" style="width: 100%">
         <el-table-column label="序号" type="index" width="80" />
         <el-table-column prop="mchName" label="商家名称" width="150" />
@@ -82,6 +83,7 @@
           @current-change="handleCurrentChange"
         />
       </div>
+      </section>
 
     <!-- 审核对话框 -->
     <el-dialog :title="dialogTitle" v-model="dialogVisible" width="800px">

@@ -1,14 +1,8 @@
 <template>
 
-  <div class="shipping-settings">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <h2>发货信息设置</h2>
-    </div>
-
-
+  <div class="shipping-settings mall-page">
     <!-- 基本信息卡片 -->
-    <el-card class="info-card">
+    <el-card class="info-card" shadow="never">
       <template #header>
         <div class="card-header">
           <h3>基本发货信息</h3>
@@ -92,7 +86,7 @@
     </el-card>
 
     <!-- 物流商设置卡片 -->
-    <el-card class="info-card">
+    <el-card class="info-card" shadow="never">
       <template #header>
         <div class="card-header">
           <h3>物流商设置</h3>

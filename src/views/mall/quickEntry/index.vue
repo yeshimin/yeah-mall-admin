@@ -1,5 +1,5 @@
 <template>
-  <div class="quick-entry-page">
+  <div class="quick-entry-page mall-page">
     <div v-show="showSearch" class="search-bar">
       <el-form class="search-form" :inline="true" :model="search" @submit.prevent="handleSearch">
         <el-form-item label="入口名称">
