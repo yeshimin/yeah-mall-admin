@@ -35,7 +35,8 @@
 /* Transitional coverage for mall pages that have not adopted the shared shell yet. */
 .mall-page > .search-bar,
 .mall-page > .query-form,
-.mall-page > .filter-form {
+.mall-page > .filter-form,
+.mall-page > .el-form {
   box-sizing: border-box;
   margin-bottom: 14px;
   padding: 16px;
@@ -46,8 +47,33 @@
 
 .mall-page > .search-bar .el-form-item,
 .mall-page > .query-form.el-form--inline .el-form-item,
-.mall-page > .filter-form.el-form--inline .el-form-item {
+.mall-page > .filter-form.el-form--inline .el-form-item,
+.mall-page > .el-form.el-form--inline .el-form-item {
   margin-bottom: 0;
+}
+
+.mall-page > .el-form + .mall-action-row,
+.mall-page > .search-bar + .action-bar,
+.mall-page > .query-form + .action-bar,
+.mall-page > .filter-form + .action-bar {
+  box-sizing: border-box;
+  min-height: 54px;
+  justify-content: flex-end;
+  margin-top: -14px;
+  padding: 0 16px 16px;
+  border: 1px solid var(--mall-line);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  background: #fafcfa;
+}
+
+.mall-page > .el-form:has(+ .mall-action-row),
+.mall-page > .search-bar:has(+ .action-bar),
+.mall-page > .query-form:has(+ .action-bar),
+.mall-page > .filter-form:has(+ .action-bar) {
+  margin-bottom: 14px;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
 }
 
 .mall-page > .action-bar,
@@ -214,6 +240,16 @@
 
 .mall-page .el-dialog {
   border-radius: 10px;
+}
+
+/* The prototype keeps list filters always visible and omits duplicate refresh controls. */
+.mall-page .mall-list-tools {
+  display: none !important;
+}
+
+.mall-business-actions:has(> .mall-list-tools:only-child),
+.mall-action-row:has(> .mall-list-tools:only-child) {
+  display: none !important;
 }
 
 @media (max-width: 1180px) {

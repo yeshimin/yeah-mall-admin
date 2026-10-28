@@ -1,9 +1,13 @@
 <template>
   <aside class="sidebar-container" :class="{ 'is-collapsed': isCollapse }">
     <div class="sidebar-logo" role="button" tabindex="0" @click="openHome" @keydown.enter="openHome">
-      <h1>管理后台</h1>
+      <span class="brand-stamp">Y</span>
+      <div class="brand-copy">
+        <strong>Yeah Mall</strong>
+        <small>{{ brandSubtitle }}</small>
+      </div>
     </div>
-    <el-scrollbar height="100%">
+    <el-scrollbar class="sidebar-scroll">
       <el-menu
         :default-active="activeMenu"
         class="sidebar-menu"
@@ -43,6 +47,7 @@ const activeMenu = computed(() => {
 
 const isCollapse = computed(() => appStore.sidebarCollapsed)
 const menuList = computed(() => authStore.sidebarMenus)
+const brandSubtitle = computed(() => authStore.subject === 'merchant' ? '商家工作台' : '平台运营端')
 
 function findMenuNode(nodes: ResourceTreeNode[], index: string): ResourceTreeNode | null {
   for (const node of nodes) {
@@ -110,6 +115,8 @@ async function openHome() {
 
 <style scoped>
 .sidebar-container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100vh;
   background-color: #001529;
@@ -149,11 +156,13 @@ async function openHome() {
 }
 
 .sidebar-logo {
-  height: 60px;
+  height: 72px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid #1f2d3d;
+  gap: 12px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
 }
 
@@ -162,11 +171,57 @@ async function openHome() {
   outline-offset: -2px;
 }
 
-.sidebar-logo h1 {
+.brand-stamp {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: #17372b;
+  background: #e5b873;
+  font-weight: 800;
+}
+
+.brand-stamp {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
   font-size: 18px;
-  margin: 0;
+}
+
+.brand-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.brand-copy strong {
+  overflow: hidden;
   color: #fff;
   white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.brand-copy strong {
+  font-size: 17px;
+  letter-spacing: 0.01em;
+}
+
+.brand-copy small {
+  overflow: hidden;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 11px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sidebar-scroll {
+  min-height: 0;
+  flex: 1;
+}
+
+.brand-copy {
   opacity: 1;
   transform: translateX(0);
   transition:
@@ -174,14 +229,21 @@ async function openHome() {
     transform 0.3s ease;
 }
 
-.sidebar-container.is-collapsed .sidebar-logo h1 {
+.sidebar-container.is-collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar-container.is-collapsed .brand-copy {
+  width: 0;
+  flex: 0 0 0;
+  overflow: hidden;
   opacity: 0;
   transform: translateX(-8px);
 }
 
 .sidebar-menu {
   width: 100%;
-  height: calc(100vh - 60px);
   transition: width 0.3s ease;
 }
 </style>

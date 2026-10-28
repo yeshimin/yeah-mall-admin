@@ -26,6 +26,13 @@
         <el-icon><Shop /></el-icon>
         <span>{{ currentShop.name }}</span>
       </div>
+      <el-tooltip content="站内信功能建设中" placement="bottom">
+        <el-badge is-dot class="notice-badge">
+          <el-button link class="header-icon-button" aria-label="站内信" @click="handleNotice">
+            <el-icon><Bell /></el-icon>
+          </el-button>
+        </el-badge>
+      </el-tooltip>
       <el-dropdown trigger="click" @command="handleCommand">
         <div class="user-info">
           <el-avatar :size="32" :src="avatarUrl || defaultAvatar" @error="handleAvatarError"></el-avatar>
@@ -51,7 +58,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { ArrowDown, Expand, Fold, Shop, User, SwitchButton } from '@element-plus/icons-vue'
+import { ArrowDown, Bell, Expand, Fold, Shop, User, SwitchButton } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
@@ -168,6 +175,10 @@ const toggleSidebar = () => {
   appStore.toggleSidebar()
 }
 
+const handleNotice = () => {
+  ElMessage.info('站内信功能建设中')
+}
+
 // 处理下拉菜单命令
 const handleCommand = async (command: string) => {
   switch (command) {
@@ -228,6 +239,24 @@ const handleCommand = async (command: string) => {
 .header-right {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.notice-badge {
+  display: inline-flex;
+}
+
+.header-icon-button {
+  width: 36px;
+  height: 36px;
+  color: #52635a;
+  border-radius: 8px;
+  background: #f4f7f5;
+}
+
+.header-icon-button:hover {
+  color: #24634f;
+  background: #e8f2ed;
 }
 
 .current-shop {
