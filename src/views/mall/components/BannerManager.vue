@@ -23,12 +23,15 @@
             <StorageImage :src="row.imageUrl" :width="180" :height="72" />
           </template>
         </el-table-column>
+        <el-table-column v-if="scope === 'platform'" prop="target" label="跳转目标" min-width="240">
+          <template #default="{ row }">{{ row.target || '不跳转' }}</template>
+        </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="170" />
         <el-table-column prop="updateTime" label="更新时间" width="170" />
         <el-table-column label="操作" width="140" fixed="right">
           <template #default="{ row }">
             <div class="table-row-actions">
-              <el-button link type="primary" @click="openForm(row)">更换图片</el-button>
+              <el-button link type="primary" @click="openForm(row)">{{ scope === 'platform' ? '编辑' : '更换图片' }}</el-button>
               <el-button link type="danger" @click="removeBanners(row)">删除</el-button>
             </div>
           </template>
@@ -45,7 +48,7 @@
 
     <el-dialog
       v-model="dialog.visible"
-      :title="dialog.id ? '更换 Banner 图片' : '新增 Banner'"
+      :title="dialog.id ? '编辑 Banner' : '新增 Banner'"
       width="560px"
       :close-on-click-modal="!dialog.submitting"
       :close-on-press-escape="!dialog.submitting"
@@ -56,6 +59,12 @@
         <span>当前图片</span>
         <StorageImage :src="dialog.currentImage" :width="240" :height="96" />
       </div>
+      <el-form v-if="scope === 'platform'" label-position="top">
+        <el-form-item label="跳转目标">
+          <el-input v-model="dialog.target" maxlength="500" clearable placeholder="选填，例如 /pages/product/detail?id=1" />
+          <div class="field-tip">仅支持 /pages/ 开头的 App 站内页面路径；留空时点击 Banner 不跳转。</div>
+        </el-form-item>
+      </el-form>
       <el-upload
         v-model:file-list="dialog.files"
         action="#"
@@ -64,7 +73,7 @@
         :limit="1"
         :on-change="handleFileChange"
       >
-        <el-button type="primary">选择新图片</el-button>
+        <el-button type="primary">{{ dialog.id ? '选择新图片（可选）' : '选择图片' }}</el-button>
         <template #tip>
           <div class="upload-tip">支持 JPG、PNG、GIF、WebP、SVG 等图片，大小不超过 5MB。</div>
         </template>
@@ -109,6 +118,7 @@ const dialog = reactive({
   submitting: false,
   id: '',
   currentImage: '',
+  target: '',
   files: [] as UploadUserFile[],
 })
 
@@ -153,12 +163,14 @@ function openForm(row?: BannerRecord) {
   resetDialog()
   dialog.id = row?.id || ''
   dialog.currentImage = row?.imageUrl || ''
+  dialog.target = row?.target || ''
   dialog.visible = true
 }
 
 function resetDialog() {
   dialog.id = ''
   dialog.currentImage = ''
+  dialog.target = ''
   dialog.files = []
 }
 
@@ -180,7 +192,7 @@ function handleFileChange(file: UploadFile, files: UploadFiles) {
 
 async function saveBanner() {
   const file = dialog.files[0]?.raw
-  if (!file) {
+  if (!file && (!dialog.id || props.scope === 'merchant')) {
     ElMessage.warning('请选择新图片')
     return
   }
@@ -193,12 +205,12 @@ async function saveBanner() {
   dialog.submitting = true
   try {
     if (props.scope === 'merchant') {
-      if (dialog.id) await updateMerchantBanner(dialog.id, currentShopId, file)
-      else await createMerchantBanner(currentShopId, file)
+      if (dialog.id) await updateMerchantBanner(dialog.id, currentShopId, file!)
+      else await createMerchantBanner(currentShopId, file!)
     } else if (dialog.id) {
-      await updatePlatformBanner(dialog.id, file)
+      await updatePlatformBanner(dialog.id, file, dialog.target.trim())
     } else {
-      await createPlatformBanner(file)
+      await createPlatformBanner(file!, dialog.target.trim())
     }
     ElMessage.success('保存成功')
     dialog.visible = false
@@ -243,4 +255,5 @@ onMounted(() => void loadBanners())
 .table-container { flex: 1; min-height: 0; margin-top: 20px; }
 .current-image { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; color: #606266; }
 .upload-tip { margin-top: 8px; color: #909399; font-size: 12px; }
+.field-tip { margin-top: 6px; color: #909399; font-size: 12px; line-height: 1.5; }
 </style>
