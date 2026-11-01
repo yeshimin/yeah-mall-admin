@@ -108,6 +108,11 @@
             <span>¥{{ formatAmount(scope.row.finalAmount) }}</span>
           </template>
         </el-table-column>
+        <el-table-column prop="payAmount" label="实际支付" min-width="110" align="right">
+          <template #default="scope">
+            <span>¥{{ formatAmount(scope.row.payAmount) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="orderType" label="订单类型" min-width="120">
           <template #default="scope">
             <el-tag :type="getOrderTypeTagType(scope.row.orderType)">{{ getOrderTypeText(scope.row.orderType) }}</el-tag>
@@ -186,6 +191,10 @@
                 <span class="value amount">¥{{ formatAmount(currentOrder.finalAmount) }}</span>
               </div>
               <div class="detail-item">
+                <span class="label">实际支付：</span>
+                <span class="value amount">¥{{ formatAmount(currentOrder.payAmount) }}</span>
+              </div>
+              <div class="detail-item">
                 <span class="label">订单状态：</span>
                 <el-tag :type="getStatusType(currentOrder.status)">{{ getStatusText(currentOrder.status) }}</el-tag>
               </div>
@@ -198,6 +207,12 @@
               <div class="detail-item">
                 <span class="label">售后状态：</span>
                 <el-tag :type="getAfterSaleStatusType(currentOrder.afterSaleStatus)">{{ getAfterSaleStatusText(currentOrder.afterSaleStatus) }}</el-tag>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-item full-width">
+                <span class="label">买家备注：</span>
+                <span class="value">{{ currentOrder.buyerRemark || '-' }}</span>
               </div>
             </div>
             <div v-if="currentOrder.groupBuyInfo" class="detail-row">
@@ -217,6 +232,20 @@
                   {{ currentOrder.groupBuyInfo.memberCount || 0 }}/{{ currentOrder.groupBuyInfo.minPeople || '-' }}
                   {{ currentOrder.groupBuyInfo.leader ? '（团长）' : '' }}
                 </span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="label">收款模式：</span>
+                <span class="value">{{ getCollectionModeText(currentOrder.collectionMode) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">结算模式：</span>
+                <span class="value">{{ getSettlementModeText(currentOrder.settlementMode) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">支付通道：</span>
+                <span class="value">{{ currentOrder.paymentChannelCode || '-' }}</span>
               </div>
             </div>
             <div class="detail-row">
@@ -268,6 +297,26 @@
               <div class="detail-item">
                 <span class="label">退款申请原因：</span>
                 <span class="value">{{ currentOrder.refundApplyReason || '-' }}</span>
+              </div>
+            </div>
+            <div v-if="currentOrder.refundApplyDescription" class="detail-row">
+              <div class="detail-item full-width">
+                <span class="label">退款补充说明：</span>
+                <span class="value">{{ currentOrder.refundApplyDescription }}</span>
+              </div>
+            </div>
+            <div v-if="currentOrder.refundImages?.length" class="detail-row">
+              <div class="detail-item full-width refund-evidence-item">
+                <span class="label">退款凭证：</span>
+                <div class="refund-evidence-list">
+                  <StorageImage
+                    v-for="image in currentOrder.refundImages"
+                    :key="image"
+                    :src="image"
+                    :width="72"
+                    :height="72"
+                  />
+                </div>
               </div>
             </div>
             <div class="detail-row">
@@ -405,6 +454,10 @@
               <span>优惠后应付：</span>
               <span class="amount">¥{{ formatAmount(currentOrder.finalAmount) }}</span>
             </div>
+            <div class="summary-item">
+              <span>实际支付：</span>
+              <span class="amount">¥{{ formatAmount(currentOrder.payAmount) }}</span>
+            </div>
           </div>
         </el-collapse-item>
 
@@ -418,7 +471,7 @@
               <div class="detail-item">
                 <span class="label">快递公司：</span>
                 <span class="value">
-                  {{ (deliveryList.find(item => item.code === currentOrder.deliveryProviderCode)?.name || currentOrder.deliveryProviderCode || '-') }}
+                  {{ currentOrder.deliveryProviderName || deliveryList.find(item => item.code === currentOrder.deliveryProviderCode)?.name || currentOrder.deliveryProviderCode || '-' }}
                 </span>
               </div>
             </div>
@@ -538,7 +591,28 @@
     </el-dialog>
 
     <el-dialog v-model="processRefundDialogVisible" title="处理退款" width="600px">
-      <el-form ref="processRefundFormRef" :model="processRefundForm" label-width="100px">
+      <div v-loading="processRefundDetailLoading" class="refund-process-context">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="退款原因">
+            {{ processRefundContext.order?.refundApplyReason || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="补充说明">
+            {{ processRefundContext.order?.refundApplyDescription || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item v-if="processRefundContext.refundImages?.length" label="退款凭证">
+            <div class="refund-evidence-list">
+              <StorageImage
+                v-for="image in processRefundContext.refundImages"
+                :key="image"
+                :src="image"
+                :width="72"
+                :height="72"
+              />
+            </div>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+      <el-form ref="processRefundFormRef" :model="processRefundForm" label-width="100px" class="refund-process-form">
         <el-form-item label="订单编号">
           <el-input v-model="processRefundForm.orderNo" disabled></el-input>
         </el-form-item>
@@ -773,6 +847,8 @@ const processRefundForm = reactive({
   remark: ''
 });
 const processRefundLoading = ref(false);
+const processRefundDetailLoading = ref(false);
+const processRefundContext = ref({ order: null, refundImages: [] });
 
 const refundRecordsDialogVisible = ref(false);
 const refundRecordsLoading = ref(false);
@@ -968,6 +1044,7 @@ const handleOrderDetail = async (row) => {
 
     const orderData = response.data.order;
     orderData.groupBuyInfo = response.data.groupBuyInfo || null;
+    orderData.refundImages = response.data.refundImages || [];
     const itemsData = response.data.shopProducts || [];
     const tracking = response.data.deliveryTracking;
 
@@ -1086,6 +1163,18 @@ const getOrderTypeTagType = (orderType) => {
   };
   return typeMap[orderType] || 'info';
 };
+
+const getCollectionModeText = (mode) => {
+  return ({
+    '1': '平台普通商户直收',
+    '2': '服务商代子商户收款',
+    '3': '独立店铺普通商户直收'
+  })[mode] || '-'
+}
+
+const getSettlementModeText = (mode) => {
+  return ({ '1': '平台线下结算', '2': '微信分账', '3': '无需二次结算' })[mode] || '-'
+}
 
 const getGroupBuyStatusText = (status) => {
   const statusMap = {
@@ -1276,14 +1365,32 @@ const handleConfirmRefund = (row) => {
   confirmRefundDialogVisible.value = true;
 };
 
-const handleProcessRefund = (row) => {
+const handleProcessRefund = async (row) => {
   Object.assign(processRefundForm, {
     orderId: row.id,
     orderNo: row.orderNo,
     action: 'confirm',
     remark: ''
   });
+  processRefundContext.value = { order: row, refundImages: [] };
   processRefundDialogVisible.value = true;
+  processRefundDetailLoading.value = true;
+  try {
+    const response = await getOrderDetail(row.id);
+    if (response.code === 0 && response.data?.order) {
+      processRefundContext.value = {
+        order: response.data.order,
+        refundImages: response.data.refundImages || []
+      };
+    } else {
+      ElMessage.error(response.message || '退款申请信息加载失败');
+    }
+  } catch (error) {
+    console.error('退款申请信息加载失败:', error);
+    ElMessage.error('退款申请信息加载失败');
+  } finally {
+    processRefundDetailLoading.value = false;
+  }
 };
 
 const handleViewRefundRecords = async (row) => {
@@ -1594,6 +1701,20 @@ onMounted(() => {
 .refund-detail {
   max-height: 500px;
   overflow-y: auto;
+}
+
+.refund-evidence-item {
+  align-items: flex-start;
+}
+
+.refund-evidence-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.refund-process-form {
+  margin-top: 18px;
 }
 
 .time-range-separator {

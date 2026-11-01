@@ -80,7 +80,7 @@
       <el-table-column prop="endTime" label="结束时间" width="180" />
       <el-table-column prop="totalCount" label="总数量" width="100" />
       <el-table-column prop="receivedCount" label="已领取" width="100" />
-      <el-table-column prop="usedCount" label="已使用" width="100" />
+      <el-table-column prop="usedCount" label="已占用/使用" width="120" />
       <el-table-column prop="status" label="状态" width="100">
         <template #default="scope">
           <el-tag :type="scope.row.status === '1' ? 'success' : 'danger'">

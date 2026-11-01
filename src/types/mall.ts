@@ -25,6 +25,10 @@ export interface ShopRecord extends MallEntity {
   mchName?: string
   shopNo?: string
   shopName: string
+  settlementCommissionRate?: number
+  settlementDelayDays?: number
+  isEnabled?: boolean
+  isOpen?: boolean
   status?: string
 }
 
@@ -33,4 +37,7 @@ export interface ShopForm {
   mchId?: MallId
   shopNo: string
   shopName: string
+  settlementCommissionRate?: number
+  settlementDelayDays?: number
+  isEnabled: boolean
 }

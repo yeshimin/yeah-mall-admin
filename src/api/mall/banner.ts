@@ -13,12 +13,12 @@ export function queryMerchantBanners(params: Record<string, unknown>) {
   return request<PageResponse<BannerRecord>>({ url: '/mch/banner/crud/query', method: 'get', params })
 }
 
-export function createMerchantBanner(shopId: string, file: File) {
-  return request<void>({ url: '/mch/banner/create', method: 'post', data: bannerFormData(file, { shopId }) })
+export function createMerchantBanner(shopId: string, file: File, target = '') {
+  return request<void>({ url: '/mch/banner/create', method: 'post', data: bannerFormData(file, { shopId, target }) })
 }
 
-export function updateMerchantBanner(id: string, shopId: string, file: File) {
-  return request<void>({ url: '/mch/banner/update', method: 'post', data: bannerFormData(file, { id, shopId }) })
+export function updateMerchantBanner(id: string, shopId: string, file: File | undefined, target = '') {
+  return request<void>({ url: '/mch/banner/update', method: 'post', data: bannerFormData(file, { id, shopId, target }) })
 }
 
 export function deleteMerchantBanners(ids: string[]) {

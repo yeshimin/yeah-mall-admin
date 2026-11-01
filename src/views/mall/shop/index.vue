@@ -28,6 +28,9 @@
       <el-table-column prop="shopNo" label="店铺编号" min-width="140" />
       <el-table-column prop="shopName" label="店铺名称" min-width="180" />
       <el-table-column prop="mchName" label="商家" min-width="160" />
+      <el-table-column label="平台状态" width="100">
+        <template #default="{ row }"><el-tag :type="row.isEnabled ? 'success' : 'info'">{{ row.isEnabled ? '已启用' : '已停用' }}</el-tag></template>
+      </el-table-column>
       <el-table-column prop="createTime" label="创建时间" width="176" />
       <el-table-column label="操作" width="160" fixed="right">
         <template #default="{ row }">
@@ -65,6 +68,17 @@
         <el-form-item label="店铺编号" prop="shopNo">
           <el-input v-model="form.shopNo" :disabled="Boolean(editingId)" placeholder="留空由系统生成" />
         </el-form-item>
+        <el-form-item label="平台佣金">
+          <el-input-number v-model="form.settlementCommissionRate" :min="0" :max="100" :precision="2" :step="0.1" />
+          <span style="margin-left: 8px">%</span>
+        </el-form-item>
+        <el-form-item label="结算周期">
+          <el-input-number v-model="form.settlementDelayDays" :min="0" :max="365" :step="1" />
+          <span style="margin-left: 8px">天（订单完成后）</span>
+        </el-form-item>
+        <el-form-item label="平台状态">
+          <el-switch v-model="form.isEnabled" active-text="启用" inactive-text="停用" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -101,7 +115,14 @@ const selectedIds = ref<string[]>([])
 
 const searchForm = reactive<{ mchId?: string; shopName: string }>({ shopName: '' })
 const pagination = reactive({ current: 1, size: 10, total: 0 })
-const form = reactive<ShopForm>({ mchId: undefined, shopNo: '', shopName: '' })
+const form = reactive<ShopForm>({
+  mchId: undefined,
+  shopNo: '',
+  shopName: '',
+  settlementCommissionRate: 0,
+  settlementDelayDays: 7,
+  isEnabled: true,
+})
 
 const formRules: FormRules<ShopForm> = {
   mchId: [{ required: true, message: '请选择所属商家', trigger: 'change' }],
@@ -110,7 +131,14 @@ const formRules: FormRules<ShopForm> = {
 
 function resetForm() {
   editingId.value = undefined
-  Object.assign(form, { mchId: undefined, shopNo: '', shopName: '' })
+  Object.assign(form, {
+    mchId: undefined,
+    shopNo: '',
+    shopName: '',
+    settlementCommissionRate: 0,
+    settlementDelayDays: 7,
+    isEnabled: true,
+  })
   formRef.value?.clearValidate()
 }
 
@@ -173,6 +201,9 @@ async function openEditDialog(row: ShopRecord) {
       mchId: response.data.mchId,
       shopNo: response.data.shopNo || '',
       shopName: response.data.shopName,
+      settlementCommissionRate: Number(response.data.settlementCommissionRate || 0),
+      settlementDelayDays: Number(response.data.settlementDelayDays ?? 7),
+      isEnabled: response.data.isEnabled !== false,
     })
     dialogVisible.value = true
   } catch (error) {

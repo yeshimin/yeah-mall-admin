@@ -23,7 +23,7 @@
             <StorageImage :src="row.imageUrl" :width="180" :height="72" />
           </template>
         </el-table-column>
-        <el-table-column v-if="scope === 'platform'" prop="target" label="跳转目标" min-width="240">
+        <el-table-column prop="target" label="跳转目标" min-width="240">
           <template #default="{ row }">{{ row.target || '不跳转' }}</template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="170" />
@@ -31,7 +31,7 @@
         <el-table-column label="操作" width="140" fixed="right">
           <template #default="{ row }">
             <div class="table-row-actions">
-              <el-button link type="primary" @click="openForm(row)">{{ scope === 'platform' ? '编辑' : '更换图片' }}</el-button>
+              <el-button link type="primary" @click="openForm(row)">编辑</el-button>
               <el-button link type="danger" @click="removeBanners(row)">删除</el-button>
             </div>
           </template>
@@ -59,7 +59,7 @@
         <span>当前图片</span>
         <StorageImage :src="dialog.currentImage" :width="240" :height="96" />
       </div>
-      <el-form v-if="scope === 'platform'" label-position="top">
+      <el-form label-position="top">
         <el-form-item label="跳转目标">
           <el-input v-model="dialog.target" maxlength="500" clearable placeholder="选填，例如 /pages/product/detail?id=1" />
           <div class="field-tip">仅支持 /pages/ 开头的 App 站内页面路径；留空时点击 Banner 不跳转。</div>
@@ -192,7 +192,7 @@ function handleFileChange(file: UploadFile, files: UploadFiles) {
 
 async function saveBanner() {
   const file = dialog.files[0]?.raw
-  if (!file && (!dialog.id || props.scope === 'merchant')) {
+  if (!file && !dialog.id) {
     ElMessage.warning('请选择新图片')
     return
   }
@@ -205,8 +205,8 @@ async function saveBanner() {
   dialog.submitting = true
   try {
     if (props.scope === 'merchant') {
-      if (dialog.id) await updateMerchantBanner(dialog.id, currentShopId, file!)
-      else await createMerchantBanner(currentShopId, file!)
+      if (dialog.id) await updateMerchantBanner(dialog.id, currentShopId, file, dialog.target.trim())
+      else await createMerchantBanner(currentShopId, file!, dialog.target.trim())
     } else if (dialog.id) {
       await updatePlatformBanner(dialog.id, file, dialog.target.trim())
     } else {

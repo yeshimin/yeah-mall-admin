@@ -16,6 +16,32 @@
           <el-input v-model="settingsForm.shopName" placeholder="请输入店铺名称" style="width: 400px;"></el-input>
         </el-form-item>
 
+        <el-form-item label="店铺简介" prop="shopIntro">
+          <el-input
+            v-model="settingsForm.shopIntro"
+            type="textarea"
+            :rows="4"
+            maxlength="500"
+            show-word-limit
+            placeholder="简要介绍店铺经营内容与特色"
+            style="width: 520px;"
+          />
+        </el-form-item>
+
+        <el-form-item label="营业状态">
+          <el-switch v-model="settingsForm.isOpen" active-text="营业中" inactive-text="已停业" />
+          <div class="form-tip">停业后商品仍可在平台浏览，但用户不能提交新订单。</div>
+        </el-form-item>
+
+        <el-form-item label="平台佣金">
+          <el-input :model-value="`${settingsForm.settlementCommissionRate}%`" style="width: 400px;" disabled />
+        </el-form-item>
+
+        <el-form-item label="结算周期">
+          <el-input :model-value="`订单完成后 ${settingsForm.settlementDelayDays} 天`" style="width: 400px;" disabled />
+          <div class="form-tip">结算规则由平台设置，如有疑问请联系平台管理员。</div>
+        </el-form-item>
+
         <el-form-item label="店铺Logo" prop="shopLogo">
           <el-upload
             class="logo-upload"
@@ -74,7 +100,11 @@ const merchantStorageUploadUrl = resolveApiUrl('/mch/storage/upload')
 const settingsForm = reactive({
   shopNo: '',
   shopName: '',
-  shopLogo: ''
+  shopLogo: '',
+  shopIntro: '',
+  isOpen: true,
+  settlementCommissionRate: 0,
+  settlementDelayDays: 7
 });
 
 const settingsRules = {
@@ -125,7 +155,9 @@ const handleSaveSettings = async () => {
     const response = await updateMchShop({
       id: shopId,
       shopName: settingsForm.shopName,
-      shopLogo: settingsForm.shopLogo
+      shopLogo: settingsForm.shopLogo,
+      shopIntro: settingsForm.shopIntro,
+      isOpen: settingsForm.isOpen
     });
 
     if (response.code === 0) {
@@ -165,6 +197,10 @@ const getShopInfo = async () => {
       settingsForm.shopNo = shopInfo.shopNo || '';
       settingsForm.shopName = shopInfo.shopName || '';
       settingsForm.shopLogo = shopInfo.shopLogo || '';
+      settingsForm.shopIntro = shopInfo.shopIntro || '';
+      settingsForm.isOpen = shopInfo.isOpen !== false;
+      settingsForm.settlementCommissionRate = Number(shopInfo.settlementCommissionRate || 0);
+      settingsForm.settlementDelayDays = Number(shopInfo.settlementDelayDays ?? 7);
     } else {
       ElMessage.error(response.message || '获取店铺信息失败');
     }

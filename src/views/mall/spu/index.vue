@@ -11,6 +11,12 @@
           :props="{ label: 'name', value: 'id', children: 'children' }" placeholder="请选择商品分类" check-strictly
           :render-after-expand="false" style="width: 200px" />
       </el-form-item>
+      <el-form-item label="商品状态" prop="isEnabled">
+        <el-select v-model="queryParams.isEnabled" clearable placeholder="全部状态" style="width: 140px">
+          <el-option label="已上架" :value="true" />
+          <el-option label="已下架" :value="false" />
+        </el-select>
+      </el-form-item>
       <el-form-item class="mall-query-actions">
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
         <el-button type="primary" icon="Search" @click="handleQuery">查询</el-button>
@@ -35,17 +41,28 @@
         </template>
       </el-table-column>
       <el-table-column prop="name" label="商品名称" align="center" />
+      <el-table-column prop="subtitle" label="商品副标题" min-width="180" show-overflow-tooltip />
       <el-table-column prop="categoryName" label="分类名称" align="center" />
+      <el-table-column label="状态" width="90" align="center">
+        <template #default="scope">
+          <el-tag :type="scope.row.isEnabled ? 'success' : 'info'">
+            {{ scope.row.isEnabled ? '已上架' : '已下架' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="createBy" label="创建人" align="center" />
       <el-table-column prop="createTime" label="创建时间" align="center" />
       <el-table-column prop="updateBy" label="更新人" align="center" />
       <el-table-column prop="updateTime" label="更新时间" align="center" />
-      <el-table-column label="操作" width="320" align="center" class-name="mall-actions-column">
+      <el-table-column label="操作" width="390" align="center" class-name="mall-actions-column">
   <template #default="scope">
     <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
     <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
     <el-button link type="primary" icon="Picture" @click="handleImageManage(scope.row)">图片管理</el-button>
     <el-button link type="primary" icon="PriceTag" @click="handleSkuManage(scope.row.id)">SKU管理</el-button>
+    <el-button link :type="scope.row.isEnabled ? 'warning' : 'success'" @click="handleStatusChange(scope.row)">
+      {{ scope.row.isEnabled ? '下架' : '上架' }}
+    </el-button>
   </template>
 </el-table-column>
     </el-table>
@@ -62,12 +79,15 @@
       </el-steps>
       <el-form :model="createForm" :rules="createFormRules" label-width="90px" class="product-form" v-show="createStep === 0">
         <el-form-item label="商品分类" prop="categoryId">
-          <el-tree-select v-model="createForm.categoryId" :data="categoryTree"
+          <el-tree-select v-model="createForm.categoryId" :data="productCategoryTree"
             :props="{ label: 'name', value: 'id', children: 'children' }" placeholder="请选择商品分类" check-strictly
             :render-after-expand="false" style="width: 100%" />
         </el-form-item>
         <el-form-item label="商品名称" prop="name">
           <el-input v-model="createForm.name" placeholder="请输入商品名称" />
+        </el-form-item>
+        <el-form-item label="商品副标题" prop="subtitle">
+          <el-input v-model="createForm.subtitle" maxlength="128" show-word-limit placeholder="选填，用于商品列表补充卖点" />
         </el-form-item>
       </el-form>
       <el-form v-if="createStep === 1" :model="createForm" :rules="createFormRules" class="product-form product-editor-form">
@@ -120,8 +140,11 @@
         <el-form-item label="商品名称" prop="name">
           <el-input v-model="editForm.name" placeholder="请输入商品名称" />
         </el-form-item>
+        <el-form-item label="商品副标题" prop="subtitle">
+          <el-input v-model="editForm.subtitle" maxlength="128" show-word-limit placeholder="选填，用于商品列表补充卖点" />
+        </el-form-item>
         <el-form-item label="商品分类" prop="categoryId">
-          <el-tree-select v-model="editForm.categoryId" :data="categoryTree"
+          <el-tree-select v-model="editForm.categoryId" :data="productCategoryTree"
             :props="{ label: 'name', value: 'id', children: 'children' }" placeholder="请选择商品分类" check-strictly
             :render-after-expand="false" style="width: 100%" />
         </el-form-item>
@@ -223,7 +246,7 @@ import { ref, computed, onMounted } from 'vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { getCurrentShop } from '@/utils/shop'
 import { resolveApiUrl } from '@/utils/download'
-import { listSpu, createSpu, updateSpu, deleteSpu, getSpuDetail, setMainImage } from '@/api/mall/spu'
+import { listSpu, createSpu, updateSpu, updateSpuStatus, deleteSpu, getSpuDetail, setMainImage } from '@/api/mall/spu'
 import { setCarouselImages, listSpuImages, deleteSpuImage } from '@/api/mall/spuImage'
 import { getCategoryTree } from '@/api/mall/category'
 import { listSpecDef, listSpecOptDef } from '@/api/mall/specDef'
@@ -249,13 +272,14 @@ const router = useRouter()
 const queryParams = ref({
   name: '',
   categoryId: '',
+  isEnabled: '',
   current: 1,
   size: 10
 })
 
 const createDialogVisible = ref(false)
 const createStep = ref(0)
-const createForm = ref({ name: '', categoryId: '', specs: [], detailDesc: '' })
+const createForm = ref({ name: '', subtitle: '', categoryId: '', specs: [], detailDesc: '' })
 const createFormRules = {
   name: [ { required: true, message: '请输入商品名称', trigger: 'blur' } ],
   categoryId: [ { required: true, message: '请输入所属分类', trigger: 'blur' } ]
@@ -263,7 +287,7 @@ const createFormRules = {
 
 const editDialogVisible = ref(false)
 const editStep = ref(0)
-const editForm = ref({ id: '', name: '', categoryId: '', specs: [], detailDesc: '', detailImages: null })
+const editForm = ref({ id: '', name: '', subtitle: '', categoryId: '', specs: [], detailDesc: '', detailImages: null })
 const editFormRules = {
   name: [ { required: true, message: '请输入商品名称', trigger: 'blur' } ],
   categoryId: [ { required: true, message: '请选择所属分类', trigger: 'blur' } ]
@@ -290,6 +314,15 @@ const activeSpecId = ref(null)
 const selectedSpecs = ref([]) // [{specId, optIds: []}]
 
 const filteredTableData = computed(() => tableData.value)
+const productCategoryTree = computed(() => markProductCategoryOptions(categoryTree.value))
+
+function markProductCategoryOptions(nodes = []) {
+  return nodes.map((node) => ({
+    ...node,
+    disabled: Number(node.level) !== 2,
+    children: markProductCategoryOptions(node.children || [])
+  }))
+}
 
 fetchCategoryTree()
 
@@ -374,6 +407,7 @@ function handleQuery() {
 function resetQuery() {
   queryParams.value.name = ''
   queryParams.value.categoryId = ''
+  queryParams.value.isEnabled = ''
   handleQuery()
 }
 function handleSelectionChange(selection) {
@@ -383,7 +417,7 @@ function handleSelectionChange(selection) {
   multiple.value = !selection.length
 }
 function handleAdd() {
-  createForm.value = { name: '', categoryId: '', specs: [], detailDesc: '' }
+  createForm.value = { name: '', subtitle: '', categoryId: '', specs: [], detailDesc: '' }
   createStep.value = 0
   selectedSpecs.value = []
   fetchSpecs()
@@ -425,6 +459,7 @@ function handleCreateConfirm() {
   createSpu({
     shopId: getShopId(),
     name: createForm.value.name,
+    subtitle: createForm.value.subtitle,
     categoryId: createForm.value.categoryId,
     specs: createForm.value.specs,
     detailDesc: createForm.value.detailDesc,
@@ -526,6 +561,24 @@ function handleSkuManage(spuId) {
   router.push({ path: '/mall/sku', query: { spuId } })
 }
 
+async function handleStatusChange(row) {
+  const nextEnabled = !row.isEnabled
+  try {
+    await ElMessageBox.confirm(
+      `确认${nextEnabled ? '上架' : '下架'}商品“${row.name}”吗？`,
+      `${nextEnabled ? '上架' : '下架'}确认`,
+      { type: nextEnabled ? 'success' : 'warning' }
+    )
+    await updateSpuStatus({ id: row.id, shopId: getShopId(), isEnabled: nextEnabled })
+    ElMessage.success(`${nextEnabled ? '上架' : '下架'}成功`)
+    getList()
+  } catch (error) {
+    if (error !== 'cancel' && error !== 'close') {
+      console.error('更新商品状态失败:', error)
+    }
+  }
+}
+
 // 图片管理处理函数
 function handleImageManage(row) {
   currentProduct.value = row
@@ -602,6 +655,9 @@ function getList() {
   // categoryId
   if (queryParams.value.categoryId) {
     params['categoryId'] = queryParams.value.categoryId
+  }
+  if (queryParams.value.isEnabled !== '') {
+    params['isEnabled'] = queryParams.value.isEnabled
   }
   listSpu(params).then(res => {
     tableData.value = res.data?.records || []

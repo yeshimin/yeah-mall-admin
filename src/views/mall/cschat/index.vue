@@ -103,10 +103,10 @@
               <div class="message-bubble" :class="message.type === 'send' ? 'send' : 'receive'">
                 <template v-if="message.msgType === 2">
                   <el-image
-                    :src="getFullImageUrl(message.content)"
+                    :src="message.attachment.url"
                     fit="cover"
                     :style="{ width: '80px', height: '80px' }"
-                    :preview-src-list="[getFullImageUrl(message.content)]"
+                    :preview-src-list="[message.attachment.url]"
                     preview-teleported
                   >
                     <template #error>
@@ -115,6 +115,18 @@
                       </div>
                     </template>
                   </el-image>
+                </template>
+                <template v-else-if="message.msgType === 3">
+                  <video class="message-video" :src="message.attachment.url" controls></video>
+                </template>
+                <template v-else-if="message.msgType === 4">
+                  <a class="message-file" :href="message.attachment.url" target="_blank" rel="noopener noreferrer">
+                    <el-icon><Document /></el-icon>
+                    <span>
+                      <strong>{{ message.attachment.fileName || '附件文件' }}</strong>
+                      <small>{{ formatFileSize(message.attachment.fileSize) }}</small>
+                    </span>
+                  </a>
                 </template>
                 <template v-else>
                   {{ message.content }}
@@ -130,24 +142,23 @@
 
         <!-- 消息输入 -->
         <div class="chat-input">
-          <el-upload
-            class="image-upload"
-            action="#"
-            :auto-upload="false"
-            :on-change="handleImageUpload"
-            :show-file-list="false"
-            accept="image/*"
-          >
-            <el-button class="image-upload-button" aria-label="发送图片">
-              <el-icon><PictureFilled /></el-icon>
-            </el-button>
-          </el-upload>
+          <el-dropdown trigger="click" @command="chooseAttachment">
+            <el-button class="attachment-button" aria-label="选择附件"><el-icon><Plus /></el-icon></el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="image"><el-icon><PictureFilled /></el-icon>图片</el-dropdown-item>
+                <el-dropdown-item command="video"><el-icon><VideoPlay /></el-icon>视频</el-dropdown-item>
+                <el-dropdown-item command="file"><el-icon><Document /></el-icon>文件</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <input ref="attachmentInputRef" class="attachment-input" type="file" :accept="attachmentAccept" @change="handleAttachmentChange" />
 
           <div class="input-container">
-            <!-- 图片预览 -->
-            <div v-if="imagePreviewUrl" class="image-preview-in-input">
+            <div v-if="selectedAttachment?.file" class="attachment-preview-in-input">
               <el-image
-                :src="imagePreviewUrl"
+                v-if="selectedAttachment.kind === 'image'"
+                :src="attachmentPreviewUrl"
                 fit="cover"
                 :style="{ width: '80px', height: '80px' }"
               >
@@ -157,9 +168,9 @@
                   </div>
                 </template>
               </el-image>
-              <el-button size="small" type="danger" @click="clearImage" style="position: absolute; top: -10px; right: -10px; padding: 0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                    <el-icon><Close /></el-icon>
-                  </el-button>
+              <video v-else-if="selectedAttachment.kind === 'video'" :src="attachmentPreviewUrl" controls></video>
+              <div v-else class="selected-file"><el-icon><Document /></el-icon><span>{{ selectedAttachment.file.name }}</span></div>
+              <el-button class="attachment-clear" size="small" type="danger" @click="clearAttachment"><el-icon><Close /></el-icon></el-button>
             </div>
 
             <!-- 文本输入框 -->
@@ -186,7 +197,7 @@
 <script setup>
 import { ref, reactive, onBeforeUnmount, onMounted, nextTick } from 'vue';
 import { ElMessage, ElIcon } from 'element-plus';
-import { PictureFilled, Close, User } from '@element-plus/icons-vue';
+import { Close, Document, PictureFilled, Plus, User, VideoPlay } from '@element-plus/icons-vue';
 import wsService from '@/utils/websocket';
 import { initConversation, queryConversationList, queryConversationMessages, sendMessage, uploadCsMessageFile } from '@/api/mall/cschat';
 import { resolveApiUrl } from '@/utils/download';
@@ -195,8 +206,10 @@ const loading = ref(false);
 const messagesLoading = ref(false);
 const sending = ref(false);
 const chatMessagesRef = ref(null);
-const selectedImageFile = ref(null);
-const imagePreviewUrl = ref(null);
+const attachmentInputRef = ref(null);
+const selectedAttachment = ref(null);
+const attachmentPreviewUrl = ref('');
+const attachmentAccept = ref('image/*');
 const inputDisabled = ref(false);
 const messagePagination = reactive({
   current: 1,
@@ -254,6 +267,27 @@ const getFullImageUrl = (fileKey) => {
   return resolveApiUrl(`/public/storage/preview?fileKey=${encodeURIComponent(fileKey)}`);
 };
 
+const formatFileSize = (size) => {
+  const bytes = Number(size || 0);
+  if (!bytes) return '附件文件';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+};
+
+const parseAttachment = (content, msgType) => {
+  if (Number(msgType) === 2) {
+    return { fileKey: content, url: getFullImageUrl(content) };
+  }
+  if (![3, 4].includes(Number(msgType))) return null;
+  try {
+    const metadata = JSON.parse(content || '{}');
+    return { ...metadata, url: getFullImageUrl(metadata.fileKey) };
+  } catch (error) {
+    return { fileKey: content, url: getFullImageUrl(content) };
+  }
+};
+
 // 滚动到底部
 const scrollToBottom = () => {
   nextTick(() => {
@@ -281,7 +315,7 @@ const updateConversationSummary = (conversationId, content, msgType, messageTime
   // 更新会话摘要，并将最近有消息的会话移动到列表顶部。
   const conversation = {
     ...conversationList.value[conversationIndex],
-    lastMessage: msgType === 2 ? '[图片]' : content,
+    lastMessage: Number(msgType) === 2 ? '[图片]' : Number(msgType) === 3 ? '[视频]' : Number(msgType) === 4 ? '[文件]' : content,
     lastMessageTime: messageTime
   };
   conversationList.value.splice(conversationIndex, 1);
@@ -337,7 +371,8 @@ const getChatMessages = async (conversationId, isLoadMore = false) => {
         conversationId: msg.conversationId,
         content: msg.msgContent,
         type: msg.msgDirection === 1 ? 'receive' : 'send', // 1-买家到商家（接收），2-商家到买家（发送）
-        msgType: msg.msgType, // 消息类型：1-文本，2-图片
+        msgType: msg.msgType,
+        attachment: parseAttachment(msg.msgContent, msg.msgType),
         createTime: msg.createTime
       }));
 
@@ -421,16 +456,15 @@ const handleViewConversation = async (row) => {
 
 // 发送消息
 const handleSendMessage = async () => {
-  if (!messageInput.value.trim() && !selectedImageFile.value) {
+  if (!messageInput.value.trim() && !selectedAttachment.value?.file) {
     return;
   }
 
   sending.value = true;
 
   try {
-    // 如果有选中的图片文件，发送图片消息
-    if (selectedImageFile.value) {
-      await sendImageMessage();
+    if (selectedAttachment.value?.file) {
+      await sendAttachmentMessage();
     }
     // 否则，发送文本消息
     else if (messageInput.value.trim()) {
@@ -479,74 +513,82 @@ const sendTextMessage = async () => {
   scrollToBottom();
 };
 
-// 发送图片消息
-const sendImageMessage = async () => {
+// 发送附件消息
+const sendAttachmentMessage = async () => {
   const conversationId = currentConversation.value.id;
-  const file = selectedImageFile.value;
-  const result = await uploadCsMessageFile(file.raw);
+  const attachment = selectedAttachment.value;
+  const result = await uploadCsMessageFile(attachment.file);
 
   if (result.code === 0 && result.data && result.data.fileKey) {
     const fileKey = result.data.fileKey;
+    const msgType = attachment.kind === 'image' ? 2 : attachment.kind === 'video' ? 3 : 4;
+    const content = msgType === 2 ? fileKey : JSON.stringify({
+      fileKey,
+      fileName: attachment.file.name.slice(0, 72),
+      fileSize: attachment.file.size || 0
+    });
     const message = {
       category: 'biz-handle',
       command: 'cs-chat.mch',
       subCmd: 'msg.mch2mem',
       payload: {
         conversationId,
-        content: fileKey,
-        type: 2
+        content,
+        type: msgType
       }
     };
     await sendMessage(message);
 
-    // 上传和发送都成功后再显示图片。
     const createTime = new Date().toISOString();
     const newMessage = {
       id: Date.now().toString(),
       conversationId,
-      content: fileKey, // 使用fileKey作为内容
+      content,
       type: 'send',
-      msgType: 2, // 消息类型：2-图片
+      msgType,
+      attachment: parseAttachment(content, msgType),
       createTime
     };
 
     chatMessages.value.push(newMessage);
-    updateConversationSummary(conversationId, fileKey, 2, createTime);
-    selectedImageFile.value = null; // 清空选中的图片
-    imagePreviewUrl.value = ''; // 清空图片预览
-    inputDisabled.value = false; // 重新启用输入框
+    updateConversationSummary(conversationId, content, msgType, createTime);
+    clearAttachment();
     scrollToBottom();
-
   } else {
-    ElMessage.error('图片上传失败');
+    ElMessage.error('附件上传失败');
   }
 };
 
-// 处理图片选择
-const handleImageUpload = (file) => {
-  selectedImageFile.value = file;
-  // 生成图片预览URL
-  imagePreviewUrl.value = URL.createObjectURL(file.raw);
-  // 清空文本输入框，确保图片和文本不可同时存在
-  messageInput.value = '';
-  // 禁用输入框
-  inputDisabled.value = true;
-  ElMessage.success('图片已选择，点击发送按钮发送');
+const chooseAttachment = (kind) => {
+  attachmentAccept.value = kind === 'image' ? 'image/*' : kind === 'video' ? 'video/*' : '*/*';
+  selectedAttachment.value = { kind, file: null };
+  nextTick(() => attachmentInputRef.value?.click());
 };
 
-// 清除图片
-const clearImage = () => {
-  selectedImageFile.value = null;
-  imagePreviewUrl.value = '';
-  // 重新启用输入框
+const handleAttachmentChange = (event) => {
+  const file = event.target.files?.[0];
+  if (!file || !selectedAttachment.value) {
+    selectedAttachment.value = null;
+    return;
+  }
+  selectedAttachment.value = { ...selectedAttachment.value, file };
+  attachmentPreviewUrl.value = selectedAttachment.value.kind === 'file' ? '' : URL.createObjectURL(file);
+  messageInput.value = '';
+  inputDisabled.value = true;
+  event.target.value = '';
+};
+
+const clearAttachment = () => {
+  if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value);
+  selectedAttachment.value = null;
+  attachmentPreviewUrl.value = '';
   inputDisabled.value = false;
 };
 
 // 处理文本输入
 const handleTextInput = () => {
-  // 如果输入文本，清除图片选择
-  if (messageInput.value.trim() && selectedImageFile.value) {
-    clearImage();
+  if (messageInput.value.trim() && selectedAttachment.value) {
+    clearAttachment();
   }
 };
 
@@ -575,6 +617,8 @@ const handleDialogClosed = () => {
   chatMessagesRef.value?.removeEventListener('scroll', handleMessageScroll);
   currentConversation.value = null;
   chatMessages.value = [];
+  messageInput.value = '';
+  clearAttachment();
 };
 
 // 搜索
@@ -608,16 +652,20 @@ const handleWebSocketMessage = (message) => {
     const payload = message.payload;
     if (!payload) return;
 
-    const receiveTime = new Date().toISOString();
+    const receiveTime = payload.createTime || new Date().toISOString();
     updateConversationSummary(payload.conversationId, payload.content, payload.type, receiveTime);
 
     if (currentConversation.value && String(payload.conversationId) === String(currentConversation.value.id)) {
+      if (payload.messageId && chatMessages.value.some(item => String(item.id) === String(payload.messageId))) {
+        return;
+      }
       chatMessages.value.push({
-        id: Date.now().toString(),
+        id: payload.messageId || Date.now().toString(),
         conversationId: payload.conversationId,
         content: payload.content,
         type: 'receive',
         msgType: payload.type,
+        attachment: parseAttachment(payload.content, payload.type),
         createTime: receiveTime
       });
       scrollToBottom();
@@ -797,6 +845,48 @@ onBeforeUnmount(() => {
   }
 }
 
+.message-video {
+  display: block;
+  width: 280px;
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 6px;
+  background: #111;
+}
+
+.message-file {
+  display: flex;
+  width: 260px;
+  max-width: 100%;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+
+  > .el-icon {
+    flex: 0 0 auto;
+    font-size: 34px;
+  }
+
+  > span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  strong {
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    opacity: .68;
+  }
+}
+
 .no-messages {
   text-align: center;
   padding: 40px 0;
@@ -812,9 +902,7 @@ onBeforeUnmount(() => {
   align-items: flex-end;
 }
 
-.image-upload {
-  flex-shrink: 0;
-}
+.attachment-input { display: none; }
 
 .input-container {
   flex: 1;
@@ -822,7 +910,7 @@ onBeforeUnmount(() => {
   min-height: 80px;
 }
 
-.image-preview-in-input {
+.attachment-preview-in-input {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -831,6 +919,40 @@ onBeforeUnmount(() => {
   position: relative;
   margin-right: 10px;
   margin-bottom: 10px;
+}
+
+.attachment-preview-in-input > video {
+  width: 160px;
+  height: 90px;
+  border-radius: 6px;
+  background: #111;
+}
+
+.selected-file {
+  display: flex;
+  max-width: 320px;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: var(--mall-paper);
+}
+
+.selected-file span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-clear {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
 }
 
 .el-input {
@@ -908,13 +1030,12 @@ textarea:focus {
   border-top-color: var(--mall-line);
 }
 
-.image-upload,
-.image-upload-button {
+.attachment-button {
   width: 40px;
   height: 40px;
 }
 
-.image-upload-button {
+.attachment-button {
   padding: 0;
   color: var(--mall-brand);
   border-color: var(--mall-line-strong);
@@ -929,7 +1050,7 @@ textarea:focus {
   gap: 10px;
 }
 
-.image-preview-in-input {
+.attachment-preview-in-input {
   position: relative;
   top: auto;
   left: auto;

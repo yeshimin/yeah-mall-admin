@@ -24,6 +24,15 @@ export function updateSpu(data) {
     data
   })
 }
+
+// 更新商品上下架状态
+export function updateSpuStatus(data) {
+  return request({
+    url: '/mch/productSpu/updateStatus',
+    method: 'post',
+    data
+  })
+}
 // 删除SPU（支持批量）
 export function deleteSpu(ids) {
   return request({

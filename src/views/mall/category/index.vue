@@ -80,6 +80,7 @@
             placeholder="不选择表示一级分类"
             style="width: 100%"
           />
+          <div class="form-tip">店铺分类最多两级；商品只能挂载到二级分类。</div>
         </el-form-item>
         <el-form-item label="分类名称" prop="name">
           <el-input v-model="form.name" maxlength="64" placeholder="请输入店铺分类名称" />
@@ -173,7 +174,7 @@ function disableCurrentBranch(nodes: CategoryRecord[], currentId: string, parent
     const blocked = parentBlocked || Boolean(currentId && String(node.id) === String(currentId))
     return {
       ...node,
-      disabled: blocked,
+      disabled: blocked || Number(node.level) !== 1,
       children: node.children ? disableCurrentBranch(node.children, currentId, blocked) : undefined,
     }
   })
