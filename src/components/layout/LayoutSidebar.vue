@@ -1,22 +1,11 @@
 <template>
   <aside class="sidebar-container" :class="{ 'is-collapsed': isCollapse }">
     <div class="sidebar-logo" role="button" tabindex="0" @click="openHome" @keydown.enter="openHome">
-      <h1>管理后台</h1>
+      <span class="sidebar-logo-mark">Y</span>
+      <span class="sidebar-logo-title">管理后台</span>
     </div>
-    <el-scrollbar height="100%">
-      <el-menu
-        :default-active="activeMenu"
-        class="sidebar-menu"
-        :collapse="isCollapse"
-        :unique-opened="true"
-        @select="handleMenuSelect"
-      >
-        <el-menu-item index="/home">
-          <el-icon><House /></el-icon>
-          <template #title>首页</template>
-        </el-menu-item>
-        <LayoutMenuNode v-for="menu in menuList" :key="menu.id" :node="menu" />
-      </el-menu>
+    <el-scrollbar class="sidebar-scrollbar">
+      <LayoutNavigation mode="vertical" :collapsed="isCollapse" @navigated="emit('navigated')" />
     </el-scrollbar>
   </aside>
 </template>
@@ -24,82 +13,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { House } from '@element-plus/icons-vue'
-import LayoutMenuNode from './LayoutMenuNode.vue'
+import LayoutNavigation from './LayoutNavigation.vue'
 import { useAppStore } from '@/stores/app'
-import { useAuthStore } from '@/stores/auth'
-import type { ResourceTreeNode } from '@/types/upms'
+
+const props = defineProps<{
+  collapsed?: boolean
+}>()
+
+const emit = defineEmits<{
+  navigated: []
+}>()
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
-const authStore = useAuthStore()
 
-// 当前激活的菜单
-const activeMenu = computed(() => {
-  return route.path
-})
-
-const isCollapse = computed(() => appStore.sidebarCollapsed)
-const menuList = computed(() => authStore.sidebarMenus)
-
-function findMenuNode(nodes: ResourceTreeNode[], index: string): ResourceTreeNode | null {
-  for (const node of nodes) {
-    if (node.path === index || String(node.id) === index) {
-      return node
-    }
-    if (node.children?.length) {
-      const found = findMenuNode(node.children, index)
-      if (found) {
-        return found
-      }
-    }
-  }
-  return null
-}
-
-function resolveExternalUrl(linkUrl?: string) {
-  if (!linkUrl) {
-    return null
-  }
-
-  try {
-    const url = new URL(linkUrl)
-    return ['http:', 'https:'].includes(url.protocol) ? url : null
-  } catch {
-    return null
-  }
-}
-
-async function handleMenuSelect(index: string) {
-  if (index === '/home') {
-    await openHome()
-    return
-  }
-
-  const node = findMenuNode(menuList.value, index)
-
-  if (node?.isLink) {
-    const externalUrl = resolveExternalUrl(node.linkUrl)
-    if (!externalUrl) {
-      ElMessage.warning('外链地址无效，请联系管理员检查菜单配置')
-      return
-    }
-
-    window.open(externalUrl.href, '_blank', 'noopener,noreferrer')
-    return
-  }
-
-  if (!node?.path) {
-    ElMessage.warning('菜单路径未配置')
-    return
-  }
-
-  if (node.path !== route.path) {
-    await router.push(node.path)
-  }
-}
+const isCollapse = computed(() => props.collapsed ?? appStore.sidebarCollapsed)
 
 async function openHome() {
   if (route.path !== '/home') {
@@ -110,8 +39,10 @@ async function openHome() {
 
 <style scoped>
 .sidebar-container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   background-color: #001529;
   color: #fff;
   overflow: hidden;
@@ -149,12 +80,15 @@ async function openHome() {
 }
 
 .sidebar-logo {
+  flex: 0 0 60px;
   height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   border-bottom: 1px solid #1f2d3d;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .sidebar-logo:focus-visible {
@@ -162,26 +96,53 @@ async function openHome() {
   outline-offset: -2px;
 }
 
-.sidebar-logo h1 {
+.sidebar-logo-mark {
+  display: inline-flex;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #409eff, #36cfc9);
+  color: #fff;
   font-size: 18px;
-  margin: 0;
+  font-weight: 700;
+}
+
+.sidebar-logo-title {
+  font-size: 18px;
+  font-weight: 600;
   color: #fff;
   white-space: nowrap;
   opacity: 1;
-  transform: translateX(0);
+  max-width: 100px;
   transition:
     opacity 0.15s ease,
-    transform 0.3s ease;
+    max-width 0.3s ease;
 }
 
-.sidebar-container.is-collapsed .sidebar-logo h1 {
+.sidebar-container.is-collapsed .sidebar-logo {
+  gap: 0;
+}
+
+.sidebar-container.is-collapsed .sidebar-logo-title {
   opacity: 0;
-  transform: translateX(-8px);
+  max-width: 0;
 }
 
-.sidebar-menu {
+.sidebar-scrollbar {
+  flex: 1;
+  min-height: 0;
+}
+
+.sidebar-scrollbar :deep(.el-scrollbar__view) {
+  height: 100%;
+}
+
+.sidebar-container :deep(.layout-navigation) {
   width: 100%;
-  height: calc(100vh - 60px);
+  min-height: 100%;
   transition: width 0.3s ease;
 }
 </style>

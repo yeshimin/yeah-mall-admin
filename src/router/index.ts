@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { isPageResourceType } from '@/constants/resource'
 import type { ResourceTreeNode } from '@/types/upms'
@@ -260,6 +261,7 @@ function ensureDynamicRoutes(resources: ResourceTreeNode[]) {
 
 // 路由守卫
 router.beforeEach(async (to) => {
+  const appStore = useAppStore()
   const authStore = useAuthStore()
 
   // 设置页面标题
@@ -281,7 +283,7 @@ router.beforeEach(async (to) => {
   }
 
   try {
-    await authStore.bootstrap()
+    await Promise.all([appStore.loadNavigationMode(), authStore.bootstrap()])
     ensureDynamicRoutes(authStore.sidebarMenus)
   } catch {
     await authStore.clearAuth()

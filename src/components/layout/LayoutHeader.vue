@@ -1,32 +1,52 @@
 <template>
-  <header class="header-container">
-    <div class="header-left">
-      <el-button
-        link
-        class="header-collapse-btn"
-        @click="toggleSidebar"
-      >
+  <header class="header-container" :class="{ 'is-top-navigation': props.navigationMode === 'top' }">
+    <button
+      v-if="props.navigationMode === 'top'"
+      type="button"
+      class="header-brand"
+      title="返回首页"
+      @click="openHome"
+    >
+      <span class="header-brand-mark">Y</span>
+      <span class="header-brand-title">YeahBoot</span>
+    </button>
+
+    <div v-if="props.navigationMode === 'top'" class="header-navigation">
+      <LayoutNavigation mode="horizontal" />
+    </div>
+
+    <div v-else class="header-left">
+      <el-button link class="header-collapse-btn" @click="handleNavigationButton">
         <el-icon class="header-collapse-icon">
-          <component :is="collapseIcon" />
+          <Menu v-if="props.mobile" />
+          <component :is="collapseIcon" v-else />
         </el-icon>
       </el-button>
-      <el-breadcrumb class="header-breadcrumb">
-        <template v-for="(item, index) in breadcrumbList" :key="index">
-          <el-breadcrumb-item v-if="item.path" :to="item.path">
-            {{ item.title }}
-          </el-breadcrumb-item>
-          <el-breadcrumb-item v-else>
-            {{ item.title }}
-          </el-breadcrumb-item>
-        </template>
-      </el-breadcrumb>
+      <button v-if="props.mobile" type="button" class="mobile-brand" @click="openHome">
+        <span class="header-brand-mark">Y</span>
+        <span class="header-brand-title">YeahBoot</span>
+      </button>
+      <LayoutBreadcrumb v-else />
     </div>
+
     <div class="header-right">
+      <el-popover placement="bottom" :width="240" trigger="click">
+        <template #reference>
+          <button type="button" class="header-action" title="通知">
+            <el-icon><Bell /></el-icon>
+          </button>
+        </template>
+        <div class="notification-panel">
+          <strong>通知</strong>
+          <p>暂无新通知</p>
+        </div>
+      </el-popover>
+
       <el-dropdown trigger="click" @command="handleCommand">
         <div class="user-info">
           <el-avatar :size="32" :src="avatarUrl || defaultAvatar" @error="handleAvatarError"></el-avatar>
           <span class="user-name">{{ authStore.displayName }}</span>
-          <el-icon class="el-icon--right"><arrow-down /></el-icon>
+          <el-icon class="el-icon--right"><ArrowDown /></el-icon>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -47,71 +67,33 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { ArrowDown, Expand, Fold, User, SwitchButton } from '@element-plus/icons-vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ArrowDown, Bell, Expand, Fold, Menu, SwitchButton, User } from '@element-plus/icons-vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useAppStore } from '@/stores/app'
+import LayoutBreadcrumb from './LayoutBreadcrumb.vue'
+import LayoutNavigation from './LayoutNavigation.vue'
+import { useAppStore, type NavigationMode } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
-import type { ResourceTreeNode } from '@/types/upms'
 import { DEFAULT_AVATAR_URL, resolveAvatarUrl } from '@/utils/avatar'
+
+const props = withDefaults(defineProps<{
+  navigationMode: NavigationMode
+  mobile?: boolean
+}>(), {
+  mobile: false,
+})
+
+const emit = defineEmits<{
+  openMobileNavigation: []
+}>()
 
 const router = useRouter()
 const route = useRoute()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 
-function hasConcreteRoute(path?: string) {
-  if (!path) {
-    return false
-  }
-  return router.getRoutes().some((item) => item.path === path)
-}
-
-// 默认头像
 const defaultAvatar = DEFAULT_AVATAR_URL
 const avatarLoadFailed = ref(false)
-
-function findMenuTrail(
-  nodes: ResourceTreeNode[],
-  targetPath: string,
-  trail: Array<{ title: string; path?: string }> = [],
-): Array<{ title: string; path?: string }> | null {
-  for (const node of nodes) {
-    const normalizedPath = hasConcreteRoute(node.path) ? node.path : undefined
-    const nextTrail = [...trail, { title: node.name, path: normalizedPath }]
-    if (node.path === targetPath) {
-      return nextTrail
-    }
-    if (node.children?.length) {
-      const found = findMenuTrail(node.children, targetPath, nextTrail)
-      if (found) {
-        return found
-      }
-    }
-  }
-  return null
-}
-
-// 动态计算面包屑
-const breadcrumbList = computed(() => {
-  const menuTrail = findMenuTrail(authStore.sidebarMenus, route.path)
-  if (menuTrail?.length) {
-    return menuTrail
-  }
-
-  const breadcrumbs: Array<{ title: string; path?: string }> = []
-  for (const routeItem of route.matched || []) {
-    if (routeItem?.meta?.title && routeItem?.path && routeItem.path !== '/') {
-      breadcrumbs.push({
-        title: routeItem.meta.title as string,
-        path: routeItem.path,
-      })
-    }
-  }
-
-  return breadcrumbs
-})
-
 const collapseIcon = computed(() => (appStore.sidebarCollapsed ? Expand : Fold))
 
 const avatarSource = computed(() => authStore.mine?.user?.avatar || '')
@@ -131,13 +113,21 @@ function handleAvatarError() {
   return false
 }
 
-// 切换侧边栏折叠状态
-const toggleSidebar = () => {
+function handleNavigationButton() {
+  if (props.mobile) {
+    emit('openMobileNavigation')
+    return
+  }
   appStore.toggleSidebar()
 }
 
-// 处理下拉菜单命令
-const handleCommand = async (command: string) => {
+async function openHome() {
+  if (route.path !== '/home') {
+    await router.push('/home')
+  }
+}
+
+async function handleCommand(command: string) {
   switch (command) {
     case 'profile':
       if (route.path !== '/profile') {
@@ -146,7 +136,7 @@ const handleCommand = async (command: string) => {
       break
     case 'logout':
       await authStore.logout()
-      router.push('/login')
+      await router.push('/login')
       ElMessage.success('退出登录成功')
       break
   }
@@ -155,29 +145,85 @@ const handleCommand = async (command: string) => {
 
 <style scoped>
 .header-container {
+  position: relative;
+  z-index: 100;
   display: flex;
+  flex: 0 0 60px;
+  height: 60px;
   align-items: center;
   justify-content: space-between;
-  height: 60px;
   padding: 0 20px;
   background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 100;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
+}
+
+.header-container.is-top-navigation {
+  gap: 18px;
+  padding-left: 16px;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
 }
 
 .header-left {
-  display: flex;
+  min-width: 0;
+}
+
+.header-right {
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.header-brand,
+.mobile-brand {
+  display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.header-brand-mark {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1677ff, #13c2c2);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.header-brand-title {
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.header-navigation {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .header-collapse-btn {
-  margin-right: 20px;
   width: 36px;
   height: 36px;
+  margin-right: 20px;
   padding: 0;
   border-radius: 8px;
-  color: #303133;
   background-color: #f5f7fa;
+  color: #303133;
 }
 
 .header-collapse-btn:hover {
@@ -189,22 +235,33 @@ const handleCommand = async (command: string) => {
   font-size: 18px;
 }
 
-.header-breadcrumb {
-  font-size: 14px;
+.header-action {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #606266;
+  cursor: pointer;
+  font-size: 18px;
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
+.header-action:hover {
+  color: #409eff;
+  background: #ecf5ff;
 }
 
 .user-info {
   display: flex;
   align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: all 0.3s;
+  transition: background-color 0.2s ease;
 }
 
 .user-info:hover {
@@ -212,12 +269,53 @@ const handleCommand = async (command: string) => {
 }
 
 .user-name {
+  max-width: 120px;
   margin: 0 8px;
+  overflow: hidden;
   font-size: 14px;
   font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .el-icon--right {
   font-size: 12px;
+}
+
+.notification-panel strong {
+  color: #303133;
+  font-size: 14px;
+}
+
+.notification-panel p {
+  margin: 14px 0 4px;
+  color: #909399;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .is-top-navigation .user-name {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .header-container {
+    padding: 0 12px;
+  }
+
+  .header-collapse-btn {
+    margin-right: 10px;
+  }
+
+  .mobile-brand .header-brand-title,
+  .user-name {
+    display: none;
+  }
+
+  .user-info {
+    padding-right: 4px;
+  }
 }
 </style>

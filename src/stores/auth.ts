@@ -236,6 +236,7 @@ export const useAuthStore = defineStore('auth', () => {
     resources.value = []
     initialized.value = false
     appStore.clearPageTags()
+    appStore.resetNavigationModeLoadState()
     removeToken()
   }
 
