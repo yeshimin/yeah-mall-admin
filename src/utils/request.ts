@@ -12,6 +12,13 @@ type RequestConfig = ApiEncryptionRequestConfig & {
   idempotencyKey?: string
 }
 
+const PAGE_NUMBER_KEYS = ['total', 'current', 'size', 'pages'] as const
+
+/**
+ * 兼容后端将 Long 序列化为字符串的分页响应。
+ *
+ * 仅处理标准 IPage 结构的元数据，不遍历 records，避免改变 UUID、雪花 ID 等业务字段。
+ */
 function normalizePageNumbers(payload: unknown) {
   if (!payload || typeof payload !== 'object') {
     return
@@ -24,12 +31,15 @@ function normalizePageNumbers(payload: unknown) {
   if (!Array.isArray(page.records)) {
     return
   }
-  for (const key of ['total', 'current', 'size', 'pages']) {
-    if (typeof page[key] === 'string') {
-      const value = Number(page[key])
-      if (Number.isFinite(value)) {
-        page[key] = value
-      }
+  for (const key of PAGE_NUMBER_KEYS) {
+    const rawValue = page[key]
+    if (typeof rawValue !== 'string') {
+      continue
+    }
+
+    const value = Number(rawValue)
+    if (Number.isSafeInteger(value) && value >= 0) {
+      page[key] = value
     }
   }
 }

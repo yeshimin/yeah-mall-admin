@@ -278,6 +278,7 @@ export const useAuthStore = defineStore('auth', () => {
     initialized.value = false
     appStore.clearPageTags()
     clearCurrentShop()
+    appStore.resetNavigationModeLoadState()
     removeToken()
     removeLoginSubject()
   }

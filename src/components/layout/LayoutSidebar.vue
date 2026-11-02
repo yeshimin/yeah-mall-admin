@@ -7,20 +7,8 @@
         <small>{{ brandSubtitle }}</small>
       </div>
     </div>
-    <el-scrollbar class="sidebar-scroll">
-      <el-menu
-        :default-active="activeMenu"
-        class="sidebar-menu"
-        :collapse="isCollapse"
-        :unique-opened="true"
-        @select="handleMenuSelect"
-      >
-        <el-menu-item index="/home">
-          <el-icon><House /></el-icon>
-          <template #title>经营概览</template>
-        </el-menu-item>
-        <LayoutMenuNode v-for="menu in menuList" :key="menu.id" :node="menu" />
-      </el-menu>
+    <el-scrollbar class="sidebar-scrollbar">
+      <LayoutNavigation mode="vertical" :collapsed="isCollapse" @navigated="emit('navigated')" />
     </el-scrollbar>
   </aside>
 </template>
@@ -28,83 +16,25 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { House } from '@element-plus/icons-vue'
-import LayoutMenuNode from './LayoutMenuNode.vue'
+import LayoutNavigation from './LayoutNavigation.vue'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
-import type { ResourceTreeNode } from '@/types/upms'
+
+const props = defineProps<{
+  collapsed?: boolean
+}>()
+
+const emit = defineEmits<{
+  navigated: []
+}>()
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 
-// 当前激活的菜单
-const activeMenu = computed(() => {
-  return route.path
-})
-
-const isCollapse = computed(() => appStore.sidebarCollapsed)
-const menuList = computed(() => authStore.sidebarMenus)
+const isCollapse = computed(() => props.collapsed ?? appStore.sidebarCollapsed)
 const brandSubtitle = computed(() => authStore.subject === 'merchant' ? '商家工作台' : '平台运营端')
-
-function findMenuNode(nodes: ResourceTreeNode[], index: string): ResourceTreeNode | null {
-  for (const node of nodes) {
-    if (node.path === index || String(node.id) === index) {
-      return node
-    }
-    if (node.children?.length) {
-      const found = findMenuNode(node.children, index)
-      if (found) {
-        return found
-      }
-    }
-  }
-  return null
-}
-
-function resolveExternalUrl(linkUrl?: string) {
-  if (!linkUrl) {
-    return null
-  }
-
-  try {
-    const url = new URL(linkUrl)
-    return ['http:', 'https:'].includes(url.protocol) ? url : null
-  } catch {
-    return null
-  }
-}
-
-async function handleMenuSelect(index: string) {
-  if (index === '/home') {
-    await openHome()
-    return
-  }
-
-  const node = findMenuNode(menuList.value, index)
-
-  if (node?.isLink) {
-    const externalUrl = resolveExternalUrl(node.linkUrl)
-    if (!externalUrl) {
-      ElMessage.warning('外链地址无效，请联系管理员检查菜单配置')
-      return
-    }
-
-    window.open(externalUrl.href, '_blank', 'noopener,noreferrer')
-    return
-  }
-
-  if (!node?.path) {
-    ElMessage.warning('菜单路径未配置')
-    return
-  }
-
-  if (node.path !== route.path) {
-    await router.push(node.path)
-  }
-}
 
 async function openHome() {
   if (route.path !== '/home') {
@@ -116,39 +46,36 @@ async function openHome() {
 <style scoped>
 .sidebar-container {
   display: flex;
-  flex-direction: column;
   width: 100%;
-  height: 100vh;
-  background-color: #001529;
-  color: #fff;
+  height: 100%;
   overflow: hidden;
+  flex-direction: column;
+  color: #fff;
+  background-color: #001529;
 }
 
 .sidebar-container :deep(.el-menu) {
-  background-color: #001529;
   border-right: none;
+  background-color: #001529;
 }
 
 .sidebar-container :deep(.el-menu-item),
 .sidebar-container :deep(.el-sub-menu__title) {
-  color: #fff;
   height: 56px;
+  color: #fff;
   line-height: 56px;
 }
 
 .sidebar-container :deep(.el-menu-item:hover),
-.sidebar-container :deep(.el-sub-menu__title:hover) {
-  background-color: #1890ff;
+.sidebar-container :deep(.el-sub-menu__title:hover),
+.sidebar-container :deep(.el-menu-item:not(.is-active)):hover,
+.sidebar-container :deep(.el-sub-menu__title:not(.is-active)):hover {
+  background-color: #24634f;
 }
 
 .sidebar-container :deep(.el-menu-item.is-active) {
-  background-color: #1890ff;
   color: #fff;
-}
-
-.sidebar-container :deep(.el-menu-item:not(.is-active)):hover,
-.sidebar-container :deep(.el-sub-menu__title:not(.is-active)):hover {
-  background-color: #1890ff;
+  background-color: #24634f;
 }
 
 .sidebar-container :deep(.el-icon) {
@@ -156,94 +83,92 @@ async function openHome() {
 }
 
 .sidebar-logo {
-  height: 72px;
   display: flex;
+  height: 60px;
+  flex: 0 0 60px;
   align-items: center;
   gap: 12px;
   box-sizing: border-box;
   padding: 0 16px;
+  overflow: hidden;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
 }
 
 .sidebar-logo:focus-visible {
-  outline: 2px solid #409eff;
+  outline: 2px solid #8eafa0;
   outline-offset: -2px;
 }
 
 .brand-stamp {
   display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  color: #17372b;
-  background: #e5b873;
-  font-weight: 800;
-}
-
-.brand-stamp {
   width: 34px;
   height: 34px;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
   border-radius: 9px;
+  color: #17372b;
+  background: #e5b873;
   font-size: 18px;
+  font-weight: 800;
 }
 
 .brand-copy {
   display: flex;
   min-width: 0;
+  max-width: 120px;
   flex: 1;
   flex-direction: column;
+  opacity: 1;
+  transition:
+    opacity 0.15s ease,
+    max-width 0.3s ease;
 }
 
-.brand-copy strong {
+.brand-copy strong,
+.brand-copy small {
   overflow: hidden;
-  color: #fff;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 .brand-copy strong {
+  color: #fff;
   font-size: 17px;
   letter-spacing: 0.01em;
 }
 
 .brand-copy small {
-  overflow: hidden;
   margin-top: 2px;
   color: rgba(255, 255, 255, 0.52);
   font-size: 11px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.sidebar-scroll {
-  min-height: 0;
-  flex: 1;
-}
-
-.brand-copy {
-  opacity: 1;
-  transform: translateX(0);
-  transition:
-    opacity 0.15s ease,
-    transform 0.3s ease;
 }
 
 .sidebar-container.is-collapsed .sidebar-logo {
   justify-content: center;
+  gap: 0;
   padding: 0;
 }
 
 .sidebar-container.is-collapsed .brand-copy {
-  width: 0;
-  flex: 0 0 0;
+  max-width: 0;
   overflow: hidden;
   opacity: 0;
-  transform: translateX(-8px);
 }
 
-.sidebar-menu {
+.sidebar-scrollbar {
+  min-height: 0;
+  flex: 1;
+}
+
+.sidebar-scrollbar :deep(.el-scrollbar__view) {
+  height: 100%;
+}
+
+.sidebar-container :deep(.layout-navigation) {
   width: 100%;
+  min-height: 100%;
   transition: width 0.3s ease;
 }
 </style>
