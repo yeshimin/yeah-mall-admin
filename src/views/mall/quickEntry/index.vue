@@ -12,7 +12,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" native-type="submit">搜索</el-button>
+          <el-button type="primary" native-type="submit" icon="Search">搜索</el-button>
           <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
@@ -20,7 +20,7 @@
 
     <div class="action-bar">
       <div class="action-buttons">
-        <el-button type="primary" @click="openCreateDialog">新增入口</el-button>
+        <el-button type="primary" icon="Plus" @click="openCreateDialog">新增入口</el-button>
         <el-button type="danger" :disabled="selectedRows.length === 0" @click="removeEntries()">批量删除</el-button>
       </div>
       <MallListTools v-model:showSearch="showSearch" @refresh="loadEntries" />
@@ -262,14 +262,11 @@ onMounted(() => void loadEntries())
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  background: #fff;
 }
 
-.search-bar { margin-bottom: 20px; }
 .action-bar { display: flex; justify-content: space-between; align-items: center; }
 .action-buttons { display: flex; gap: 12px; }
-.table-container { flex: 1; min-height: 0; margin-top: 20px; }
+.table-container { flex: 1; min-height: 0; }
 .entry-name { display: flex; align-items: center; gap: 12px; }
 .entry-icon-field { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
 .form-tip { width: 100%; color: var(--mall-muted); font-size: 12px; }

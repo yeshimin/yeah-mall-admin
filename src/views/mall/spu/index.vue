@@ -54,17 +54,22 @@
       <el-table-column prop="createTime" label="创建时间" align="center" />
       <el-table-column prop="updateBy" label="更新人" align="center" />
       <el-table-column prop="updateTime" label="更新时间" align="center" />
-      <el-table-column label="操作" width="390" align="center" class-name="mall-actions-column">
-  <template #default="scope">
-    <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-    <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-    <el-button link type="primary" icon="Picture" @click="handleImageManage(scope.row)">图片管理</el-button>
-    <el-button link type="primary" icon="PriceTag" @click="handleSkuManage(scope.row.id)">SKU管理</el-button>
-    <el-button link :type="scope.row.isEnabled ? 'warning' : 'success'" @click="handleStatusChange(scope.row)">
-      {{ scope.row.isEnabled ? '下架' : '上架' }}
-    </el-button>
-  </template>
-</el-table-column>
+      <el-table-column label="操作" width="170" align="right" class-name="mall-actions-column">
+        <template #default="scope">
+          <el-button link type="primary" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-dropdown @command="handleSpuAction($event, scope.row)">
+            <el-button link type="primary">更多</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="sku">SKU 管理</el-dropdown-item>
+                <el-dropdown-item command="image">图片管理</el-dropdown-item>
+                <el-dropdown-item command="status">{{ scope.row.isEnabled ? '下架' : '上架' }}</el-dropdown-item>
+                <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
+      </el-table-column>
     </el-table>
 
     <MallPagination v-show="total > 0" :total="Number(total)" v-model:page="queryParams.current" v-model:limit="queryParams.size"
@@ -561,6 +566,13 @@ function handleSkuManage(spuId) {
   router.push({ path: '/mall/sku', query: { spuId } })
 }
 
+function handleSpuAction(command, row) {
+  if (command === 'sku') return handleSkuManage(row.id)
+  if (command === 'image') return handleImageManage(row)
+  if (command === 'status') return handleStatusChange(row)
+  if (command === 'delete') return handleDelete(row)
+}
+
 async function handleStatusChange(row) {
   const nextEnabled = !row.isEnabled
   try {
@@ -863,14 +875,14 @@ function handleImageManageClose() {
 }
 
 .product-dialog :deep(.el-dialog__title) {
-  color: #1f2937;
-  font-size: 18px;
+  color: var(--mall-ink, #17251f);
+  font-size: 16px;
   font-weight: 650;
 }
 
 .product-dialog :deep(.el-dialog__body) {
   padding: 20px 26px 12px;
-  background: linear-gradient(180deg, #f8fafc 0, #ffffff 140px);
+  background: #fff;
 }
 
 .product-dialog :deep(.el-dialog__footer) {
@@ -881,8 +893,8 @@ function handleImageManageClose() {
 .product-steps {
   margin-bottom: 20px;
   padding: 12px 16px;
-  background: #f1f5f9;
-  border-radius: 10px;
+  background: #eef2ef;
+  border-radius: 8px;
 }
 
 .product-form {
@@ -902,14 +914,14 @@ function handleImageManageClose() {
 }
 
 .detail-editor-title {
-  color: #1f2937;
-  font-size: 16px;
+  color: var(--mall-ink, #17251f);
+  font-size: 15px;
   font-weight: 600;
 }
 
 .detail-editor-hint {
   margin-top: 5px;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
   font-size: 13px;
 }
 /* 规格样式优化 */
@@ -918,9 +930,9 @@ function handleImageManageClose() {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 .el-tag--primary {
-  background-color: #2d62ed;
+  background-color: var(--mall-brand, #24634f);
   color: #ffffff;
-  box-shadow: 0 3px 12px rgba(45, 98, 237, 0.35);
+  box-shadow: none;
 }
 .el-tag--info {
   background-color: #f2f3f5;
@@ -936,15 +948,15 @@ function handleImageManageClose() {
   border: 1px solid #e0e0e0;
 }
 .el-check-tag:hover {
-  border-color: #409eff;
+  border-color: var(--mall-brand, #24634f);
 }
 .el-check-tag.is-checked {
-  background-color: #f0f7ff;
-  border-color: #409eff;
-  color: #409eff;
+  background-color: var(--mall-brand-soft, #e8f2ed);
+  border-color: var(--mall-brand, #24634f);
+  color: var(--mall-brand, #24634f);
 }
 .spec-container { padding: 10px; }
-.active-spec-tag { background: #e6f0ff; color: #1890ff; border: 1px solid #b3d8ff; box-sizing: border-box; }
+.active-spec-tag { background: var(--mall-brand-soft, #e8f2ed); color: var(--mall-brand, #24634f); border: 1px solid var(--mall-brand, #24634f); box-sizing: border-box; }
 .default-spec-tag { background: #f5f5f5; color: #333; border: 1px solid #e0e0e0; box-sizing: border-box; }
 .active-spec-tag:hover, .default-spec-tag:hover { transform: none !important; padding: 6px 16px !important; border-width: 1px !important; box-shadow: none !important; outline: none !important; }
 .spec-title {

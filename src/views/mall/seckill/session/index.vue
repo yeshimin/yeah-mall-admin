@@ -1,6 +1,7 @@
 <template>
   <div class="seckill-session-manage mall-page">
-    <el-form ref="searchFormRef" :model="queryParams" label-position="left" label-width="80px" inline class="mall-filter-panel mall-query-form">
+    <section class="mall-filter-panel">
+    <el-form ref="searchFormRef" :model="queryParams" label-position="left" label-width="80px" inline class="mall-query-form">
       <el-form-item label="场次名称">
         <el-input
           v-model="queryParams.name"
@@ -20,21 +21,24 @@
           <el-option label="禁用" value="0" />
         </el-select>
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <el-icon><Search /></el-icon>
-          查询
-        </el-button>
+      <el-form-item class="mall-query-actions">
         <el-button @click="resetQuery">
           <el-icon><Refresh /></el-icon>
           重置
         </el-button>
-        <el-button type="primary" @click="handleAdd">
-          <el-icon><Plus /></el-icon>
-          新增场次
+        <el-button type="primary" @click="handleQuery">
+          <el-icon><Search /></el-icon>
+          查询
         </el-button>
       </el-form-item>
     </el-form>
+    <div class="mall-business-actions">
+      <el-button type="primary" @click="handleAdd">
+        <el-icon><Plus /></el-icon>
+        新增场次
+      </el-button>
+    </div>
+    </section>
 
     <section class="mall-table-panel">
     <el-table v-loading="loading" :data="sessionList" style="width: 100%">
@@ -381,14 +385,6 @@ function handleCurrentChange(current) {
 </script>
 
 <style lang="scss" scoped>
-.seckill-session-manage {
-  padding: 20px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .pagination-container {
   margin-top: 20px;
   display: flex;

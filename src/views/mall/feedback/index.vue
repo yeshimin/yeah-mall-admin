@@ -1,6 +1,7 @@
 <template>
   <div class="mall-page">
-    <el-form :inline="true" class="query-form">
+    <section class="mall-filter-panel">
+    <el-form :inline="true" class="mall-query-form query-form">
       <el-form-item label="处理状态">
         <el-select v-model="query.status" placeholder="全部" clearable>
           <el-option label="待处理" value="1" />
@@ -8,10 +9,14 @@
           <el-option label="已解决" value="3" />
         </el-select>
       </el-form-item>
-      <el-button type="primary" @click="load(true)">查询</el-button>
-      <el-button @click="reset">重置</el-button>
+      <el-form-item class="mall-query-actions">
+        <el-button @click="reset">重置</el-button>
+        <el-button type="primary" icon="Search" @click="load(true)">查询</el-button>
+      </el-form-item>
     </el-form>
+    </section>
 
+    <section class="mall-table-panel">
     <el-table v-loading="loading" :data="records">
       <el-table-column prop="id" label="ID" width="150" />
       <el-table-column prop="memberId" label="会员ID" width="150" />
@@ -47,12 +52,13 @@
         v-model:current-page="page.current"
         v-model:page-size="page.size"
         :page-sizes="[10, 20, 50, 100]"
-        :total="page.total"
+        :total="Number(page.total)"
         layout="total, sizes, prev, pager, next, jumper"
         @size-change="load(true)"
         @current-change="load()"
       />
     </div>
+    </section>
 
     <el-dialog v-model="detailDialog.visible" title="反馈详情" width="680px">
       <el-descriptions v-if="detailDialog.feedback" :column="2" border>

@@ -10,7 +10,7 @@
       </el-form-item>
       <el-form-item class="mall-query-actions">
         <el-button @click="resetQuery">重置</el-button>
-        <el-button type="primary" @click="loadMembers(true)">查询</el-button>
+        <el-button type="primary" icon="Search" @click="loadMembers(true)">查询</el-button>
       </el-form-item>
     </el-form>
     </section>
@@ -179,7 +179,7 @@ onMounted(() => loadMembers())
 
 <style scoped>
 .member-cell { display: flex; align-items: center; gap: 12px; }
-.member-cell strong { color: #303133; font-weight: 600; }
-.member-cell p { margin: 4px 0 0; color: #909399; font-size: 12px; }
+.member-cell strong { color: var(--mall-ink); font-weight: 600; }
+.member-cell p { margin: 4px 0 0; color: var(--mall-muted); font-size: 12px; }
 :deep(.el-dropdown) { margin-left: 12px; vertical-align: middle; }
 </style>

@@ -278,14 +278,6 @@ function getStatusTagType(status) {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 24px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .pagination-container {
   margin-top: 20px;
   display: flex;

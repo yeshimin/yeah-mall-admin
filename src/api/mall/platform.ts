@@ -1,25 +1,33 @@
 import { request } from '@/utils/request'
 import type { PageResponse } from '@/types/api'
-import type { MerchantForm, MerchantRecord, ShopForm, ShopRecord } from '@/types/mall'
+import type {
+  MerchantDetailRecord,
+  MerchantForm,
+  MerchantRecord,
+  MerchantResetPasswordForm,
+  MerchantStatusForm,
+  ShopForm,
+  ShopRecord,
+} from '@/types/mall'
 
 export function queryMerchants(params: Record<string, unknown>) {
   return request<PageResponse<MerchantRecord>>({
-    url: '/admin/merchant/crud/query',
+    url: '/admin/merchant/query',
     method: 'get',
     params,
   })
 }
 
 export function getMerchantDetail(id: string) {
-  return request<MerchantRecord>({
-    url: '/admin/merchant/crud/detail',
+  return request<MerchantDetailRecord>({
+    url: '/admin/merchant/detail',
     method: 'get',
     params: { id },
   })
 }
 
 export function createMerchant(data: MerchantForm) {
-  return request<MerchantRecord>({
+  return request<void>({
     url: '/admin/merchant/create',
     method: 'post',
     data,
@@ -27,8 +35,24 @@ export function createMerchant(data: MerchantForm) {
 }
 
 export function updateMerchant(data: MerchantForm) {
-  return request<MerchantRecord>({
+  return request<void>({
     url: '/admin/merchant/update',
+    method: 'post',
+    data,
+  })
+}
+
+export function resetMerchantPassword(data: MerchantResetPasswordForm) {
+  return request<void>({
+    url: '/admin/merchant/resetPassword',
+    method: 'post',
+    data,
+  })
+}
+
+export function updateMerchantStatus(data: MerchantStatusForm) {
+  return request<void>({
+    url: '/admin/merchant/updateStatus',
     method: 'post',
     data,
   })

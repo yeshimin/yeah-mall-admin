@@ -14,7 +14,7 @@
         </el-form-item>
         <el-form-item class="mall-query-actions">
           <el-button @click="reset">重置</el-button>
-          <el-button type="primary" native-type="submit">查询</el-button>
+          <el-button type="primary" native-type="submit" icon="Search">查询</el-button>
         </el-form-item>
       </el-form>
     </section>

@@ -88,28 +88,20 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="450" fixed="right">
+      <el-table-column label="操作" width="150" fixed="right">
         <template #default="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope.row)" plain>
-            <el-icon><Edit /></el-icon>
-            编辑
-          </el-button>
-          <el-button type="success" size="small" @click="handleStatusChange(scope.row)" plain>
-            <el-icon><Check /></el-icon>
-            {{ scope.row.status === '1' ? '禁用' : '启用' }}
-          </el-button>
-          <el-button type="info" size="small" @click="navigateToReceive(scope.row.id)" plain>
-            <el-icon><View /></el-icon>
-            领取记录
-          </el-button>
-          <el-button type="warning" size="small" @click="navigateToRecord(scope.row.id)" plain>
-            <el-icon><View /></el-icon>
-            使用记录
-          </el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope.row.id)" plain>
-            <el-icon><Delete /></el-icon>
-            删除
-          </el-button>
+          <el-button link type="primary" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-dropdown @command="handleCouponAction($event, scope.row)">
+            <el-button link type="primary">更多</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="status">{{ scope.row.status === '1' ? '禁用' : '启用' }}</el-dropdown-item>
+                <el-dropdown-item command="receive">领取记录</el-dropdown-item>
+                <el-dropdown-item command="record">使用记录</el-dropdown-item>
+                <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
@@ -145,7 +137,7 @@
         <el-form-item label="折扣比例" prop="value" v-if="form.type === '2'">
           <div style="display: flex; align-items: center; width: 100%">
             <el-input-number v-model="form.value" :min="0.1" :max="0.99" :step="0.01" style="flex: 1" placeholder="请输入折扣比例" />
-            <span style="margin-left: 24px; font-size: 12px; color: #909399;">例如：0.85表示85折</span>
+            <span style="margin-left: 24px; font-size: 12px; color: var(--mall-muted, #65726a);">例如：0.85 表示 85 折</span>
           </div>
         </el-form-item>
         <el-form-item label="使用门槛金额" prop="minAmount">
@@ -162,7 +154,7 @@
         </el-form-item>
         <el-form-item label="积分兑换">
           <el-switch v-model="form.isPointsExchangeEnabled" active-text="开放" inactive-text="不开放" />
-          <span style="margin-left: 16px; color: #909399; font-size: 12px">开放后平台可将该券配置为积分商品</span>
+          <span style="margin-left: 16px; color: var(--mall-muted, #65726a); font-size: 12px">开放后平台可将该券配置为积分商品</span>
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
           <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" />
@@ -193,12 +185,12 @@
                 style="width: 60px; height: 60px"
                 lazy
               />
-              <div v-else style="width: 60px; height: 60px; border: 1px solid #e4e7ed; display: flex; align-items: center; justify-content: center; color: #909399">
+              <div v-else style="width: 60px; height: 60px; border: 1px solid #e4e7ed; display: flex; align-items: center; justify-content: center; color: var(--mall-muted, #65726a)">
                 无图片
               </div>
               <div style="flex: 1">
                 <div style="font-weight: 500; margin-bottom: 4px">{{ form.targetName }}</div>
-                <div style="font-size: 12px; color: #909399">商品ID: {{ form.targetId }}</div>
+                <div style="font-size: 12px; color: var(--mall-muted, #65726a)">商品 ID：{{ form.targetId }}</div>
               </div>
             </div>
           </div>
@@ -750,6 +742,13 @@ function navigateToRecord(couponId) {
   })
 }
 
+function handleCouponAction(command, row) {
+  if (command === 'status') return handleStatusChange(row)
+  if (command === 'receive') return navigateToReceive(row.id)
+  if (command === 'record') return navigateToRecord(row.id)
+  if (command === 'delete') return handleDelete(row.id)
+}
+
 // 查询
 function handleQuery() {
   pagination.current = 1
@@ -790,14 +789,6 @@ function getTypeText(type) {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 24px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .pagination-container {
   margin-top: 20px;
   display: flex;
@@ -813,7 +804,7 @@ function getTypeText(type) {
 }
 
 .text-gray-400 {
-  color: #909399;
+  color: var(--mall-muted, #65726a);
 }
 
 .mt-1 {

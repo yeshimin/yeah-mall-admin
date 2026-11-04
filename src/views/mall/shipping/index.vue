@@ -121,7 +121,7 @@
             <el-option label="是" :value="true"></el-option>
             <el-option label="否" :value="false"></el-option>
           </el-select>
-          <el-button type="primary" @click="handleLogisticsSearch">搜索</el-button>
+          <el-button type="primary" icon="Search" @click="handleLogisticsSearch">搜索</el-button>
           <el-button @click="handleLogisticsReset">重置</el-button>
         </div>
 
@@ -184,7 +184,7 @@
             v-model:page-size="logisticsPagination.pageSize"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="logisticsPagination.total"
+            :total="Number(logisticsPagination.total)"
             @size-change="handleLogisticsSizeChange"
             @current-change="handleLogisticsCurrentChange"
           />
@@ -742,10 +742,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.shipping-settings {
-  padding: 20px;
-}
-
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -753,9 +749,9 @@ export default {
   margin-bottom: 20px;
 
   h2 {
-    color: #303133;
+    color: var(--mall-ink);
     margin: 0;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 600;
   }
 
@@ -766,14 +762,14 @@ export default {
 }
 
 .info-card {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 
   .card-header {
     h3 {
-      color: #606266;
+      color: var(--mall-ink);
       margin: 0 0 5px 0;
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 15px;
+      font-weight: 650;
     }
   }
 }
@@ -787,14 +783,14 @@ export default {
 }
 
 .logistics-search {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .logistics-buttons {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .search-input {

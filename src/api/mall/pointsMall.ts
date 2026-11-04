@@ -15,6 +15,9 @@ export const queryPointsProducts = (params: Record<string, unknown>) =>
 export const savePointsProduct = (data: Record<string, unknown>) =>
   request({ url: '/admin/pointsMall/product/save', method: 'post', data })
 
+export const updatePointsProductStatus = (data: { id: string; isEnabled: boolean }) =>
+  request({ url: '/admin/pointsMall/product/status', method: 'post', data })
+
 export const deletePointsProduct = (id: string) =>
   request({ url: '/admin/pointsMall/product/delete', method: 'post', params: { id } })
 

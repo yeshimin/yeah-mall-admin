@@ -20,7 +20,7 @@
         </el-form-item>
         <el-form-item class="mall-query-actions">
           <el-button @click="reset">重置</el-button>
-          <el-button type="primary" native-type="submit">查询</el-button>
+          <el-button type="primary" native-type="submit" icon="Search">查询</el-button>
         </el-form-item>
       </el-form>
       <div v-if="scope === 'platform'" class="mall-business-actions">
@@ -306,11 +306,11 @@ onMounted(() => void load())
 .account-preview {
   margin-top: 12px;
   padding: 14px 16px;
-  color: #303133;
+  color: var(--mall-ink, #17251f);
   line-height: 1.9;
   background: #f5f7fa;
 }
-.account-preview span { color: #909399; }
+.account-preview span { color: var(--mall-muted, #65726a); }
 .positive { color: #24634f; }
 .negative { color: #b6403a; }
 </style>

@@ -7,12 +7,12 @@
         </el-form-item>
         <el-form-item class="mall-query-actions">
           <el-button @click="handleReset">重置</el-button>
-          <el-button type="primary" native-type="submit">查询</el-button>
+          <el-button type="primary" native-type="submit" icon="Search">查询</el-button>
         </el-form-item>
       </el-form>
       <div class="mall-business-actions">
         <el-button type="danger" :disabled="selectedRows.length === 0" @click="removeCategories()">批量删除</el-button>
-        <el-button type="primary" @click="openCreateDialog">新增店铺分类</el-button>
+        <el-button type="primary" icon="Plus" @click="openCreateDialog">新增店铺分类</el-button>
       </div>
     </section>
 

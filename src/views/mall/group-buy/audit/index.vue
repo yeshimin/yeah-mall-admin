@@ -104,7 +104,7 @@
         v-model:current-page="pagination.current"
         v-model:page-size="pagination.size"
         :page-sizes="[10, 20, 50, 100]"
-        layout="sizes, prev, pager, next, jumper"
+        layout="total, sizes, prev, pager, next, jumper"
         :total="Number(pagination.total)"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -357,14 +357,6 @@ function formatPriceRange(minPrice, maxPrice) {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 24px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .pagination-container {
   margin-top: 20px;
   display: flex;

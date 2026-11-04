@@ -53,35 +53,24 @@
         </template>
       </el-table-column>
       <el-table-column prop="description" label="活动描述" min-width="200" />
-      <el-table-column label="操作" width="320" fixed="right">
+      <el-table-column label="操作" width="180" fixed="right">
         <template #default="scope">
           <el-button
-            size="small"
+            link
             type="primary"
             @click="handleApply(scope.row)"
           >
-            <el-icon><Edit /></el-icon>
             申请参加
           </el-button>
-
-          <el-button
-            size="small"
-            type="info"
-            @click="goToApplyRecord(scope.row)"
-          >
-            <el-icon><Document /></el-icon>
-            申请记录
-          </el-button>
-
-          <el-button
-            size="small"
-            type="success"
-            @click="goToSeckillProduct(scope.row)"
-          >
-            <el-icon><Goods /></el-icon>
-            秒杀商品
-          </el-button>
-
+          <el-dropdown @command="handleActivityAction($event, scope.row)">
+            <el-button link type="primary">更多</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="apply">申请记录</el-dropdown-item>
+                <el-dropdown-item command="product">秒杀商品</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
@@ -919,6 +908,11 @@ const goToSeckillProduct = (activity) => {
   })
 }
 
+function handleActivityAction(command, row) {
+  if (command === 'apply') return goToApplyRecord(row)
+  if (command === 'product') return goToSeckillProduct(row)
+}
+
 // 初始化
 onMounted(() => {
   getActivityList()
@@ -926,14 +920,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 20px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .dialog-footer {
   text-align: right;
 }
@@ -980,7 +966,7 @@ onMounted(() => {
 }
 
 .spu-item:hover {
-  border-color: #409eff;
+  border-color: var(--mall-brand, #24634f);
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
@@ -1012,7 +998,7 @@ onMounted(() => {
 }
 
 .sku-item:hover {
-  border-color: #409eff;
+  border-color: var(--mall-brand, #24634f);
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
@@ -1058,16 +1044,16 @@ onMounted(() => {
 }
 
 .sku-price {
-  color: #606266;
+  color: var(--mall-ink-secondary, #30423a);
 }
 
 .sku-stock {
-  color: #909399;
+  color: var(--mall-muted, #65726a);
 }
 
 .unit {
   margin-left: 5px;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
 }
 
 /* 确保表单行不会因为图片而被挤压 */
@@ -1133,7 +1119,7 @@ onMounted(() => {
 
 /* 表格行悬停效果 */
 .el-table__row:hover {
-  background-color: #ecf5ff;
+  background-color: var(--mall-brand-soft, #e8f2ed);
 }
 
 .mb-4 {
@@ -1163,7 +1149,7 @@ onMounted(() => {
 }
 
 .spu-select-dialog .el-table__row:hover {
-  background-color: #ecf5ff;
+  background-color: var(--mall-brand-soft, #e8f2ed);
 }
 
 .spu-select-dialog .el-image {
@@ -1184,7 +1170,7 @@ onMounted(() => {
 
 .session-option-time {
   font-size: 12px;
-  color: #606266;
+  color: var(--mall-ink-secondary, #30423a);
 }
 
 .session-option-status {

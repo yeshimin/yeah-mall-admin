@@ -29,7 +29,7 @@
       </el-form-item>
       <el-form-item class="mall-query-actions">
         <el-button @click="reset">重置</el-button>
-        <el-button type="primary" @click="load(true)">查询</el-button>
+        <el-button type="primary" icon="Search" @click="load(true)">查询</el-button>
       </el-form-item>
     </el-form>
     </section>
@@ -68,7 +68,7 @@
     </el-table>
 
     <div class="pagination-container">
-      <el-pagination v-model:current-page="page.current" v-model:page-size="page.size" :page-sizes="[10, 20, 50, 100]" :total="page.total" layout="sizes, prev, pager, next, jumper" @size-change="load(true)" @current-change="load()" />
+      <el-pagination v-model:current-page="page.current" v-model:page-size="page.size" :page-sizes="[10, 20, 50, 100]" :total="Number(page.total)" layout="total, sizes, prev, pager, next, jumper" @size-change="load(true)" @current-change="load()" />
     </div>
     </section>
 
@@ -194,5 +194,5 @@ onMounted(() => load())
 .review-image { width: 96px; height: 96px; border-radius: 8px; }
 .review-replies { margin-top: 16px; }
 .review-reply-item { padding: 10px 12px; margin-top: 8px; background: #f4f6f3; border-radius: 8px; line-height: 1.6; }
-.review-reply-item span { display: block; margin-top: 4px; color: #909399; font-size: 12px; }
+.review-reply-item span { display: block; margin-top: 4px; color: var(--mall-muted, #65726a); font-size: 12px; }
 </style>

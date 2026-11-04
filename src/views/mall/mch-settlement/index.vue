@@ -1,9 +1,11 @@
 <template>
+  <div class="mall-page settlement-page-shell">
   <el-tabs v-model="activeTab" class="settlement-tabs">
     <el-tab-pane label="结算记录" name="ledger"><SettlementManager scope="merchant" /></el-tab-pane>
     <el-tab-pane label="收款账户" name="account"><SettlementAccountForm /></el-tab-pane>
     <el-tab-pane label="独立App支付" name="channel"><MerchantPaymentChannelForm /></el-tab-pane>
   </el-tabs>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -17,7 +19,9 @@ const activeTab = ref('ledger')
 </script>
 
 <style scoped>
+.settlement-page-shell { padding-top: 10px; }
 .settlement-tabs { height: 100%; }
 .settlement-tabs :deep(.el-tabs__content),
 .settlement-tabs :deep(.el-tab-pane) { height: calc(100% - 28px); }
+.settlement-tabs :deep(.mall-page) { min-height: 0; padding: 0; background: transparent; }
 </style>

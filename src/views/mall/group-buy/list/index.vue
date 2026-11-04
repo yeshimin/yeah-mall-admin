@@ -92,31 +92,23 @@
         </template>
       </el-table-column>
       <el-table-column prop="description" label="活动描述" />
-      <el-table-column label="操作" width="440" fixed="right">
+      <el-table-column label="操作" width="220" fixed="right">
         <template #default="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope.row)" plain>
-            <el-icon><Edit /></el-icon>
-            编辑
-          </el-button>
-          <el-button v-if="getNextStatus(scope.row.status)" type="warning" size="small" @click="handleStatusChange(scope.row)" plain>
+          <el-button link type="primary" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button v-if="getNextStatus(scope.row.status)" link type="primary" @click="handleStatusChange(scope.row)">
             {{ getNextStatusText(scope.row.status) }}
           </el-button>
-          <el-button type="success" size="small" @click="handleProduct(scope.row)" plain>
-            <el-icon><Goods /></el-icon>
-            商品管理
-          </el-button>
-          <el-button type="primary" size="small" @click="handleGroupOverview(scope.row)" plain>
-            <el-icon><View /></el-icon>
-            查看拼团
-          </el-button>
-          <el-button type="info" size="small" @click="handleAudit(scope.row)" plain>
-            <el-icon><Check /></el-icon>
-            申请审核
-          </el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope.row.id)" plain>
-            <el-icon><Delete /></el-icon>
-            删除
-          </el-button>
+          <el-dropdown @command="handleActivityAction($event, scope.row)">
+            <el-button link type="primary">更多</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="product">商品管理</el-dropdown-item>
+                <el-dropdown-item command="groups">查看拼团</el-dropdown-item>
+                <el-dropdown-item command="audit">申请审核</el-dropdown-item>
+                <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
@@ -126,7 +118,7 @@
         v-model:current-page="pagination.current"
         v-model:page-size="pagination.size"
         :page-sizes="[10, 20, 50, 100]"
-        layout="sizes, prev, pager, next, jumper"
+        layout="total, sizes, prev, pager, next, jumper"
         :total="Number(pagination.total)"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -595,6 +587,13 @@ function handleAudit(row) {
   router.push(`/mall/group-buy/audit?activityId=${row.id}`)
 }
 
+function handleActivityAction(command, row) {
+  if (command === 'product') return handleProduct(row)
+  if (command === 'groups') return handleGroupOverview(row)
+  if (command === 'audit') return handleAudit(row)
+  if (command === 'delete') return handleDelete(row.id)
+}
+
 /**
  * 查看活动下当前所有团的状态。
  */
@@ -768,14 +767,6 @@ function handleEnabledChange(row) {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 24px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .pagination-container {
   margin-top: 20px;
   display: flex;
@@ -789,7 +780,7 @@ function handleEnabledChange(row) {
 .form-tip {
   width: 100%;
   margin-top: 8px;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
   font-size: 12px;
 }
 
@@ -808,7 +799,7 @@ function handleEnabledChange(row) {
 .reserved-count {
   display: block;
   margin-top: 2px;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
   font-size: 12px;
 }
 </style>

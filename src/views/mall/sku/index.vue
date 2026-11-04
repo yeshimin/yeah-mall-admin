@@ -288,15 +288,11 @@ function getShopId() {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 20px;
-}
-
 /* 新增规格样式 */
 .spec-loading,
 .spec-empty {
   padding: 10px;
-  color: #606266;
+  color: var(--mall-ink-secondary, #30423a);
   text-align: center;
 }
 .spec-item {

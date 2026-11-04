@@ -19,7 +19,7 @@
           </el-form-item>
           <el-form-item class="mall-query-actions">
             <el-button @click="resetLedger">重置</el-button>
-            <el-button type="primary" @click="loadLedger(true)">查询</el-button>
+            <el-button type="primary" icon="Search" @click="loadLedger(true)">查询</el-button>
           </el-form-item>
         </el-form>
         </section>

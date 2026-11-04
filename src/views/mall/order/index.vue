@@ -83,7 +83,7 @@
         </el-form-item>
         <el-form-item class="mall-query-actions">
           <el-button @click="resetForm">重置</el-button>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
+          <el-button type="primary" icon="Search" @click="handleSearch">查询</el-button>
         </el-form-item>
       </el-form>
     </section>
@@ -143,13 +143,13 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="400" fixed="right">
+        <el-table-column label="操作" width="250" fixed="right">
           <template #default="scope">
-            <el-button size="small" @click="handleOrderDetail(scope.row)">详情</el-button>
-            <el-button size="small" type="primary" v-if="scope.row.status === '2' || scope.row.status === 2" @click="handleDeliver(scope.row)">发货</el-button>
-            <el-button size="small" type="primary" v-if="scope.row.status === '3' || scope.row.status === 3" @click="handleDeliver(scope.row)">更新发货信息</el-button>
-            <el-button size="small" type="warning" v-if="(scope.row.status === '6' || scope.row.status === 6) && ((scope.row.refundStatus === '1' || scope.row.refundStatus === 1) || (scope.row.refundStatus === '5' || scope.row.refundStatus === 5))" @click="handleProcessRefund(scope.row)">处理退款</el-button>
-            <el-button size="small" type="info" v-if="scope.row.refundStatus && scope.row.refundStatus !== '0' && scope.row.refundStatus !== 0" @click="handleViewRefundRecords(scope.row)">退款记录</el-button>
+            <el-button link type="primary" @click="handleOrderDetail(scope.row)">详情</el-button>
+            <el-button link type="primary" v-if="scope.row.status === '2' || scope.row.status === 2" @click="handleDeliver(scope.row)">发货</el-button>
+            <el-button link type="primary" v-if="scope.row.status === '3' || scope.row.status === 3" @click="handleDeliver(scope.row)">更新物流</el-button>
+            <el-button link type="warning" v-if="(scope.row.status === '6' || scope.row.status === 6) && ((scope.row.refundStatus === '1' || scope.row.refundStatus === 1) || (scope.row.refundStatus === '5' || scope.row.refundStatus === 5))" @click="handleProcessRefund(scope.row)">处理退款</el-button>
+            <el-button link type="primary" v-if="scope.row.refundStatus && scope.row.refundStatus !== '0' && scope.row.refundStatus !== 0" @click="handleViewRefundRecords(scope.row)">退款记录</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -159,8 +159,8 @@
           v-model:current-page="pagination.current"
           v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50, 100]"
-          layout="sizes, prev, pager, next, jumper"
-          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="Number(pagination.total)"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
@@ -1542,7 +1542,7 @@ onMounted(() => {
 
 .spec-item {
   font-size: 12px;
-  color: #606266;
+  color: var(--mall-muted, #65726a);
 }
 
 .spec-separator {
@@ -1575,12 +1575,12 @@ onMounted(() => {
 .detail-item .label {
   width: 110px;
   font-weight: bold;
-  color: #606266;
+  color: var(--mall-muted, #65726a);
   flex-shrink: 0;
 }
 
 .detail-item .value {
-  color: #333;
+  color: var(--mall-ink-secondary, #30423a);
   word-break: break-all;
 }
 
@@ -1603,7 +1603,7 @@ onMounted(() => {
 .delivery-item .label {
   width: 100px;
   font-weight: bold;
-  color: #606266;
+  color: var(--mall-muted, #65726a);
 }
 
 .tracking-list {
@@ -1632,15 +1632,15 @@ onMounted(() => {
   }
   &.current-node {
     &:before {
-      background-color: #409eff;
-      box-shadow: 0 0 0 2px #c6e2ff;
+      background-color: var(--mall-brand, #24634f);
+      box-shadow: 0 0 0 2px var(--mall-brand-soft, #e8f2ed);
     }
     .tracking-time {
-      color: #409eff;
+      color: var(--mall-brand, #24634f);
       font-weight: bold;
     }
     .tracking-content {
-      color: #409eff;
+      color: var(--mall-brand, #24634f);
       font-weight: bold;
     }
   }
@@ -1648,20 +1648,20 @@ onMounted(() => {
 
 .tracking-time {
   font-size: 12px;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
   margin-bottom: 5px;
 }
 
 .tracking-content {
   font-size: 14px;
-  color: #606266;
+  color: var(--mall-ink-secondary, #30423a);
 }
 
 .no-tracking,
 .no-delivery,
 .no-refund-records {
   text-align: center;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
   padding: 20px 0;
 }
 
@@ -1719,7 +1719,7 @@ onMounted(() => {
 
 .time-range-separator {
   margin: 0 8px;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
 }
 
 </style>

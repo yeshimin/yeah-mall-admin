@@ -12,7 +12,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button type="primary" icon="Search" @click="handleSearch">搜索</el-button>
           <el-button @click="resetForm">重置</el-button>
         </el-form-item>
       </el-form>
@@ -695,10 +695,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.chat-manage {
-  padding: 20px;
-}
-
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -722,7 +718,7 @@ onBeforeUnmount(() => {
 }
 
 .message-content {
-  color: #606266;
+  color: var(--mall-ink-secondary, #30423a);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -730,7 +726,7 @@ onBeforeUnmount(() => {
 
 .message-time {
   font-size: 12px;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
 }
 
 /* 聊天对话框样式 */
@@ -799,7 +795,7 @@ onBeforeUnmount(() => {
 
 .message-nickname {
   font-size: 12px;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
   margin-bottom: 4px;
 
   &.send {
@@ -817,14 +813,14 @@ onBeforeUnmount(() => {
   word-break: break-word;
 
   &.send {
-    background-color: #409eff;
+    background-color: var(--mall-brand, #24634f);
     color: white;
     border-bottom-right-radius: 4px;
   }
 
   &.receive {
     background-color: white;
-    color: #303133;
+    color: var(--mall-ink-secondary, #30423a);
     border-bottom-left-radius: 4px;
   }
 
@@ -890,7 +886,7 @@ onBeforeUnmount(() => {
 .no-messages {
   text-align: center;
   padding: 40px 0;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
 }
 
 .chat-input {
@@ -973,7 +969,7 @@ textarea:focus {
 .no-messages {
   text-align: center;
   padding: 40px 0;
-  color: #909399;
+  color: var(--mall-muted, #65726a);
 }
 
 .chat-manage {

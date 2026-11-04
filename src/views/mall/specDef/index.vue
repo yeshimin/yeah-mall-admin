@@ -6,7 +6,7 @@
           <el-input v-model="search.specName" clearable placeholder="请输入规格名称" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" native-type="submit">搜索</el-button>
+          <el-button type="primary" native-type="submit" icon="Search">搜索</el-button>
           <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
@@ -14,7 +14,7 @@
 
     <div class="action-bar">
       <div class="action-buttons">
-        <el-button type="primary" @click="openSpecForm()">新增规格</el-button>
+        <el-button type="primary" icon="Plus" @click="openSpecForm()">新增规格</el-button>
         <el-button type="danger" :disabled="selectedSpecs.length === 0" @click="removeSpecs()">批量删除</el-button>
       </div>
       <MallListTools v-model:showSearch="showSearch" @refresh="loadSpecs" />
@@ -72,7 +72,7 @@
 
     <el-dialog v-model="optionsDialog.visible" :title="`${optionsDialog.spec?.specName || ''} · 规格选项`" width="720px">
       <div class="options-action">
-        <el-button type="primary" @click="openOptionForm()">新增选项</el-button>
+        <el-button type="primary" icon="Plus" @click="openOptionForm()">新增选项</el-button>
       </div>
       <el-table v-loading="optionsDialog.loading" :data="optionsDialog.options" stripe>
         <el-table-column prop="optName" label="选项名称" min-width="180" />
@@ -329,13 +329,10 @@ onMounted(() => void loadSpecs())
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  background: #fff;
 }
 
-.search-bar { margin-bottom: 20px; }
 .action-bar { display: flex; justify-content: space-between; align-items: center; }
 .action-buttons { display: flex; gap: 12px; }
-.table-container { flex: 1; min-height: 0; margin-top: 20px; }
+.table-container { flex: 1; min-height: 0; }
 .options-action { display: flex; justify-content: flex-end; margin-bottom: 16px; }
 </style>

@@ -569,14 +569,6 @@ function handleCurrentChange(current) {
 </script>
 
 <style lang="scss" scoped>
-.seckill-manage {
-  padding: 20px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .pagination-container {
   margin-top: 20px;
   display: flex;

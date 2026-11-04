@@ -2,47 +2,19 @@
   <div class="basic-settings mall-page">
     <el-card class="settings-card" shadow="never">
       <template #header>
-        <div class="card-header">
-          <h3>店铺信息设置</h3>
+        <div class="settings-section-title">
+          <div>
+            <h3>店铺信息设置</h3>
+            <p>资料仅作用于当前登录选择的店铺，保存后同步展示在 App 店铺页。</p>
+          </div>
+          <el-tag :type="settingsForm.isOpen ? 'success' : 'info'">
+            {{ settingsForm.isOpen ? '营业中' : '已停业' }}
+          </el-tag>
         </div>
       </template>
 
-      <el-form ref="settingsFormRef" :model="settingsForm" label-width="120px" :rules="settingsRules">
-        <el-form-item label="店铺编号" prop="shopNo">
-          <el-input v-model="settingsForm.shopNo" placeholder="店铺编号" style="width: 400px;" disabled></el-input>
-        </el-form-item>
-
-        <el-form-item label="店铺名称" prop="shopName">
-          <el-input v-model="settingsForm.shopName" placeholder="请输入店铺名称" style="width: 400px;"></el-input>
-        </el-form-item>
-
-        <el-form-item label="店铺简介" prop="shopIntro">
-          <el-input
-            v-model="settingsForm.shopIntro"
-            type="textarea"
-            :rows="4"
-            maxlength="500"
-            show-word-limit
-            placeholder="简要介绍店铺经营内容与特色"
-            style="width: 520px;"
-          />
-        </el-form-item>
-
-        <el-form-item label="营业状态">
-          <el-switch v-model="settingsForm.isOpen" active-text="营业中" inactive-text="已停业" />
-          <div class="form-tip">停业后商品仍可在平台浏览，但用户不能提交新订单。</div>
-        </el-form-item>
-
-        <el-form-item label="平台佣金">
-          <el-input :model-value="`${settingsForm.settlementCommissionRate}%`" style="width: 400px;" disabled />
-        </el-form-item>
-
-        <el-form-item label="结算周期">
-          <el-input :model-value="`订单完成后 ${settingsForm.settlementDelayDays} 天`" style="width: 400px;" disabled />
-          <div class="form-tip">结算规则由平台设置，如有疑问请联系平台管理员。</div>
-        </el-form-item>
-
-        <el-form-item label="店铺Logo" prop="shopLogo">
+      <div class="settings-form-layout">
+        <aside class="settings-logo-panel">
           <el-upload
             class="logo-upload"
             :action="merchantStorageUploadUrl"
@@ -57,28 +29,63 @@
                 v-if="settingsForm.shopLogo"
                 :src="getFullImageUrl(settingsForm.shopLogo)"
                 fit="cover"
-                :style="{ width: '120px', height: '120px' }"
+                class="shop-logo-preview"
               >
                 <template #error>
-                  <div class="image-slot">
-                    <el-icon><picture-filled /></el-icon>
-                  </div>
+                  <div class="upload-placeholder"><el-icon><picture-filled /></el-icon></div>
                 </template>
               </el-image>
               <div v-else class="upload-placeholder">
                 <el-icon><upload-filled /></el-icon>
-                <div class="upload-text">点击上传Logo</div>
+                <span>上传 Logo</span>
               </div>
             </div>
           </el-upload>
-          <div class="form-tip">建议上传尺寸为200x200的图片，支持JPG、PNG格式</div>
+          <strong>店铺 Logo</strong>
+          <span>建议 200 × 200，支持 JPG、PNG</span>
+        </aside>
+
+      <el-form ref="settingsFormRef" :model="settingsForm" label-position="top" :rules="settingsRules" class="settings-form-grid">
+        <el-form-item label="店铺编号" prop="shopNo">
+          <el-input v-model="settingsForm.shopNo" placeholder="店铺编号" disabled />
         </el-form-item>
 
-        <el-form-item>
-          <el-button type="primary" @click="handleSaveSettings" :loading="saving">保存设置</el-button>
-          <el-button @click="handleResetForm">重置</el-button>
+        <el-form-item label="店铺名称" prop="shopName">
+          <el-input v-model="settingsForm.shopName" placeholder="请输入店铺名称" />
+        </el-form-item>
+
+        <el-form-item label="店铺简介" prop="shopIntro" class="settings-form-wide">
+          <el-input
+            v-model="settingsForm.shopIntro"
+            type="textarea"
+            :rows="4"
+            maxlength="500"
+            show-word-limit
+            placeholder="简要介绍店铺经营内容与特色"
+          />
+        </el-form-item>
+
+        <el-form-item label="营业状态" class="business-status-field">
+          <el-switch v-model="settingsForm.isOpen" active-text="营业中" inactive-text="已停业" />
+          <div class="form-tip">停业后商品仍可在平台浏览，但用户不能提交新订单。</div>
+        </el-form-item>
+
+        <el-form-item label="平台佣金">
+          <el-input :model-value="`${settingsForm.settlementCommissionRate}%`" disabled />
+          <div class="form-tip">由平台统一设置。</div>
+        </el-form-item>
+
+        <el-form-item label="结算周期">
+          <el-input :model-value="`订单完成后 ${settingsForm.settlementDelayDays} 天`" disabled />
+          <div class="form-tip">结算规则由平台设置，如有疑问请联系平台管理员。</div>
         </el-form-item>
       </el-form>
+      </div>
+
+      <div class="settings-save-bar">
+        <el-button @click="handleResetForm">重置</el-button>
+        <el-button type="primary" :loading="saving" @click="handleSaveSettings">保存设置</el-button>
+      </div>
     </el-card>
   </div>
 </template>
@@ -218,52 +225,120 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.basic-settings {
-  padding: 20px;
-}
-
-.card-header {
+.settings-section-title {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-}
 
-.logo-upload {
-  margin-bottom: 20px;
-}
+  h3,
+  p {
+    margin: 0;
+  }
 
-.upload-area {
-  display: inline-block;
-  cursor: pointer;
-}
-
-.upload-placeholder {
-  width: 120px;
-  height: 120px;
-  border: 1px dashed #d9d9d9;
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #fafafa;
-  transition: all 0.3s;
-
-  &:hover {
-    border-color: #409eff;
-    background-color: #f0f9ff;
+  p {
+    margin-top: 5px;
+    color: var(--mall-muted);
+    font-size: 12px;
   }
 }
 
-.upload-text {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #909399;
+.settings-form-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 28px;
+  padding: 24px;
+}
+
+.settings-logo-panel {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 8px;
+  background: #f4f6f3;
+
+  strong {
+    color: var(--mall-ink);
+    font-size: 13px;
+  }
+
+  > span {
+    color: var(--mall-muted);
+    font-size: 12px;
+    text-align: center;
+  }
+}
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 22px;
+
+  :deep(.el-form-item) {
+    margin-bottom: 16px;
+  }
+
+  :deep(.settings-form-wide) {
+    grid-column: 1 / -1;
+  }
+}
+
+.upload-area {
+  cursor: pointer;
+}
+
+.shop-logo-preview,
+.upload-placeholder {
+  width: 120px;
+  height: 120px;
+  overflow: hidden;
+  border: 1px dashed var(--mall-line-strong);
+  border-radius: 8px;
+}
+
+.upload-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--mall-muted);
+  background: #fff;
+  transition: 0.2s ease;
+
+  &:hover {
+    color: var(--mall-brand);
+    border-color: var(--mall-brand);
+    background: var(--mall-brand-soft);
+  }
 }
 
 .form-tip {
-  margin-top: 8px;
+  margin-top: 6px;
+  color: var(--mall-muted);
   font-size: 12px;
-  color: #909399;
+  line-height: 1.5;
+}
+
+.settings-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--mall-line);
+  background: #fafbfa;
+}
+
+@media (max-width: 900px) {
+  .settings-form-layout,
+  .settings-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-form-grid :deep(.settings-form-wide) {
+    grid-column: auto;
+  }
 }
 </style>

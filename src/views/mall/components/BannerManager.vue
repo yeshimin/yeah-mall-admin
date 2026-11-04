@@ -2,7 +2,7 @@
   <div class="banner-page mall-page">
     <div class="action-bar">
       <div class="action-buttons">
-        <el-button type="primary" @click="openForm()">新增 Banner</el-button>
+        <el-button type="primary" icon="Plus" @click="openForm()">新增 Banner</el-button>
         <el-button type="danger" :disabled="selectedRows.length === 0" @click="removeBanners()">批量删除</el-button>
       </div>
       <MallListTools :search="false" @refresh="loadBanners" />
@@ -246,14 +246,12 @@ onMounted(() => void loadBanners())
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  background: #fff;
 }
 
 .action-bar { display: flex; justify-content: space-between; align-items: center; }
 .action-buttons { display: flex; gap: 12px; }
-.table-container { flex: 1; min-height: 0; margin-top: 20px; }
-.current-image { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; color: #606266; }
-.upload-tip { margin-top: 8px; color: #909399; font-size: 12px; }
-.field-tip { margin-top: 6px; color: #909399; font-size: 12px; line-height: 1.5; }
+.table-container { flex: 1; min-height: 0; }
+.current-image { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; color: var(--mall-ink-secondary, #30423a); }
+.upload-tip { margin-top: 8px; color: var(--mall-muted, #65726a); font-size: 12px; }
+.field-tip { margin-top: 6px; color: var(--mall-muted, #65726a); font-size: 12px; line-height: 1.5; }
 </style>

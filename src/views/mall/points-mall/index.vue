@@ -3,7 +3,7 @@
     <el-tabs v-model="activeTab" class="content-tabs" @tab-change="loadActiveTab">
       <el-tab-pane label="商品分类" name="category">
         <div class="toolbar-row">
-          <el-button type="primary" @click="openCategoryDialog()">新增分类</el-button>
+          <el-button type="primary" icon="Plus" @click="openCategoryDialog()">新增分类</el-button>
         </div>
         <el-table v-loading="loading" :data="categories" row-key="id">
           <el-table-column prop="name" label="分类名称" min-width="180" />
@@ -49,12 +49,12 @@
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="loadProducts(true)">查询</el-button>
+            <el-button type="primary" icon="Search" @click="loadProducts(true)">查询</el-button>
             <el-button @click="resetProductQuery">重置</el-button>
           </el-form-item>
         </el-form>
         <div class="toolbar-row">
-          <el-button type="primary" @click="openProductDialog()">新增商品</el-button>
+          <el-button type="primary" icon="Plus" @click="openProductDialog()">新增商品</el-button>
         </div>
         <el-table v-loading="loading" :data="products">
           <el-table-column label="商品" min-width="260">
@@ -86,9 +86,16 @@
           <el-table-column prop="perMemberLimit" label="每人限兑" width="100">
             <template #default="{ row }">{{ row.perMemberLimit > POINTS_UNLIMITED_PER_MEMBER_LIMIT ? row.perMemberLimit : '不限' }}</template>
           </el-table-column>
-          <el-table-column label="状态" width="90">
+          <el-table-column label="状态" width="140">
             <template #default="{ row }">
-              <el-tag :type="row.isEnabled ? 'success' : 'info'">{{ row.isEnabled ? '已上架' : '已下架' }}</el-tag>
+              <div class="status-switch-cell">
+                <el-switch
+                  :model-value="Boolean(row.isEnabled)"
+                  :loading="productStatusUpdatingId === row.id"
+                  @change="changeProductStatus(row, $event)"
+                />
+                <span>{{ row.isEnabled ? '已上架' : '已下架' }}</span>
+              </div>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="220" fixed="right">
@@ -121,7 +128,7 @@
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="loadOrders(true)">查询</el-button>
+            <el-button type="primary" icon="Search" @click="loadOrders(true)">查询</el-button>
             <el-button @click="resetOrderQuery">重置</el-button>
           </el-form-item>
         </el-form>
@@ -251,7 +258,7 @@
     </el-dialog>
 
     <el-dialog v-model="skuDialog.visible" :title="`${skuDialog.product?.name || ''} · SKU管理`" width="820px">
-      <div class="toolbar-row"><el-button type="primary" @click="openSkuEdit()">新增SKU</el-button></div>
+      <div class="toolbar-row"><el-button type="primary" icon="Plus" @click="openSkuEdit()">新增SKU</el-button></div>
       <el-table v-loading="skuDialog.loading" :data="skuDialog.rows">
         <el-table-column prop="name" label="SKU名称" min-width="180" />
         <el-table-column label="图片" width="90">
@@ -398,6 +405,7 @@ import {
   savePointsProduct,
   savePointsSku,
   shipPointsOrder,
+  updatePointsProductStatus,
 } from '@/api/mall/pointsMall'
 
 const ImageUploader = defineComponent({
@@ -429,6 +437,7 @@ const activeTab = ref('category')
 const loading = ref(false)
 const categories = ref<any[]>([])
 const products = ref<any[]>([])
+const productStatusUpdatingId = ref('')
 const coupons = ref<any[]>([])
 const deliveryProviders = ref<any[]>([])
 const deliveryProviderLoading = ref(false)
@@ -553,6 +562,18 @@ async function submitProduct() {
   await savePointsProduct({ ...productDialog.form, beginTime, endTime, exchangeTime: undefined, couponId: productDialog.form.couponId || null })
   ElMessage.success('商品保存成功'); productDialog.visible = false; await loadProducts()
 }
+async function changeProductStatus(row: any, value: string | number | boolean) {
+  const isEnabled = Boolean(value)
+  if (Boolean(row.isEnabled) === isEnabled || productStatusUpdatingId.value) return
+  productStatusUpdatingId.value = row.id
+  try {
+    await updatePointsProductStatus({ id: row.id, isEnabled })
+    row.isEnabled = isEnabled
+    ElMessage.success(isEnabled ? '商品已上架' : '商品已下架')
+  } finally {
+    productStatusUpdatingId.value = ''
+  }
+}
 async function removeProduct(row: any) {
   await ElMessageBox.confirm(`确认删除积分商品“${row.name}”？仅无兑换记录的商品可删除。`, '删除确认', { type: 'warning' })
   await deletePointsProduct(row.id); ElMessage.success('删除成功'); await loadProducts()
@@ -614,6 +635,8 @@ onMounted(loadCategories)
 .filter-form + .toolbar-row { margin: -1px 0 16px; padding: 0 16px 14px; border: 1px solid var(--mall-line); border-top: 0; border-radius: 0 0 8px 8px; background: #fafcfa; }
 .filter-form:has(+ .toolbar-row) { border-bottom: 0; border-radius: 8px 8px 0 0; }
 .product-cell { display: flex; align-items: center; gap: 12px; }.product-cell p { margin: 4px 0 0; color: var(--mall-muted); font-size: 12px; }.product-cell.compact { gap: 8px; }
+.status-switch-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.status-switch-cell span { color: var(--mall-muted); font-size: 12px; }
 .product-image { width: 58px; height: 58px; border-radius: 9px; background: var(--sand); }.table-image { width: 44px; height: 44px; border-radius: 7px; background: var(--sand); }
 .muted { color: var(--mall-muted); font-size: 12px; }.form-tip { margin-left: 12px; color: var(--mall-muted); font-size: 12px; }.dialog-form { margin-top: 18px; }
 .timeline-title { margin: 26px 0 18px; font-size: 16px; }.image-uploader { display: flex; align-items: center; gap: 12px; }.upload-preview { width: 72px; height: 72px; border-radius: 9px; background: var(--sand); }

@@ -1,5 +1,5 @@
 <template>
-  <div class="mall-page">
+  <div class="seckill-router-view">
     <router-view />
   </div>
 </template>
@@ -9,7 +9,5 @@
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 20px;
-}
+.seckill-router-view { min-height: 100%; }
 </style>

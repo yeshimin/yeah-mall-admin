@@ -89,7 +89,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.toolbar { display: flex; gap: 12px; margin-bottom: 16px; }
+.toolbar { display: flex; gap: 12px; }
 .ranking-card { margin-top: 16px; }
-.data-note { margin-top: 12px; color: #909399; font-size: 12px; text-align: center; }
+.data-note { margin-top: 12px; color: var(--mall-muted); font-size: 12px; text-align: center; }
 </style>

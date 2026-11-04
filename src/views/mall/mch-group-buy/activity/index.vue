@@ -52,48 +52,32 @@
         </template>
       </el-table-column>
       <el-table-column prop="description" label="活动描述" min-width="200" />
-      <el-table-column label="操作" width="440" fixed="right">
+      <el-table-column label="操作" width="190" fixed="right">
         <template #default="scope">
           <div class="activity-actions">
             <el-tooltip :content="getApplyDisabledReason(scope.row)" :disabled="canApply(scope.row)">
               <span class="apply-button-wrapper">
                 <el-button
-                  size="small"
+                  link
                   type="primary"
                   :disabled="!canApply(scope.row)"
                   @click="handleApply(scope.row)"
                 >
-                  <el-icon><Edit /></el-icon>
                   {{ canApply(scope.row) ? '申请参加' : '不可报名' }}
                 </el-button>
               </span>
             </el-tooltip>
 
-            <el-button
-              size="small"
-              type="info"
-              @click="goToApplyRecord(scope.row)"
-            >
-              <el-icon><Document /></el-icon>
-              申请记录
-            </el-button>
-
-            <el-button
-              size="small"
-              type="success"
-              @click="goToGroupBuyProduct(scope.row)"
-            >
-              <el-icon><Goods /></el-icon>
-              拼团商品
-            </el-button>
-            <el-button
-              size="small"
-              type="primary"
-              @click="handleGroupOverview(scope.row)"
-            >
-              <el-icon><View /></el-icon>
-              查看拼团
-            </el-button>
+            <el-dropdown @command="handleActivityAction($event, scope.row)">
+              <el-button link type="primary">更多</el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="apply">申请记录</el-dropdown-item>
+                  <el-dropdown-item command="product">拼团商品</el-dropdown-item>
+                  <el-dropdown-item command="groups">查看拼团</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </template>
       </el-table-column>
@@ -1040,6 +1024,12 @@ const goToGroupBuyProduct = (activity) => {
   })
 }
 
+function handleActivityAction(command, row) {
+  if (command === 'apply') return goToApplyRecord(row)
+  if (command === 'product') return goToGroupBuyProduct(row)
+  if (command === 'groups') return handleGroupOverview(row)
+}
+
 // 获取状态文本
 function getStatusText(status) {
   const statusMap = {
@@ -1075,14 +1065,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 24px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .dialog-footer {
   text-align: right;
 }
@@ -1096,6 +1078,7 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
 }
 

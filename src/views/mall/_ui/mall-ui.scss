@@ -30,7 +30,7 @@
   padding: 16px;
   border: 1px solid var(--mall-line);
   border-radius: 8px;
-  background: #fafcfa;
+  background: #fff;
 }
 
 /* Transitional coverage for mall pages that have not adopted the shared shell yet. */
@@ -65,10 +65,10 @@
   border: 1px solid var(--mall-line);
   border-top: 0;
   border-radius: 0 0 8px 8px;
-  background: #fafcfa;
+  background: #fff;
 }
 
-.mall-page > .el-form:has(+ .mall-action-row),
+.mall-page > .el-form:has(+ .mall-action-row > :not(.mall-list-tools)),
 .mall-page > .search-bar:has(+ .action-bar),
 .mall-page > .query-form:has(+ .action-bar),
 .mall-page > .filter-form:has(+ .action-bar) {
@@ -84,6 +84,26 @@
   justify-content: flex-end;
   gap: 8px;
   margin: 0 0 14px;
+}
+
+.mall-page > .el-form.el-form--inline > .el-form-item:last-child .el-form-item__content,
+.mall-page .mall-query-actions .el-form-item__content {
+  gap: 8px;
+}
+
+.mall-page > .el-form.el-form--inline > .el-form-item:last-child .el-button--primary,
+.mall-page .mall-query-actions .el-button--primary {
+  order: 2;
+}
+
+.mall-page > .mall-action-row.el-row {
+  flex-wrap: wrap;
+}
+
+.mall-page > .mall-action-row.el-row > .el-col {
+  width: auto;
+  max-width: none;
+  flex: 0 0 auto;
 }
 
 .mall-page > .el-table,
@@ -188,16 +208,16 @@
 }
 
 .mall-table-panel .el-table th.el-table__cell {
-  height: 46px;
+  height: 42px;
   padding: 0;
   color: var(--mall-muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .mall-table-panel .el-table td.el-table__cell {
-  height: 60px;
-  padding: 8px 0;
+  height: 54px;
+  padding: 0;
   font-size: 13px;
 }
 
@@ -236,7 +256,18 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 0;
+}
+
+.mall-page .table-row-actions .el-button.is-link,
+.mall-page .mall-row-actions .el-button.is-link {
+  padding-right: 3px;
+  padding-left: 3px;
+}
+
+.mall-page .table-row-actions .el-button + .el-button,
+.mall-page .mall-row-actions .el-button + .el-button {
+  margin-left: 0;
 }
 
 .mall-page .el-dialog {
@@ -300,7 +331,7 @@
 .mall-filter-card {
   border-color: var(--mall-line);
   border-radius: 8px;
-  background: #fafcfa;
+  background: #fff;
 }
 
 .mall-filter-card .el-form-item {
@@ -317,7 +348,7 @@
   border: 1px solid var(--mall-line);
   border-top: 0;
   border-radius: 0 0 8px 8px;
-  background: #fafcfa;
+  background: #fff;
 }
 
 .mall-page > .search-bar:has(+ .action-bar),
@@ -404,18 +435,18 @@
 .mall-page > .table-container .el-table th.el-table__cell,
 .mall-page > .el-table th.el-table__cell,
 .mall-table-card .el-table th.el-table__cell {
-  height: 46px;
+  height: 42px;
   padding: 0;
   color: var(--mall-muted);
-  font-size: 13px;
-  font-weight: 650;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .mall-page > .table-container .el-table td.el-table__cell,
 .mall-page > .el-table td.el-table__cell,
 .mall-table-card .el-table td.el-table__cell {
-  height: 60px;
-  padding: 8px 0;
+  height: 54px;
+  padding: 0;
   font-size: 13px;
 }
 
@@ -442,6 +473,7 @@
 }
 
 .mall-page > .table-container:has(+ .mall-pagination),
+.mall-page > .el-table:has(+ .mall-pagination),
 .mall-page > .el-table:has(+ .pagination-container),
 .mall-page > .el-table:has(+ .pagination-wrapper) {
   border-radius: 8px 8px 0 0;
@@ -487,6 +519,42 @@
   font-size: 15px;
 }
 
+.mall-page .el-table .el-table-fixed-column--right .cell {
+  text-align: right;
+}
+
+.mall-page .mall-actions-column .cell {
+  text-align: right;
+}
+
+.mall-page .el-table .el-table-fixed-column--right .el-button + .el-button,
+.mall-page .mall-actions-column .el-button + .el-button {
+  margin-left: 4px;
+}
+
+.mall-page .el-table .el-table-fixed-column--right .el-button,
+.mall-page .mall-actions-column .el-button {
+  min-height: auto;
+  padding: 5px 6px;
+}
+
+.mall-page .el-table .el-dropdown {
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.mall-page .el-table .el-table-fixed-column--right .el-button.is-plain,
+.mall-page .mall-actions-column .el-button.is-plain {
+  border-color: transparent;
+  background: transparent;
+}
+
+.mall-page .el-table .el-image {
+  overflow: hidden;
+  border-radius: 6px;
+  background: #eef2ef;
+}
+
 .mall-page .el-descriptions__label {
   color: var(--mall-muted) !important;
   font-weight: 600 !important;
@@ -523,23 +591,6 @@
   padding: 22px;
 }
 
-.mall-page.basic-settings .settings-card .el-form {
-  display: grid;
-  width: 100%;
-  grid-template-columns: minmax(420px, 1fr) 280px;
-  column-gap: 40px;
-  align-items: start;
-}
-
-.mall-page.basic-settings .settings-card .el-form > .el-form-item:nth-child(3) {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-}
-
-.mall-page.basic-settings .settings-card .el-form > .el-form-item:last-child {
-  grid-column: 1 / -1;
-}
-
 .mall-page.basic-settings .settings-card .el-input {
   width: 100% !important;
 }
@@ -571,6 +622,36 @@
   border-radius: 8px;
 }
 
+.mall-page .el-tab-pane > .filter-form {
+  box-sizing: border-box;
+  margin: 0 0 14px;
+  padding: 14px 14px 0;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mall-page .el-tab-pane > .filter-form + .toolbar-row {
+  min-height: 50px;
+  margin-top: -15px;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+.mall-page .el-tab-pane > .filter-form:has(+ .toolbar-row) {
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.mall-page .el-tab-pane > .el-table {
+  margin-top: 14px;
+}
+
+.mall-page .el-tab-pane > .toolbar-row + .el-table,
+.mall-page .el-tab-pane > .filter-form + .el-table {
+  margin-top: 0;
+}
+
 .mall-page .el-tab-pane > .mall-pagination {
   min-height: 54px;
   box-sizing: border-box;
@@ -580,6 +661,87 @@
   border: 1px solid var(--mall-line);
   border-radius: 0 0 8px 8px;
   background: #fff;
+}
+
+.mall-page .toolbar,
+.mall-page .toolbar-row {
+  display: flex;
+  min-height: 62px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  box-sizing: border-box;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mall-page .el-row > .el-col > .el-card {
+  height: 100%;
+}
+
+.mall-page .el-statistic__head {
+  margin-bottom: 10px;
+  color: var(--mall-muted);
+  font-size: 13px;
+}
+
+.mall-page .el-statistic__number {
+  color: var(--mall-ink);
+  font-size: 24px;
+  font-weight: 650;
+}
+
+.mall-page .ranking-card {
+  overflow: hidden;
+  border-color: var(--mall-line);
+  box-shadow: none;
+}
+
+.mall-page .ranking-card .el-card__body {
+  padding: 0;
+}
+
+.mall-page .data-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin: 12px 0 0;
+  color: var(--mall-muted);
+  border-radius: 6px;
+  background: #eef2ef;
+  font-size: 12px;
+}
+
+.mall-page .channel-manager,
+.mall-page .merchant-account-form,
+.mall-page .payment-form-wrap {
+  box-sizing: border-box;
+  padding: 20px;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mall-page .channel-manager > .toolbar {
+  min-height: auto;
+  margin-bottom: 14px;
+  padding: 0;
+  border: 0;
+}
+
+.mall-page .channel-manager > .el-table {
+  overflow: hidden;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+}
+
+.mall-page .merchant-account-form,
+.mall-page .payment-form-wrap {
+  max-width: 980px;
 }
 
 /* Dialogs and drawers are teleported outside mall-page, so their finish lives here. */
@@ -610,6 +772,32 @@
   overflow: auto;
 }
 
+.el-overlay .el-dialog__body .el-form-item__label,
+.el-overlay .el-drawer__body .el-form-item__label {
+  color: #30423a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.el-overlay .el-dialog__body .el-input.is-disabled .el-input__wrapper,
+.el-overlay .el-dialog__body .el-select.is-disabled .el-select__wrapper,
+.el-overlay .el-dialog__body .el-textarea.is-disabled .el-textarea__inner,
+.el-overlay .el-drawer__body .el-input.is-disabled .el-input__wrapper,
+.el-overlay .el-drawer__body .el-textarea.is-disabled .el-textarea__inner {
+  color: #58665f;
+  background: #eef2ef;
+  box-shadow: 0 0 0 1px #d7dfda inset;
+}
+
+.el-overlay .el-dialog__body .detail-section,
+.el-overlay .el-drawer__body .detail-section {
+  margin-bottom: 14px;
+  padding: 16px;
+  border: 1px solid #e2e8e4;
+  border-radius: 8px;
+  background: #fff;
+}
+
 .el-overlay .el-dialog__footer {
   padding: 14px 22px 18px;
   border-top: 1px solid #e5ebe7;
@@ -621,6 +809,19 @@
   min-height: 36px;
   border-radius: 6px;
   font-weight: 600;
+}
+
+.el-overlay .pagination-container,
+.el-overlay .pagination-wrapper,
+.el-overlay .mall-pagination {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  margin: 12px 0 0 !important;
+  padding-top: 10px;
+  border-top: 1px solid #e5ebe7;
 }
 
 .el-overlay .el-drawer {
@@ -639,9 +840,47 @@
 }
 
 .el-message-box {
+  box-sizing: border-box;
+  width: 390px;
   max-width: calc(100vw - 40px);
+  padding: 16px 18px 14px;
   border: 1px solid #dce4de;
   border-radius: 10px;
+  box-shadow: 0 18px 48px rgba(23, 37, 31, 0.18);
+}
+
+.el-message-box:has(.el-message-box__input:not([style*='display: none'])) {
+  width: 460px;
+}
+
+.el-message-box .el-message-box__header {
+  padding-bottom: 8px;
+}
+
+.el-message-box .el-message-box__content {
+  padding: 8px 0 10px;
+}
+
+.el-message-box .el-message-box__container {
+  align-items: flex-start;
+}
+
+.el-message-box .el-message-box__message {
+  min-width: 0;
+  color: #30423a;
+}
+
+.el-message-box .el-message-box__message p {
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.el-message-box .el-message-box__input {
+  padding-top: 10px;
+}
+
+.el-message-box .el-message-box__btns {
+  padding-top: 8px;
 }
 
 .el-overlay .cs-chat-dialog .el-dialog__body {
@@ -681,5 +920,234 @@
   .mall-page > .action-bar,
   .mall-page > .mall-action-row {
     flex-wrap: wrap;
+  }
+}
+
+/* Approved compact-region layout synchronized from the formal prototype. */
+.mall-page,
+.mall-page.banner-page,
+.mall-page.quick-entry-page,
+.mall-page.spec-page,
+.mall-page.category-page,
+.mall-page.chat-manage,
+.mall-page.basic-settings,
+.mall-page.shipping-settings,
+.mall-page.seckill-session-manage,
+.mall-page.seckill-manage {
+  padding: 12px 12px 18px;
+}
+
+.mall-filter-panel {
+  min-height: 56px;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.mall-query-form,
+.mall-query-form .el-form-item,
+.mall-query-form .el-form-item__content {
+  align-items: center;
+}
+
+.mall-query-form {
+  gap: 8px 12px;
+}
+
+.mall-query-form .el-form-item__label,
+.mall-page > .el-form.el-form--inline .el-form-item__label,
+.mall-page > .query-form.el-form--inline .el-form-item__label,
+.mall-page > .filter-form.el-form--inline .el-form-item__label,
+.mall-page > .search-bar .el-form--inline .el-form-item__label {
+  padding-right: 8px;
+  white-space: nowrap;
+}
+
+.mall-filter-panel .el-input__wrapper,
+.mall-filter-panel .el-select__wrapper,
+.mall-filter-panel .el-date-editor.el-input__wrapper,
+.mall-filter-panel .el-button {
+  min-height: 36px;
+}
+
+.mall-table-panel {
+  margin-top: 8px;
+  border-radius: 6px;
+}
+
+.mall-page > .search-bar,
+.mall-page > .query-form,
+.mall-page > .filter-form,
+.mall-page > .el-form,
+.mall-page > .mall-filter-card {
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.mall-page > .el-form.el-form--inline,
+.mall-page > .query-form.el-form--inline,
+.mall-page > .filter-form.el-form--inline,
+.mall-page > .search-bar .el-form--inline {
+  align-items: center;
+}
+
+.mall-page > .el-form.el-form--inline .el-form-item,
+.mall-page > .query-form.el-form--inline .el-form-item,
+.mall-page > .filter-form.el-form--inline .el-form-item,
+.mall-page > .search-bar .el-form--inline .el-form-item {
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.mall-page > .action-bar,
+.mall-page > .mall-action-row,
+.mall-page .toolbar,
+.mall-page .toolbar-row {
+  margin-bottom: 8px;
+}
+
+.mall-page .el-table th.el-table__cell .cell,
+.mall-page .el-table td.el-table__cell .cell {
+  text-align: center !important;
+}
+
+.mall-page .table-row-actions,
+.mall-page .mall-row-actions,
+.mall-page .el-table .el-table-fixed-column--right .cell,
+.mall-page .mall-actions-column .cell {
+  justify-content: center;
+  text-align: center !important;
+}
+
+.mall-page .el-table :is(.member-cell, .merchant-account-cell, .shop-cell, .product-cell, .product-info, .group-product-cell, .detail-product-summary) {
+  display: inline-flex;
+  justify-content: center;
+}
+
+.mall-page .el-table :is(.member-cell, .merchant-account-cell, .shop-cell, .product-cell, .product-info, .group-product-cell, .detail-product-summary) > :is(div, span) {
+  text-align: left;
+}
+
+.mall-page > .mall-pagination,
+.mall-page > .pagination-container,
+.mall-page > .pagination-wrapper,
+.mall-table-panel .pagination-container,
+.mall-table-panel .pagination-wrapper,
+.mall-table-card .pagination-container,
+.mall-page .el-tab-pane > .mall-pagination {
+  min-height: 48px;
+  padding: 7px 12px;
+}
+
+.mall-page :is(.mall-pagination, .pagination-container, .pagination-wrapper) .el-pagination,
+.mall-table-panel > .el-pagination {
+  --el-pagination-font-size: 12px;
+  --el-pagination-button-width: 30px;
+  --el-pagination-button-height: 30px;
+  height: 30px;
+  font-size: 12px;
+}
+
+.mall-page :is(.mall-pagination, .pagination-container, .pagination-wrapper) :is(.el-select__wrapper, .el-input__wrapper),
+.mall-table-panel > .el-pagination :is(.el-select__wrapper, .el-input__wrapper) {
+  min-height: 30px;
+  height: 30px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 12px;
+}
+
+.mall-page :is(.mall-pagination, .pagination-container, .pagination-wrapper) :is(.el-pagination__total, .el-pagination__sizes, .el-pagination__jump),
+.mall-table-panel > .el-pagination :is(.el-pagination__total, .el-pagination__sizes, .el-pagination__jump) {
+  font-size: 12px;
+}
+
+.mall-filter-panel .el-form-item__label,
+.mall-page :is(.search-bar, .query-form, .filter-form) .el-form-item__label {
+  height: auto;
+  color: var(--mall-ink-secondary);
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.mall-page .el-form-item__label {
+  color: var(--mall-ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mall-filter-panel :is(.el-input__inner, .el-select__selected-item, .el-select__placeholder),
+.mall-page :is(.search-bar, .query-form, .filter-form) :is(.el-input__inner, .el-select__selected-item, .el-select__placeholder),
+.mall-filter-panel .el-button,
+.mall-page :is(.search-bar, .query-form, .filter-form) .el-button {
+  font-size: 12px;
+}
+
+.mall-business-actions .el-button,
+.mall-page > .action-bar .el-button,
+.mall-page .action-buttons .el-button {
+  min-height: 36px;
+  padding-right: 12px;
+  padding-left: 12px;
+  font-size: 12px;
+}
+
+.mall-business-actions .el-button--primary,
+.mall-page > .action-bar .el-button--primary,
+.mall-page .action-buttons .el-button--primary {
+  font-weight: 700;
+}
+
+.mall-page > .el-tabs .el-tabs__item,
+.mall-page > .home-operation-tabs .el-tabs__item {
+  height: 40px;
+  color: var(--mall-muted);
+  font-size: 13px;
+}
+
+.mall-page > .el-tabs .el-tabs__item.is-active,
+.mall-page > .home-operation-tabs .el-tabs__item.is-active {
+  color: var(--mall-brand);
+  font-weight: 600;
+}
+
+.mall-page .el-tab-pane > .filter-form,
+.mall-page .el-tab-pane > .el-table,
+.mall-page .ranking-card,
+.mall-page .channel-manager,
+.mall-page .merchant-account-form,
+.mall-page .payment-form-wrap {
+  border-radius: 6px;
+}
+
+.mall-page .el-tab-pane > .el-table {
+  margin-top: 8px;
+}
+
+@media (max-width: 1180px) {
+  .mall-filter-panel {
+    align-items: stretch;
+  }
+
+  .mall-query-form .el-form-item,
+  .mall-page > .el-form.el-form--inline .el-form-item,
+  .mall-page > .query-form.el-form--inline .el-form-item,
+  .mall-page > .filter-form.el-form--inline .el-form-item,
+  .mall-page > .search-bar .el-form--inline .el-form-item {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mall-query-form .el-form-item__label,
+  .mall-page > .el-form.el-form--inline .el-form-item__label,
+  .mall-page > .query-form.el-form--inline .el-form-item__label,
+  .mall-page > .filter-form.el-form--inline .el-form-item__label,
+  .mall-page > .search-bar .el-form--inline .el-form-item__label {
+    justify-content: flex-start;
+    padding: 0 0 5px;
   }
 }

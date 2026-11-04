@@ -81,85 +81,68 @@
         </template>
       </el-table-column>
       <el-table-column prop="description" label="活动描述" />
-      <el-table-column label="操作" width="450" fixed="right">
+      <el-table-column label="操作" width="220" fixed="right">
         <template #default="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope.row)" plain>
-            <el-icon><Edit /></el-icon>
-            编辑
-          </el-button>
-          <el-button type="success" size="small" @click="handleSession(scope.row)" plain>
-            <el-icon><Timer /></el-icon>
-            场次管理
-          </el-button>
+          <el-button link type="primary" @click="handleEdit(scope.row)">编辑</el-button>
           <!-- 状态操作按钮 -->
           <el-button
             v-if="scope.row.status === '1'"
-            type="info"
-            size="small"
+            link
+            type="primary"
             @click="handleStatusUpdate(scope.row, '2')"
-            plain
           >
-            <el-icon><Check /></el-icon>
             发布
           </el-button>
           <el-button
             v-else-if="scope.row.status === '2'"
-            type="info"
-            size="small"
+            link
+            type="primary"
             @click="handleStatusUpdate(scope.row, '3')"
-            plain
           >
-            <el-icon><Check /></el-icon>
             开始报名
           </el-button>
           <el-button
             v-else-if="scope.row.status === '3'"
-            type="info"
-            size="small"
+            link
+            type="primary"
             @click="handleStatusUpdate(scope.row, '4')"
-            plain
           >
-            <el-icon><Check /></el-icon>
             结束报名
           </el-button>
           <el-button
             v-else-if="scope.row.status === '4'"
-            type="info"
-            size="small"
+            link
+            type="primary"
             @click="handleStatusUpdate(scope.row, '5')"
-            plain
           >
-            <el-icon><Check /></el-icon>
             开始活动
           </el-button>
           <el-button
             v-else-if="scope.row.status === '5'"
-            type="info"
-            size="small"
+            link
+            type="primary"
             @click="handleStatusUpdate(scope.row, '6')"
-            plain
           >
-            <el-icon><Check /></el-icon>
             结束活动
           </el-button>
           <el-button
             v-else-if="scope.row.status === '6'"
-            type="info"
-            size="small"
+            link
+            type="primary"
             @click="handleStatusUpdate(scope.row, '7')"
-            plain
           >
-            <el-icon><Check /></el-icon>
             活动下架
           </el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope.row.id)" plain>
-            <el-icon><Delete /></el-icon>
-            删除
-          </el-button>
-          <el-button type="info" size="small" @click="handleAudit(scope.row)" plain>
-            <el-icon><Check /></el-icon>
-            申请审核
-          </el-button>
+          <el-dropdown @command="handleActivityAction($event, scope.row)">
+            <el-button link type="primary">更多</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="session">场次管理</el-dropdown-item>
+                <el-dropdown-item command="audit">申请审核</el-dropdown-item>
+                <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
@@ -621,17 +604,15 @@ function handleStatusUpdate(row, newStatus) {
 function handleAudit(row) {
   router.push(`/mall/seckill/audit?activityId=${row.id}`)
 }
+
+function handleActivityAction(command, row) {
+  if (command === 'session') return handleSession(row)
+  if (command === 'audit') return handleAudit(row)
+  if (command === 'delete') return handleDelete(row.id)
+}
 </script>
 
 <style scoped>
-.mall-page {
-  padding: 24px;
-}
-
-.mall-action-row {
-  margin-bottom: 8px;
-}
-
 .pagination-container {
   margin-top: 20px;
   display: flex;
