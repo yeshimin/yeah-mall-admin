@@ -30,15 +30,42 @@
     </div>
 
     <div class="header-right">
-      <el-popover placement="bottom" :width="240" trigger="click">
+      <el-popover
+        v-model:visible="notificationPopoverVisible"
+        placement="bottom"
+        :width="340"
+        trigger="click"
+        @show="handleNotificationShow"
+      >
         <template #reference>
-          <button type="button" class="header-action" title="通知">
-            <el-icon><Bell /></el-icon>
-          </button>
+          <el-badge :value="notificationStore.unreadCount" :hidden="notificationStore.unreadCount === 0" :max="99">
+            <button type="button" class="header-action" title="通知">
+              <el-icon><Bell /></el-icon>
+            </button>
+          </el-badge>
         </template>
         <div class="notification-panel">
-          <strong>通知</strong>
-          <p>暂无新通知</p>
+          <div class="notification-panel-header">
+            <strong>通知</strong>
+            <button type="button" @click="openNotificationCenter()">查看全部</button>
+          </div>
+          <div v-loading="notificationStore.summaryLoading" class="notification-list">
+            <button
+              v-for="item in notificationStore.recentMessages"
+              :key="item.receiverId"
+              type="button"
+              class="notification-item"
+              :class="{ unread: item.readStatus === '0' }"
+              @click="handleNotificationClick(item.receiverId)"
+            >
+              <span class="notification-dot"></span>
+              <span class="notification-item-main">
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.sendTime || '-' }}</span>
+              </span>
+            </button>
+            <p v-if="notificationStore.recentMessages.length === 0">暂无新通知</p>
+          </div>
         </div>
       </el-popover>
 
@@ -66,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ArrowDown, Bell, Expand, Fold, Menu, SwitchButton, User } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -74,6 +101,7 @@ import LayoutBreadcrumb from './LayoutBreadcrumb.vue'
 import LayoutNavigation from './LayoutNavigation.vue'
 import { useAppStore, type NavigationMode } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
+import { useNotificationStore } from '@/stores/notification'
 import { DEFAULT_AVATAR_URL, resolveAvatarUrl } from '@/utils/avatar'
 
 const props = withDefaults(defineProps<{
@@ -91,9 +119,11 @@ const router = useRouter()
 const route = useRoute()
 const appStore = useAppStore()
 const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 
 const defaultAvatar = DEFAULT_AVATAR_URL
 const avatarLoadFailed = ref(false)
+const notificationPopoverVisible = ref(false)
 const collapseIcon = computed(() => (appStore.sidebarCollapsed ? Expand : Fold))
 
 const avatarSource = computed(() => authStore.mine?.user?.avatar || '')
@@ -127,6 +157,23 @@ async function openHome() {
   }
 }
 
+function handleNotificationShow() {
+  void notificationStore.refreshSummary()
+}
+
+async function handleNotificationClick(receiverId: number) {
+  await openNotificationCenter(receiverId)
+}
+
+async function openNotificationCenter(receiverId?: number) {
+  notificationPopoverVisible.value = false
+  const query = receiverId == null ? {} : { receiverId: String(receiverId) }
+  const target = router.resolve({ path: '/notifications', query })
+  if (route.fullPath !== target.fullPath) {
+    await router.push(target)
+  }
+}
+
 async function handleCommand(command: string) {
   switch (command) {
     case 'profile':
@@ -141,6 +188,14 @@ async function handleCommand(command: string) {
       break
   }
 }
+
+onMounted(() => {
+  void notificationStore.start()
+})
+
+onBeforeUnmount(() => {
+  notificationStore.stop()
+})
 </script>
 
 <style scoped>
@@ -282,16 +337,89 @@ async function handleCommand(command: string) {
   font-size: 12px;
 }
 
-.notification-panel strong {
+.notification-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.notification-panel-header strong {
   color: #303133;
   font-size: 14px;
 }
 
-.notification-panel p {
+.notification-panel-header button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #409eff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.notification-list {
+  min-height: 80px;
+  max-height: 330px;
+  overflow-y: auto;
+}
+
+.notification-list p {
   margin: 14px 0 4px;
   color: #909399;
   font-size: 13px;
   text-align: center;
+}
+
+.notification-item {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 4px;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.notification-item:hover {
+  background: #f8fbff;
+}
+
+.notification-dot {
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+.notification-item.unread .notification-dot {
+  background: #409eff;
+}
+
+.notification-item-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.notification-item-main strong {
+  overflow: hidden;
+  color: #334155;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-item-main span {
+  color: #94a3b8;
+  font-size: 11px;
 }
 
 @media (max-width: 1200px) {

@@ -43,9 +43,11 @@ const AreaManage = () => import('../views/system/AreaManage.vue')
 const FileManage = () => import('../views/system/FileManage.vue')
 const StorageManage = () => import('../views/system/StorageManage.vue')
 const ProfileView = () => import('../views/profile/ProfileView.vue')
+const NotificationCenterView = () => import('../views/notification/NotificationCenterView.vue')
 const HomeView = () => import('../views/home/HomeView.vue')
 const backendViewModules = import.meta.glob('../views/**/*.vue')
 const registeredDynamicRouteNames = new Set<string>()
+const STATIC_MANAGED_MENU_PATHS = new Set(['/notifications'])
 
 const BACKEND_COMPONENT_MAP: Record<string, () => Promise<unknown>> = {
   'system/user/index': UserManage,
@@ -92,6 +94,15 @@ const asyncRoutes = [
         component: ProfileView,
         meta: {
           title: '个人中心',
+          ignoreAccessControl: true,
+        },
+      },
+      {
+        path: '/notifications',
+        name: 'notifications',
+        component: NotificationCenterView,
+        meta: {
+          title: '消息中心',
           ignoreAccessControl: true,
         },
       },
@@ -248,7 +259,9 @@ function buildDynamicRouteNode(node: ResourceTreeNode): RouteRecordRaw {
 
 function ensureDynamicRoutes(resources: ResourceTreeNode[]) {
   const dynamicMenus = resources.filter(
-    (item) => hasInternalRouteNode(item) && !item.path?.startsWith('/system'),
+    (item) => hasInternalRouteNode(item)
+      && !item.path?.startsWith('/system')
+      && !STATIC_MANAGED_MENU_PATHS.has(item.path || ''),
   )
   dynamicMenus.forEach((node) => {
     const route = buildDynamicRouteNode(node)
