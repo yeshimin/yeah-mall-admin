@@ -1,19 +1,11 @@
 <template>
   <div class="notification-center">
-    <section class="notification-hero">
-      <div>
-        <span class="hero-kicker">MESSAGE CENTER</span>
-        <h1>消息中心</h1>
-        <p>系统通告和业务提醒都会保存在这里，实时推送不会替代消息记录。</p>
-      </div>
-      <div class="hero-actions">
-        <span class="unread-summary">{{ unreadCount }} 条未读</span>
-        <el-button :disabled="unreadCount === 0" @click="handleReadAll">全部已读</el-button>
-        <el-button v-if="canSend" type="primary" @click="openSendDialog">发送消息</el-button>
-      </div>
-    </section>
-
     <section class="message-board">
+      <div class="message-actions">
+        <el-button v-if="canSend" type="primary" @click="openSendDialog">发送消息</el-button>
+        <el-button :disabled="unreadCount === 0" @click="handleReadAll">全部已读</el-button>
+        <el-tag effect="light">{{ unreadCount }} 条未读</el-tag>
+      </div>
       <div class="filter-bar">
         <el-segmented v-model="searchForm.readStatus" :options="readStatusOptions" @change="handleSearch" />
         <el-select v-model="searchForm.messageType" placeholder="消息类型" clearable @change="handleSearch">
@@ -409,59 +401,27 @@ watch(() => route.query.receiverId, (receiverId) => {
 
 <style scoped>
 .notification-center {
+  width: 100%;
   min-height: 100%;
-  padding: 24px;
-  background:
-    radial-gradient(circle at 92% 8%, rgb(64 158 255 / 14%), transparent 30%),
-    #f5f7fa;
+  padding: 20px;
+  background: #fff;
 }
 
-.notification-hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 30px 34px;
-  border-radius: 18px;
-  background: linear-gradient(120deg, #102a43, #1f4f72 65%, #1677a6);
-  color: #fff;
-  box-shadow: 0 18px 42px rgb(15 42 67 / 18%);
-}
-
-.hero-kicker {
-  color: #8fd3ff;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 2px;
-}
-
-.notification-hero h1 {
-  margin: 8px 0 6px;
-  font-size: 30px;
-}
-
-.notification-hero p {
-  margin: 0;
-  color: rgb(255 255 255 / 72%);
-}
-
-.hero-actions {
+.message-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+  margin-bottom: 16px;
 }
 
 .unread-summary {
-  margin-right: 6px;
-  color: #b9e5ff;
-  font-weight: 600;
+  margin-left: 4px;
+  color: #606266;
 }
 
 .message-board {
-  margin-top: 18px;
-  padding: 20px;
-  border: 1px solid #e7edf3;
-  border-radius: 16px;
+  width: 100%;
   background: #fff;
 }
 
@@ -580,13 +540,13 @@ watch(() => route.query.receiverId, (receiverId) => {
     padding: 12px;
   }
 
-  .notification-hero,
+  .message-actions,
   .filter-bar {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .hero-actions {
+  .message-actions {
     flex-wrap: wrap;
   }
 
