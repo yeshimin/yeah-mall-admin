@@ -34,6 +34,38 @@ npm ci
 npm run dev
 ```
 
+默认代理目标为 `http://127.0.0.1:8080`（见 `vite.config.ts`），开发端口使用 Vite 默认值。**如果后端就运行在 8080 端口，直接 `npm run dev` 即可，无需任何额外配置。**
+
+仅当后端运行在其他端口（下面以 10020 为例）、需要覆盖时才使用以下方式，请将示例值替换为你实际的端口：
+
+macOS / Linux / Git Bash：
+
+```bash
+# 覆盖后端代理目标端口为 10020，同时覆盖前端开发端口为 10029
+VITE_PROXY_TARGET=http://127.0.0.1:10020 npm run dev -- --port 10029
+```
+
+Windows PowerShell：
+
+```powershell
+# 覆盖后端代理目标端口为 10020，同时覆盖前端开发端口为 10029
+$env:VITE_PROXY_TARGET="http://127.0.0.1:10020"; npm run dev -- --port 10029
+```
+
+或者，将环境变量写入项目根目录的 `.env.local` 文件（适合本地固定配置，Vite 会自动加载，该文件通常已被 Git 忽略）：
+
+```dotenv
+VITE_PROXY_TARGET=http://127.0.0.1:10020
+```
+
+之后启动只需指定端口：
+
+```bash
+npm run dev -- --port 10029
+```
+
+> 上述命令中的 `10020`、`10029` 均为示例值，请替换为你实际的后端代理端口和前端开发端口。
+
 构建生产版本：
 
 ```bash
