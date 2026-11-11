@@ -547,14 +547,12 @@ onMounted(() => {
 
 <style scoped>
 .shop-cell {
-  display: inline-flex;
-  width: 196px;
-  max-width: 100%;
+  display: flex;
+  width: 100%;
   min-width: 0;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 10px;
-  margin: 0 auto;
   text-align: left;
 }
 
@@ -609,9 +607,9 @@ onMounted(() => {
 
 .shop-copy {
   display: flex;
-  width: 150px;
   min-width: 0;
-  flex: 0 1 150px;
+  max-width: calc(100% - 46px);
+  flex: 0 1 auto;
   flex-direction: column;
   gap: 2px;
 }
@@ -631,6 +629,7 @@ onMounted(() => {
   display: block;
   overflow: hidden;
   max-width: 100%;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -659,7 +658,7 @@ onMounted(() => {
 }
 
 .shop-id-value {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
 }
 
 .shop-identity-separator {
@@ -671,6 +670,7 @@ onMounted(() => {
   display: block;
   width: 100%;
   overflow: hidden;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

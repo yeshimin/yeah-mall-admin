@@ -40,9 +40,9 @@
         </el-table-column>
         <el-table-column label="店铺数量" min-width="160">
           <template #default="{ row }">
-            <el-button link class="merchant-shop-count" @click="openDetail(row)">
+            <button type="button" class="merchant-shop-count" @click="openDetail(row)">
               <strong>{{ row.shopCount }}</strong><span>家店铺</span>
-            </el-button>
+            </button>
           </template>
         </el-table-column>
         <el-table-column label="账号状态" min-width="160">
@@ -339,7 +339,8 @@ onMounted(() => void loadMerchants())
 .merchant-account-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
 .merchant-account-copy strong { overflow: hidden; color: var(--mall-ink, #17251f); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .merchant-account-copy small { overflow: hidden; color: var(--mall-muted, #65726a); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.merchant-shop-count { gap: 4px; }
+.merchant-shop-count { display: inline-flex; align-items: baseline; gap: 4px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.merchant-shop-count:hover strong { color: var(--ym-brand-strong, #174b3b); }
 .merchant-shop-count strong { color: var(--mall-brand, #24634f); font-family: var(--ym-font-mono, monospace); font-size: 15px; }
 .merchant-shop-count span { color: var(--mall-muted, #65726a); font-size: 11px; }
 .merchant-account-status { display: inline-flex; align-items: center; gap: 6px; color: #89938d; font-size: 12px; font-weight: 600; }

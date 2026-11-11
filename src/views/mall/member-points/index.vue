@@ -25,20 +25,50 @@
         </section>
 
         <section class="mall-table-panel">
-        <el-table v-loading="loading" :data="ledger">
-          <el-table-column prop="memberId" label="会员ID" min-width="180" />
-          <el-table-column prop="description" label="说明" min-width="160" />
-          <el-table-column prop="changePoints" label="变动" width="100">
+        <el-table v-loading="loading" :data="ledger" class="points-ledger-table">
+          <el-table-column label="会员ID" min-width="150">
+            <template #default="{ row }">
+              <CopyableText :value="row.memberId" label="会员ID" />
+            </template>
+          </el-table-column>
+          <el-table-column label="业务类型" width="110">
+            <template #default="{ row }">
+              <el-tag :type="bizTypeTone(row.bizType)">{{ bizTypeLabel(row.bizType) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="说明" min-width="180" show-overflow-tooltip />
+          <el-table-column label="变动" width="100" align="right">
             <template #default="{ row }">
               <span :class="row.changePoints >= 0 ? 'plus' : 'minus'">
-                {{ row.changePoints >= 0 ? '+' : '' }}{{ row.changePoints }}
+                {{ row.changePoints >= 0 ? '+' : '' }}{{ formatPoints(row.changePoints) }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column prop="balanceBefore" label="变动前" width="100" />
-          <el-table-column prop="balanceAfter" label="变动后" width="100" />
-          <el-table-column prop="bizNo" label="业务单号" min-width="150" show-overflow-tooltip />
-          <el-table-column prop="createTime" label="创建时间" width="180" />
+          <el-table-column label="变动前" width="100" align="right">
+            <template #default="{ row }">{{ formatPoints(row.balanceBefore) }}</template>
+          </el-table-column>
+          <el-table-column label="变动后" width="100" align="right">
+            <template #default="{ row }">{{ formatPoints(row.balanceAfter) }}</template>
+          </el-table-column>
+          <el-table-column label="业务单号" min-width="160" show-overflow-tooltip>
+            <template #default="{ row }">
+              <CopyableText v-if="row.bizNo" :value="row.bizNo" label="业务单号" />
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" width="160">
+            <template #default="{ row }">
+              <span>{{ formatDate(row.createTime) }}</span>
+              <small class="points-time-sub">{{ formatTime(row.createTime) }}</small>
+            </template>
+          </el-table-column>
+          <template #empty>
+            <div class="points-empty">
+              <el-icon><Coin /></el-icon>
+              <strong>没有匹配的积分流水</strong>
+              <span>调整筛选条件后重试</span>
+            </div>
+          </template>
         </el-table>
 
         <MallPagination
@@ -60,7 +90,7 @@
               {{ row.calcType === MEMBER_POINTS_RULE_CALC_TYPE.FIXED ? '固定积分' : '按金额比例' }}
             </template>
           </el-table-column>
-          <el-table-column label="规则值" width="140">
+          <el-table-column label="规则值" width="140" align="right">
             <template #default="{ row }">
               {{ row.calcType === MEMBER_POINTS_RULE_CALC_TYPE.FIXED ? `${row.fixedPoints} 积分` : `每元 ${row.pointsPerYuan} 积分` }}
             </template>
@@ -111,21 +141,56 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Coin } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
 import MallPagination from '@/components/mall/MallPagination.vue'
+import CopyableText from '@/components/mall/CopyableText.vue'
 import { queryPointsLedger, queryPointsRules, updatePointsRule } from '@/api/mall/memberPoints'
 import { MEMBER_POINTS_BIZ_TYPE_OPTIONS, MEMBER_POINTS_RULE_CALC_TYPE } from '@/constants/memberPoints'
 
-const activeTab = ref('ledger')
 const route = useRoute()
+const initialTab = route.query.tab === 'rule' || route.query.tab === '积分规则' ? 'rule' : 'ledger'
+const activeTab = ref(initialTab)
 const loading = ref(false)
 const ledger = ref<any[]>([])
 const rules = ref<any[]>([])
 const ledgerQuery = reactive({ memberId: '', bizType: '' })
 const ledgerPage = reactive({ current: 1, size: 10, total: 0 })
 const ruleDialog = reactive({ visible: false, form: {} as any })
+
+type TagType = 'success' | 'warning' | 'info' | 'danger'
+
+const BIZ_TYPE_TONES: Record<string, TagType> = {
+  REGISTER: 'success',
+  ORDER_COMPLETE: 'success',
+  ORDER_REFUND: 'danger',
+  REVIEW: 'info',
+  MANUAL_ADJUST: 'warning',
+  POINTS_EXCHANGE: 'info',
+  POINTS_CANCEL: 'info',
+}
+
+function bizTypeLabel(value?: string) {
+  return MEMBER_POINTS_BIZ_TYPE_OPTIONS.find((item) => item.value === value)?.label || value || '-'
+}
+
+function bizTypeTone(value?: string): TagType {
+  return BIZ_TYPE_TONES[value || ''] || 'info'
+}
+
+function formatPoints(value: unknown) {
+  return Number(value || 0).toLocaleString('zh-CN')
+}
+
+function formatDate(value?: string) {
+  return value ? value.slice(0, 10) : '-'
+}
+
+function formatTime(value?: string) {
+  return value && value.length > 10 ? value.slice(11) : ''
+}
 
 /**
  * 查询积分流水。
@@ -202,6 +267,16 @@ function openRule(row: any) {
  * 保存积分规则。
  */
 async function saveRule() {
+  const form = ruleDialog.form
+  if (form.calcType === MEMBER_POINTS_RULE_CALC_TYPE.FIXED) {
+    if (form.fixedPoints == null || Number(form.fixedPoints) < 0) {
+      ElMessage.warning('固定积分不能小于 0')
+      return
+    }
+  } else if (form.pointsPerYuan == null || Number(form.pointsPerYuan) < 0) {
+    ElMessage.warning('每元积分不能小于 0')
+    return
+  }
   await updatePointsRule(ruleDialog.form)
   ElMessage.success('保存成功')
   ruleDialog.visible = false
@@ -209,11 +284,27 @@ async function saveRule() {
 }
 
 onMounted(() => {
-  if (route.query.tab === 'ledger') {
+  if (activeTab.value === 'ledger') {
     ledgerQuery.memberId = String(route.query.memberId || '')
+    loadLedger(true)
+  } else {
+    loadRules()
   }
-  loadLedger(true)
 })
+
+watch(
+  () => [route.query.tab, route.query.memberId],
+  () => {
+    const nextTab = route.query.tab === 'rule' || route.query.tab === '积分规则' ? 'rule' : 'ledger'
+    activeTab.value = nextTab
+    if (nextTab === 'ledger') {
+      ledgerQuery.memberId = String(route.query.memberId || '')
+      loadLedger(true)
+    } else {
+      loadRules()
+    }
+  },
+)
 </script>
 
 <style scoped>
@@ -237,5 +328,38 @@ onMounted(() => {
 .minus {
   color: #46776a;
   font-weight: 600;
+}
+
+.points-time-sub {
+  display: block;
+  margin-top: 4px;
+  color: var(--mall-muted, #65726a);
+  font-family: var(--ym-font-mono, monospace);
+  font-size: 10px;
+}
+
+.points-empty {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--mall-muted, #65726a);
+}
+
+.points-empty .el-icon {
+  margin-bottom: 3px;
+  color: var(--mall-brand, #24634f);
+  font-size: 28px;
+}
+
+.points-empty strong {
+  color: var(--mall-ink, #17251f);
+  font-size: 13px;
+}
+
+.points-empty span {
+  font-size: 12px;
 }
 </style>

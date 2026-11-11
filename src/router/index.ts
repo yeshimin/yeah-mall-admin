@@ -84,7 +84,7 @@ const asyncRoutes = [
     path: '/',
     component: Layout,
     redirect: '/home',
-    meta: { title: '首页' },
+    meta: { title: '经营概览' },
     children: [
       {
         path: '/home',

@@ -216,7 +216,7 @@ html body {
   height: 56px !important;
   flex-basis: 56px !important;
   padding: 0 14px !important;
-  border-bottom-color: var(--ym-line) !important;
+  border-bottom: 0 !important;
 }
 
 #app .sidebar-logo .brand-stamp,

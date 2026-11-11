@@ -1,460 +1,632 @@
 <template>
-  <div class="home-page">
-    <section class="welcome-card">
-      <div>
-        <p class="welcome-date">{{ currentDate }}</p>
-        <h1>{{ greeting }}，{{ authStore.displayName }}</h1>
-        <p class="welcome-description">欢迎使用管理后台，你可以从下方快捷入口开始处理工作。</p>
-      </div>
-      <el-button type="primary" @click="openProfile">
-        <el-icon><User /></el-icon>
-        个人中心
-      </el-button>
-    </section>
+  <div v-loading="loading" class="overview-page">
+    <el-empty
+      v-if="isMerchant && !currentShop"
+      description="请先选择店铺，再查看经营概览"
+    />
 
-    <template v-if="merchantDashboard">
-      <section class="merchant-heading">
-        <div>
-          <p>店铺经营</p>
-          <h2>{{ currentShop?.name }}</h2>
-        </div>
-        <el-button :loading="dashboardLoading" @click="loadMerchantDashboard">刷新数据</el-button>
+    <template v-else>
+      <section class="overview-metrics">
+        <article v-for="item in metrics" :key="item.label">
+          <span>{{ item.label }}</span>
+          <b>{{ item.value }}</b>
+          <small :class="{ attention: item.attention }">{{ item.hint }}</small>
+        </article>
       </section>
 
-      <section class="merchant-grid">
-        <button type="button" class="merchant-card ship-card" @click="openOrderList({ status: '2' })">
-          <span>待发货</span>
-          <strong>{{ merchantDashboard.waitShipCount }}</strong>
-          <small>及时处理订单履约</small>
-        </button>
-        <button type="button" class="merchant-card refund-card" @click="openOrderList({ status: '6', refundStatus: 'pending' })">
-          <span>退款待处理</span>
-          <strong>{{ merchantDashboard.refundPendingCount }}</strong>
-          <small>申请中或处理中退款</small>
-        </button>
-        <button type="button" class="merchant-card stock-card" @click="openStockWarningList">
-          <span>库存预警</span>
-          <strong>{{ merchantDashboard.stockWarningCount }}</strong>
-          <small>库存不高于 {{ merchantDashboard.stockWarningThreshold }} 件</small>
-        </button>
-        <button type="button" class="merchant-card order-card" @click="openTodayOrderList">
-          <span>今日订单</span>
-          <strong>{{ merchantDashboard.todayOrderCount }}</strong>
-          <small>今日已支付有效订单</small>
-        </button>
-        <button type="button" class="merchant-card sales-card" @click="openTodayOrderList">
-          <span>今日销售额</span>
-          <strong>¥{{ formatAmount(merchantDashboard.todaySalesAmount) }}</strong>
-          <small>按优惠后应付金额统计</small>
-        </button>
-      </section>
-
-      <el-card shadow="never" class="stock-warning-card">
-        <template #header>
-          <div class="card-header">
-            <h2>低库存商品</h2>
-            <p>展示库存最低的 {{ merchantDashboard.stockWarnings?.length || 0 }} 个 SKU</p>
+      <section class="overview-grid">
+        <section class="overview-tasks">
+          <div class="panel-toolbar">
+            <div class="panel-title">
+              <span class="shelf-mark"></span>
+              <b>待办事项</b>
+            </div>
+            <el-tag size="small" type="warning" effect="light">今日</el-tag>
           </div>
-        </template>
-        <el-table :data="merchantDashboard.stockWarnings || []" size="small">
-          <el-table-column prop="spuName" label="商品名称" min-width="180" />
-          <el-table-column prop="skuName" label="SKU" min-width="160" />
-          <el-table-column prop="stock" label="当前库存" width="110">
-            <template #default="{ row }">
-              <el-tag type="danger">{{ row.stock }}</el-tag>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-empty v-if="!merchantDashboard.stockWarnings?.length" description="暂无库存预警" :image-size="70" />
-      </el-card>
+          <button
+            v-for="task in tasks"
+            :key="task.label"
+            type="button"
+            @click="openTask(task)"
+          >
+            <span>
+              <b>{{ task.label }}</b>
+              <small>点击进入对应业务列表</small>
+            </span>
+            <strong>{{ task.count }}</strong>
+            <el-icon><ArrowRight /></el-icon>
+          </button>
+        </section>
+
+        <section class="trend-panel">
+          <div class="panel-toolbar">
+            <div class="panel-title">
+              <span class="shelf-mark"></span>
+              <b>近 7 日交易趋势</b>
+            </div>
+            <span class="mini-legend"><i></i>支付金额</span>
+          </div>
+          <div v-if="trendBars.length" class="trend-chart">
+            <div v-for="bar in trendBars" :key="bar.date" class="trend-bar">
+              <span
+                class="trend-bar-fill"
+                :style="{ height: `${bar.height}%` }"
+                :title="`${bar.date} 支付金额 ${bar.amountText}，${bar.orderCount} 笔`"
+              ></span>
+              <i>{{ bar.label }}</i>
+            </div>
+          </div>
+          <el-empty v-else description="暂无交易数据" :image-size="70" />
+        </section>
+      </section>
     </template>
-
-    <section class="overview-grid">
-      <el-card shadow="never" class="overview-card">
-        <div class="overview-icon role-icon"><Key /></div>
-        <div>
-          <div class="overview-value">{{ roleCount }}</div>
-          <div class="overview-label">当前角色</div>
-        </div>
-      </el-card>
-      <el-card shadow="never" class="overview-card">
-        <div class="overview-icon org-icon"><OfficeBuilding /></div>
-        <div>
-          <div class="overview-value">{{ orgCount }}</div>
-          <div class="overview-label">所属组织</div>
-        </div>
-      </el-card>
-      <el-card shadow="never" class="overview-card">
-        <div class="overview-icon menu-icon"><Grid /></div>
-        <div>
-          <div class="overview-value">{{ accessibleEntries.length }}</div>
-          <div class="overview-label">可访问模块</div>
-        </div>
-      </el-card>
-    </section>
-
-    <el-card shadow="never" class="quick-card">
-      <template #header>
-        <div class="card-header">
-          <h2>快捷入口</h2>
-          <p>根据当前账号拥有的菜单权限生成</p>
-        </div>
-      </template>
-
-      <div v-if="quickEntries.length" class="quick-grid">
-        <button
-          v-for="entry in quickEntries"
-          :key="entry.id"
-          type="button"
-          class="quick-entry"
-          @click="openEntry(entry.path)"
-        >
-          <span>{{ entry.name }}</span>
-          <el-icon><ArrowRight /></el-icon>
-        </button>
-      </div>
-      <el-empty v-else description="当前账号暂无可访问的业务菜单" :image-size="80" />
-    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowRight, Grid, Key, OfficeBuilding, User } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { ArrowRight } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
-import type { ResourceTreeNode } from '@/types/upms'
 import { getCurrentShop, type CurrentShop } from '@/utils/shop'
-import { queryMerchantDashboard } from '@/api/mall/dashboard'
+import {
+  queryAdminDashboardOverview,
+  queryAdminDashboardTrend,
+  queryMerchantDashboard,
+  queryMerchantDashboardTrend,
+} from '@/api/mall/dashboard'
+import { queryMchReviews } from '@/api/mall/review'
+import request from '@/utils/request'
+import type { ResourceTreeNode } from '@/types/upms'
 
-interface QuickEntry {
-  id: number
-  name: string
-  path: string
+interface PlatformOverview {
+  todayOrderCount?: number
+  todaySalesAmount?: number
+  yesterdayOrderCount?: number
+  yesterdaySalesAmount?: number
+  activeShopCount?: number
+  totalShopCount?: number
+  refundPendingCount?: number
+  refundShopCount?: number
+  pendingMerchantCount?: number
+  seckillApplyPendingCount?: number
+  hiddenReviewCount?: number
+  feedbackPendingCount?: number
+}
+
+interface MerchantOverview {
+  waitShipCount?: number
+  refundPendingCount?: number
+  stockWarningCount?: number
+  todayOrderCount?: number
+  todaySalesAmount?: number
+  stockWarningThreshold?: number
+}
+
+interface MetricCard {
+  label: string
+  value: string
+  hint: string
+  attention?: boolean
+}
+
+interface TaskItem {
+  label: string
+  count: number
+  component: string
+  fallbackPath: string
+  query?: Record<string, string>
+}
+
+interface TrendPoint {
+  date: string
+  orderCount: number
+  salesAmount: number
 }
 
 const router = useRouter()
 const authStore = useAuthStore()
+const loading = ref(false)
 const currentShop = ref<CurrentShop | null>(getCurrentShop())
-const dashboardLoading = ref(false)
-const merchantDashboard = ref<any>(null)
+const platformOverview = ref<PlatformOverview | null>(null)
+const merchantOverview = ref<MerchantOverview | null>(null)
+const trend = ref<TrendPoint[]>([])
+const unrepliedReviewCount = ref(0)
+const groupBuyApplyPendingCount = ref(0)
 
-const currentDate = new Intl.DateTimeFormat('zh-CN', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  weekday: 'long',
-}).format(new Date())
+const isMerchant = computed(() => authStore.subject === 'merchant')
 
-const greeting = computed(() => {
-  const hour = new Date().getHours()
-  if (hour < 6) {
-    return '夜深了'
+const metrics = computed<MetricCard[]>(() => {
+  if (isMerchant.value) {
+    const data = merchantOverview.value
+    if (!data) {
+      return emptyMetrics(['今日支付订单', '今日销售额', '待发货', '退款待处理'])
+    }
+    return [
+      {
+        label: '今日支付订单',
+        value: formatCount(data.todayOrderCount),
+        hint: growthHint(data.todayOrderCount, trendValue(1, 'orderCount')),
+      },
+      {
+        label: '今日销售额',
+        value: formatMoney(data.todaySalesAmount),
+        hint: growthHint(data.todaySalesAmount, trendValue(1, 'salesAmount')),
+      },
+      { label: '待发货', value: formatCount(data.waitShipCount), hint: '需及时处理' },
+      {
+        label: '退款待处理',
+        value: formatCount(data.refundPendingCount),
+        hint: '申请中或处理中',
+        attention: Number(data.refundPendingCount || 0) > 0,
+      },
+    ]
   }
-  if (hour < 12) {
-    return '上午好'
+
+  const data = platformOverview.value
+  if (!data) {
+    return emptyMetrics(['今日支付订单', '今日交易额', '活跃店铺', '退款待处理'])
   }
-  if (hour < 18) {
-    return '下午好'
-  }
-  return '晚上好'
+  return [
+    {
+      label: '今日支付订单',
+      value: formatCount(data.todayOrderCount),
+      hint: growthHint(data.todayOrderCount, data.yesterdayOrderCount),
+    },
+    {
+      label: '今日交易额',
+      value: formatMoney(data.todaySalesAmount),
+      hint: growthHint(data.todaySalesAmount, data.yesterdaySalesAmount),
+    },
+    {
+      label: '活跃店铺',
+      value: formatCount(data.activeShopCount),
+      hint: `共 ${formatCount(data.totalShopCount)} 家`,
+    },
+    {
+      label: '退款待处理',
+      value: formatCount(data.refundPendingCount),
+      hint: `跨 ${formatCount(data.refundShopCount)} 家店铺`,
+      attention: Number(data.refundPendingCount || 0) > 0,
+    },
+  ]
 })
 
-const roleCount = computed(() => authStore.mine?.roles?.length || 0)
-const orgCount = computed(() => authStore.mine?.orgs?.length || 0)
-const accessibleEntries = computed(() => collectQuickEntries(authStore.sidebarMenus))
-const quickEntries = computed(() => accessibleEntries.value.slice(0, 8))
+const tasks = computed<TaskItem[]>(() => {
+  if (isMerchant.value) {
+    const data = merchantOverview.value
+    const merchantTasks: TaskItem[] = [
+      {
+        label: '待发货订单',
+        count: Number(data?.waitShipCount || 0),
+        component: 'mall/order/index',
+        fallbackPath: '/mall/order',
+        query: { status: '2' },
+      },
+      {
+        label: '低库存商品',
+        count: Number(data?.stockWarningCount || 0),
+        component: 'mall/sku/index',
+        fallbackPath: '/mall/sku',
+        query: { stockMax: String(data?.stockWarningThreshold || 10) },
+      },
+      {
+        label: '待回复评价',
+        count: unrepliedReviewCount.value,
+        component: 'mall/mch-review/index',
+        fallbackPath: '/mall/mch-review',
+        query: { isReplied: 'false' },
+      },
+      {
+        label: '拼团报名待审',
+        count: groupBuyApplyPendingCount.value,
+        component: 'mall/mch-group-buy/apply/index',
+        fallbackPath: '/mall/mch-group-buy/apply',
+        query: { auditStatus: '1' },
+      },
+    ]
+    return merchantTasks
+  }
 
-function collectQuickEntries(nodes: ResourceTreeNode[], entries: QuickEntry[] = []) {
-  nodes.forEach((node) => {
+  const data = platformOverview.value
+  const platformTasks: TaskItem[] = [
+    {
+      label: '待启用商家',
+      count: Number(data?.pendingMerchantCount || 0),
+      component: 'mall/merchant/index',
+      fallbackPath: '/mall/merchant',
+      query: { isEnabled: 'false' },
+    },
+    {
+      label: '秒杀报名待审',
+      count: Number(data?.seckillApplyPendingCount || 0),
+      component: 'mall/seckill/audit/index',
+      fallbackPath: '/mall/seckill/audit',
+      query: { auditStatus: '1' },
+    },
+    {
+      label: '已隐藏评价',
+      count: Number(data?.hiddenReviewCount || 0),
+      component: 'mall/review/index',
+      fallbackPath: '/mall/review',
+      query: { isVisible: 'false' },
+    },
+    {
+      label: '意见反馈待处理',
+      count: Number(data?.feedbackPendingCount || 0),
+      component: 'mall/feedback/index',
+      fallbackPath: '/mall/feedback',
+      query: { status: '1' },
+    },
+  ]
+  return platformTasks
+})
+
+const trendBars = computed(() => {
+  const max = Math.max(...trend.value.map((point) => point.salesAmount), 0)
+  return trend.value.map((point) => ({
+    ...point,
+    label: point.date.slice(5).replace('-', '/'),
+    height: max > 0 ? Math.max(6, Math.round((point.salesAmount / max) * 100)) : 6,
+    amountText: formatMoney(point.salesAmount),
+  }))
+})
+
+function emptyMetrics(labels: string[]): MetricCard[] {
+  return labels.map((label) => ({ label, value: '—', hint: '暂无数据' }))
+}
+
+function trendValue(offsetFromEnd: number, key: 'orderCount' | 'salesAmount') {
+  const index = trend.value.length - 1 - offsetFromEnd
+  const point = index >= 0 ? trend.value[index] : undefined
+  return point ? Number(point[key] || 0) : 0
+}
+
+function growthHint(today: unknown, yesterday: unknown) {
+  const current = Number(today || 0)
+  const previous = Number(yesterday || 0)
+  if (previous <= 0) {
+    return current > 0 ? '较昨日新增' : '较昨日持平'
+  }
+  const rate = ((current - previous) / previous) * 100
+  return `较昨日 ${rate >= 0 ? '+' : ''}${rate.toFixed(1)}%`
+}
+
+function formatCount(value: unknown) {
+  return Number(value || 0).toLocaleString('zh-CN')
+}
+
+function formatMoney(value: unknown) {
+  return `¥${Number(value || 0).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
+function pageTotal(response: unknown) {
+  const data = (response as { data?: { total?: unknown } } | null)?.data
+  return Number(data?.total || 0)
+}
+
+function normalizeTrend(value: unknown): TrendPoint[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+  return value.map((item) => {
+    const point = item as Partial<TrendPoint>
+    return {
+      date: String(point.date || ''),
+      orderCount: Number(point.orderCount || 0),
+      salesAmount: Number(point.salesAmount || 0),
+    }
+  })
+}
+
+function findMenuPath(nodes: ResourceTreeNode[], component: string): string | null {
+  for (const node of nodes) {
+    if (node.component === component && node.path) {
+      return node.path
+    }
     if (node.children?.length) {
-      collectQuickEntries(node.children, entries)
+      const found = findMenuPath(node.children, component)
+      if (found) {
+        return found
+      }
+    }
+  }
+  return null
+}
+
+function openTask(task: TaskItem) {
+  const path = findMenuPath(authStore.sidebarMenus, task.component) || task.fallbackPath
+  void router.push({ path, query: task.query })
+}
+
+async function loadOverview() {
+  loading.value = true
+  try {
+    if (isMerchant.value) {
+      currentShop.value = getCurrentShop()
+      if (!currentShop.value) {
+        return
+      }
+      const shopId = currentShop.value.id
+      const [overviewResponse, trendResponse, reviewResponse, applyResponse] = await Promise.all([
+        queryMerchantDashboard(shopId),
+        queryMerchantDashboardTrend(shopId, 7),
+        queryMchReviews({ shopId, isReplied: false, current: 1, size: 1 }).catch(() => null),
+        request({
+          url: '/mch/groupBuy/apply/query',
+          method: 'get',
+          params: { shopId, auditStatus: '1', current: 1, size: 1 },
+        }).catch(() => null),
+      ])
+      merchantOverview.value = overviewResponse.data || null
+      trend.value = normalizeTrend(trendResponse.data)
+      unrepliedReviewCount.value = pageTotal(reviewResponse)
+      groupBuyApplyPendingCount.value = pageTotal(applyResponse)
       return
     }
-    if (!node.isLink && node.path) {
-      entries.push({
-        id: node.id,
-        name: node.name,
-        path: node.path,
-      })
-    }
-  })
-  return entries
-}
 
-function openProfile() {
-  router.push('/profile')
-}
-
-function openEntry(path: string) {
-  router.push(path)
-}
-
-function formatAmount(value: unknown) {
-  return Number(value || 0).toFixed(2)
-}
-
-async function loadMerchantDashboard() {
-  currentShop.value = getCurrentShop()
-  if (!currentShop.value) {
-    merchantDashboard.value = null
-    return
-  }
-  dashboardLoading.value = true
-  try {
-    const response = await queryMerchantDashboard(currentShop.value.id)
-    merchantDashboard.value = response.data
+    const [overviewResponse, trendResponse] = await Promise.all([
+      queryAdminDashboardOverview(),
+      queryAdminDashboardTrend(7),
+    ])
+    platformOverview.value = overviewResponse.data || null
+    trend.value = normalizeTrend(trendResponse.data)
+  } catch {
+    ElMessage.error('经营概览数据加载失败')
   } finally {
-    dashboardLoading.value = false
+    loading.value = false
   }
-}
-
-function openOrderList(query: Record<string, string>) {
-  router.push({
-    path: '/mall/order',
-    query,
-  })
-}
-
-function openStockWarningList() {
-  const threshold = Number(merchantDashboard.value?.stockWarningThreshold)
-  router.push({
-    path: '/mall/sku',
-    query: Number.isFinite(threshold) ? { stockMax: String(threshold) } : {},
-  })
-}
-
-function openTodayOrderList() {
-  const beginTime = merchantDashboard.value?.todayBeginTime
-  const endTime = merchantDashboard.value?.todayEndTime
-  if (!beginTime || !endTime) {
-    return
-  }
-  openOrderList({
-    paySuccessStartTime: String(beginTime).replace('T', ' '),
-    paySuccessEndTime: String(endTime).replace('T', ' '),
-  })
 }
 
 onMounted(() => {
-  void loadMerchantDashboard()
+  void loadOverview()
 })
 </script>
 
 <style scoped>
-.home-page {
+.overview-page {
   min-height: 100%;
-  padding: 24px;
+  padding: 18px 20px 20px;
+  background: var(--ym-paper);
 }
 
-.welcome-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 32px;
-  border: 1px solid #d9ecff;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #ecf5ff 0%, #f5f7fa 65%, #fff 100%);
-}
-
-.welcome-date {
-  margin: 0 0 10px;
-  color: #409eff;
-  font-size: 14px;
-}
-
-.welcome-card h1 {
-  margin: 0;
-  color: #303133;
-  font-size: 28px;
-  line-height: 1.4;
-}
-
-.welcome-description {
-  margin: 10px 0 0;
-  color: #606266;
-  line-height: 1.6;
-}
-
-.overview-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 20px;
-}
-
-.merchant-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.merchant-heading p {
-  margin: 0 0 6px;
-  color: #909399;
-  font-size: 13px;
-}
-
-.merchant-heading h2 {
-  margin: 0;
-  color: #303133;
-  font-size: 20px;
-}
-
-.merchant-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 14px;
-}
-
-.merchant-card {
-  display: flex;
-  min-height: 122px;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 20px;
-  border: 0;
-  border-radius: 12px;
-  color: #fff;
-  text-align: left;
-}
-
-button.merchant-card { cursor: pointer; }
-button.merchant-card:hover { transform: translateY(-2px); filter: brightness(1.03); }
-.merchant-card span { font-size: 14px; opacity: .9; }
-.merchant-card strong { margin: 10px 0 8px; font-size: 30px; line-height: 1; }
-.merchant-card small { font-size: 12px; opacity: .78; }
-.ship-card { background: linear-gradient(135deg, #3478f6, #5ba2ff); }
-.refund-card { background: linear-gradient(135deg, #ed7b4a, #f5a26e); }
-.stock-card { background: linear-gradient(135deg, #d65b53, #ed8a7e); }
-.order-card { background: linear-gradient(135deg, #4f9b79, #79b895); }
-.sales-card { background: linear-gradient(135deg, #7867b7, #a28bda); }
-.stock-warning-card { margin-top: 16px; }
-
-.overview-card :deep(.el-card__body) {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 22px;
-}
-
-.overview-icon {
-  display: flex;
-  width: 48px;
-  height: 48px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  font-size: 24px;
-}
-
-.role-icon {
-  color: #409eff;
-  background-color: #ecf5ff;
-}
-
-.org-icon {
-  color: #67c23a;
-  background-color: #f0f9eb;
-}
-
-.menu-icon {
-  color: #e6a23c;
-  background-color: #fdf6ec;
-}
-
-.overview-value {
-  color: #303133;
-  font-size: 26px;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.overview-label {
-  margin-top: 6px;
-  color: #909399;
-  font-size: 14px;
-}
-
-.quick-card {
-  margin-top: 20px;
-}
-
-.card-header h2 {
-  margin: 0;
-  color: #303133;
-  font-size: 18px;
-}
-
-.card-header p {
-  margin: 6px 0 0;
-  color: #909399;
-  font-size: 13px;
-}
-
-.quick-grid {
+.overview-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
-.quick-entry {
+.overview-metrics article {
   display: flex;
-  min-width: 0;
-  height: 54px;
+  min-height: 110px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 15px;
+  border: 1px solid var(--ym-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.overview-metrics span {
+  color: var(--ym-muted);
+  font-size: 12px;
+}
+
+.overview-metrics b {
+  margin: 9px 0 7px;
+  color: var(--ym-ink);
+  font-family: var(--ym-font-mono);
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.overview-metrics small {
+  color: var(--ym-brand);
+  font-size: 12px;
+}
+
+.overview-metrics small.attention {
+  color: var(--ym-warning);
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(420px, 1.4fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.overview-tasks,
+.trend-panel {
+  overflow: hidden;
+  border: 1px solid var(--ym-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.panel-toolbar {
+  display: flex;
+  min-height: 48px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 0 18px;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-  background-color: #fff;
-  color: #606266;
+  padding: 0 14px;
+  border-bottom: 1px solid #edf1ee;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.panel-title b {
+  color: var(--ym-ink);
+  font-size: 13px;
+}
+
+.shelf-mark {
+  display: inline-block;
+  width: 5px;
+  height: 17px;
+  border-radius: 1px;
+  background: var(--ym-brand);
+}
+
+.overview-tasks button {
+  display: grid;
+  width: 100%;
+  min-height: 62px;
+  grid-template-columns: 1fr 42px 20px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 1px solid #edf1ee;
+  background: #fff;
+  color: var(--ym-ink-secondary);
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  text-align: left;
 }
 
-.quick-entry span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.overview-tasks button:last-child {
+  border-bottom: 0;
 }
 
-.quick-entry:hover {
-  border-color: #409eff;
-  color: #409eff;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgb(64 158 255 / 12%);
+.overview-tasks button:hover {
+  background: #fafcfa;
 }
 
-@media (max-width: 960px) {
-  .merchant-grid {
+.overview-tasks button > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.overview-tasks b {
+  font-size: 13px;
+}
+
+.overview-tasks small {
+  color: var(--ym-muted);
+  font-size: 11px;
+}
+
+.overview-tasks strong {
+  color: var(--ym-warning);
+  font-family: var(--ym-font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.overview-tasks .el-icon {
+  color: var(--ym-muted);
+}
+
+.trend-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-legend {
+  display: flex;
+  align-items: center;
+  color: var(--ym-muted);
+  font-size: 12px;
+}
+
+.mini-legend i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  border-radius: 2px;
+  background: var(--ym-brand);
+}
+
+.trend-chart {
+  display: flex;
+  height: 255px;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 15px;
+  padding: 32px 24px 28px;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 24%,
+    #edf1ee 25%,
+    transparent 26%,
+    transparent 49%,
+    #edf1ee 50%,
+    transparent 51%,
+    transparent 74%,
+    #edf1ee 75%,
+    transparent 76%
+  );
+}
+
+.trend-bar {
+  position: relative;
+  display: flex;
+  height: 100%;
+  width: 42px;
+  align-items: flex-end;
+}
+
+.trend-bar-fill {
+  width: 100%;
+  min-height: 12px;
+  border-radius: 5px 5px 1px 1px;
+  background: linear-gradient(to top, var(--ym-brand), #68a38a);
+  transition: height 0.2s ease;
+}
+
+.trend-bar-fill:hover {
+  background: var(--ym-price);
+}
+
+.trend-bar i {
+  position: absolute;
+  right: 0;
+  bottom: -20px;
+  left: 0;
+  color: var(--ym-muted);
+  font-family: var(--ym-font-mono);
+  font-size: 11px;
+  font-style: normal;
+  text-align: center;
+}
+
+@media (max-width: 1050px) {
+  .overview-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .quick-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 
-@media (max-width: 680px) {
-  .home-page {
-    padding: 16px;
-  }
-
-  .welcome-card {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 24px;
-  }
-
-  .overview-grid,
-  .merchant-grid,
-  .quick-grid {
+  .overview-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .overview-page {
+    padding: 12px;
+  }
+
+  .overview-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .trend-chart {
+    gap: 8px;
+    padding: 26px 12px 26px;
+  }
+
+  .trend-bar {
+    width: 28px;
   }
 }
 </style>
