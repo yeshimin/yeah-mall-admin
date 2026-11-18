@@ -49,7 +49,7 @@
     </section>
 
     <section class="mall-table-panel">
-      <el-table v-loading="loading" :data="shopList" @selection-change="handleSelectionChange">
+      <el-table data-ym-table="r54" v-loading="loading" :data="shopList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="52" />
         <el-table-column label="店铺" min-width="220">
           <template #default="{ row }">

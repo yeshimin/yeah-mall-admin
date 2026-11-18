@@ -20,7 +20,7 @@
     </section>
 
     <section class="mall-table-panel">
-      <el-table v-loading="loading" :data="records" height="100%">
+      <el-table data-ym-table="r4" v-loading="loading" :data="records" height="100%">
         <el-table-column prop="shopId" label="店铺ID" width="110" />
         <el-table-column label="账户类型" width="110">
           <template #default="{ row }">{{ row.accountType === '1' ? '银行卡' : '支付宝' }}</template>

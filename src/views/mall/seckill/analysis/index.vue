@@ -21,7 +21,7 @@
 
       <el-card class="ranking-card" shadow="never" v-loading="loading">
         <template #header><span>商品成交贡献</span></template>
-        <el-table :data="rankingWithShare" empty-text="暂无已支付秒杀订单">
+        <el-table data-ym-table="r46" :data="rankingWithShare" empty-text="暂无已支付秒杀订单">
           <el-table-column type="index" label="排名" width="70" />
           <el-table-column prop="name" label="商品名称" min-width="220" />
           <el-table-column prop="salesCount" label="销量" width="100" />

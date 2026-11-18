@@ -31,7 +31,7 @@
     </section>
 
     <section class="mall-table-panel">
-      <el-table v-loading="loading" :data="records" height="100%" @selection-change="selected = $event">
+      <el-table data-ym-table="r5" v-loading="loading" :data="records" height="100%" @selection-change="selected = $event">
         <el-table-column v-if="scope === 'platform'" type="selection" width="52" :selectable="isSelectable" />
         <el-table-column prop="orderNo" label="订单编号" min-width="170" />
         <el-table-column v-if="scope === 'platform'" prop="shopId" label="店铺ID" min-width="100" />

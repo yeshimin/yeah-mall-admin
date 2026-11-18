@@ -25,7 +25,7 @@
     </section>
 
     <section class="mall-table-panel">
-      <el-table v-loading="loading" :data="merchantList" @selection-change="handleSelectionChange">
+      <el-table data-ym-table="r34" v-loading="loading" :data="merchantList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="52" />
         <el-table-column label="商家账号" min-width="260">
           <template #default="{ row }">
@@ -101,7 +101,7 @@
             <h3>关联店铺</h3>
             <el-button @click="goToShops">进入店铺管理</el-button>
           </div>
-          <el-table v-if="merchantDetail.shops.length" :data="merchantDetail.shops" border>
+          <el-table data-ym-table="r35" v-if="merchantDetail.shops.length" :data="merchantDetail.shops" border>
             <el-table-column prop="shopNo" label="店铺编号" min-width="130" />
             <el-table-column prop="shopName" label="店铺名称" min-width="150" />
             <el-table-column label="平台状态" width="90"><template #default="{ row }">{{ row.isEnabled ? '启用' : '停用' }}</template></el-table-column>

@@ -89,7 +89,7 @@
     </section>
 
     <section class="mall-table-panel">
-      <el-table v-loading="loading" :data="orderList" style="width: 100%" @sort-change="handleSortChange">
+      <el-table data-ym-table="r36" v-loading="loading" :data="orderList" style="width: 100%" @sort-change="handleSortChange">
         <el-table-column prop="orderNo" label="订单编号" min-width="180"></el-table-column>
         <el-table-column prop="createTime" label="下单时间" min-width="180" sortable="custom"></el-table-column>
         <el-table-column prop="paySuccessTime" label="支付时间" min-width="180" sortable="custom"></el-table-column>
@@ -399,7 +399,7 @@
         </el-collapse-item>
 
         <el-collapse-item title="商品信息" name="products">
-          <el-table :data="orderItems" style="width: 100%">
+          <el-table data-ym-table="r37" :data="orderItems" style="width: 100%">
             <el-table-column label="商品图片" width="80">
               <template #default="scope">
                 <image-preview :image-list="[{ url: getFullImageUrl(scope.row.spuMainImage) }]">
@@ -636,7 +636,7 @@
 
     <el-dialog v-model="refundRecordsDialogVisible" title="退款记录" width="900px">
       <div v-loading="refundRecordsLoading">
-        <el-table v-if="refundRecords.length > 0" :data="refundRecords" style="width: 100%">
+        <el-table data-ym-table="r38" v-if="refundRecords.length > 0" :data="refundRecords" style="width: 100%">
           <el-table-column prop="refundNo" label="退款编号" min-width="180"></el-table-column>
           <el-table-column prop="totalAmount" label="总金额" min-width="100" align="right">
             <template #default="scope">

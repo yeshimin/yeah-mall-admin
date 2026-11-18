@@ -6,7 +6,7 @@
       <el-button @click="openCreatePartnerRoute">新增子商户路由</el-button>
     </div>
 
-    <el-table v-loading="loading" :data="records" stripe>
+    <el-table data-ym-table="r3" v-loading="loading" :data="records" stripe>
       <el-table-column prop="channelName" label="通道名称" min-width="170" />
       <el-table-column prop="shopName" label="适用范围" min-width="150" />
       <el-table-column label="收款模式" width="170">

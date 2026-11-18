@@ -50,7 +50,7 @@
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="orderList" style="width: 100%">
+    <el-table data-ym-table="r22" v-loading="loading" :data="orderList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="orderNo" label="订单号" min-width="180" />
       <el-table-column prop="memberName" label="用户" width="120" />

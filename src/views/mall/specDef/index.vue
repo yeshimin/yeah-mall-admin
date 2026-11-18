@@ -21,7 +21,7 @@
     </div>
 
     <div class="table-container">
-      <el-table
+      <el-table data-ym-table="r56"
         ref="tableRef"
         v-loading="loading"
         :data="specs"
@@ -74,7 +74,7 @@
       <div class="options-action">
         <el-button type="primary" icon="Plus" @click="openOptionForm()">新增选项</el-button>
       </div>
-      <el-table v-loading="optionsDialog.loading" :data="optionsDialog.options" stripe>
+      <el-table data-ym-table="r57" v-loading="optionsDialog.loading" :data="optionsDialog.options" stripe>
         <el-table-column prop="optName" label="选项名称" min-width="180" />
         <el-table-column prop="createTime" label="创建时间" width="170" />
         <el-table-column prop="updateTime" label="更新时间" width="170" />

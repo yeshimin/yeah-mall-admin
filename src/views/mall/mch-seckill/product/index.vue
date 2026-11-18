@@ -70,7 +70,7 @@
     </el-row>
 
     <!-- 商品列表 -->
-    <el-table
+    <el-table data-ym-table="r29"
       v-loading="loading"
       :data="productList"
       style="width: 100%"
@@ -173,7 +173,7 @@
       <!-- SKU信息 -->
       <div class="mb-4" v-if="viewForm.skuList && viewForm.skuList.length > 0">
         <h4>SKU信息</h4>
-        <el-table :data="viewForm.skuList" style="width: 100%">
+        <el-table data-ym-table="r30" :data="viewForm.skuList" style="width: 100%">
           <el-table-column prop="name" label="SKU名称" min-width="200" />
           <el-table-column prop="specCode" label="规格编码" width="150" />
           <el-table-column prop="originPrice" label="原价" width="100">

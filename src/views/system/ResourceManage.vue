@@ -47,7 +47,7 @@
         </div>
 
         <div class="table-container">
-          <el-table
+          <el-table data-ym-table="r66"
             v-loading="viewTableLoading"
             :data="viewResourceList"
             stripe
@@ -158,7 +158,7 @@
         </div>
 
         <div class="table-container">
-          <el-table
+          <el-table data-ym-table="r67"
             v-loading="apiTableLoading"
             :data="apiResourceList"
             stripe

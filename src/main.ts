@@ -9,10 +9,12 @@ import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { registerUnauthorizedHandler } from '@/utils/session'
+import { installTableAlign } from '@/utils/table-align'
 
 import './assets/main.css'
 import './assets/yeah-mall-theme.css'
 import './views/mall/_ui/mall-ui.scss'
+import './assets/yeah-mall-table-align.css'
 
 const app = createApp(App)
 
@@ -49,3 +51,5 @@ registerUnauthorizedHandler(async (message) => {
 })
 
 app.mount('#app')
+
+installTableAlign()

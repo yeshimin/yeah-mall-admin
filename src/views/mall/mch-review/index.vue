@@ -29,7 +29,7 @@
     </section>
 
     <section class="mall-table-panel">
-    <el-table v-loading="loading" :data="records">
+    <el-table data-ym-table="r24" v-loading="loading" :data="records">
       <el-table-column label="商品" width="82">
         <template #default="{ row }">
           <el-image v-if="row.spuMainImage" :src="getStoragePreviewUrl(row.spuMainImage)" :preview-src-list="[getStoragePreviewUrl(row.spuMainImage)]" preview-teleported fit="cover" class="product-image" />

@@ -45,7 +45,7 @@
     </div>
 
     <div class="table-container">
-      <el-table
+      <el-table data-ym-table="r65"
         ref="positionTableRef"
         v-loading="tableLoading"
         :data="positionList"

@@ -54,9 +54,9 @@ function normalizePayload(data: QuickEntrySaveRequest) {
     name: data.name.trim(),
     icon: data.icon,
     type: data.type,
-    target: data.target.trim() || null,
+    target: (data.target || '').trim() || null,
     sort: data.sort,
     isEnabled: data.isEnabled,
-    remark: data.remark.trim(),
+    remark: (data.remark || '').trim(),
   }
 }

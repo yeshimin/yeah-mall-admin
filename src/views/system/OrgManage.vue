@@ -40,7 +40,7 @@
     </div>
 
     <div class="table-container">
-      <el-table
+      <el-table data-ym-table="r64"
         v-if="refreshTable"
         v-loading="tableLoading"
         :data="orgList"

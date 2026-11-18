@@ -32,7 +32,7 @@
     </section>
 
     <section class="mall-table-panel">
-    <el-table v-loading="loading" :data="filteredTableData" @selection-change="handleSelectionChange" row-key="id">
+    <el-table data-ym-table="r58" v-loading="loading" :data="filteredTableData" @selection-change="handleSelectionChange" row-key="id">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column prop="id" label="ID" align="center" />
       <el-table-column prop="mainImage" label="主图" align="center">

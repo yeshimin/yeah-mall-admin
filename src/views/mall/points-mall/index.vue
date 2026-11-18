@@ -1,183 +1,251 @@
 <template>
   <div class="mall-page points-mall-page">
-    <el-tabs v-model="activeTab" class="content-tabs" @tab-change="loadActiveTab">
+    <el-tabs v-model="activeTab" @tab-change="loadActiveTab">
       <el-tab-pane label="商品分类" name="category">
-        <div class="toolbar-row">
+        <div class="points-category-toolbar">
           <el-button type="primary" icon="Plus" @click="openCategoryDialog()">新增分类</el-button>
         </div>
-        <el-table v-loading="loading" :data="categories" row-key="id">
-          <el-table-column prop="name" label="分类名称" min-width="180" />
-          <el-table-column prop="parentId" label="父分类" min-width="160">
-            <template #default="{ row }">{{ categoryName(row.parentId) }}</template>
-          </el-table-column>
-          <el-table-column label="图标" width="90">
-            <template #default="{ row }">
-              <el-image v-if="row.icon" :src="previewUrl(row.icon)" fit="cover" class="table-image" />
-              <span v-else class="muted">-</span>
+        <section class="mall-table-panel">
+          <el-table data-ym-table="r40" v-loading="loading" :data="categories" row-key="id">
+            <el-table-column label="分类名称" min-width="180">
+              <template #default="{ row }"><span class="points-category-name">{{ row.name }}</span></template>
+            </el-table-column>
+            <el-table-column prop="parentId" label="父分类" min-width="160">
+              <template #default="{ row }">{{ categoryName(row.parentId) }}</template>
+            </el-table-column>
+            <el-table-column label="图标" width="90">
+              <template #default="{ row }">
+                <el-image v-if="row.icon" :src="previewUrl(row.icon)" fit="cover" class="table-image" />
+                <span v-else class="muted">-</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="sort" label="排序" width="90" />
+            <el-table-column label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="row.isEnabled ? 'success' : 'info'">{{ row.isEnabled ? '启用' : '停用' }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间" width="180" />
+            <el-table-column label="操作" width="150" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openCategoryDialog(row)">编辑</el-button>
+                <el-button link type="danger" @click="removeCategory(row)">删除</el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <div class="points-mall-empty">
+                <el-icon><Goods /></el-icon>
+                <strong>暂无积分分类</strong>
+                <span>点击右上角新增分类</span>
+              </div>
             </template>
-          </el-table-column>
-          <el-table-column prop="sort" label="排序" width="90" />
-          <el-table-column label="状态" width="100">
-            <template #default="{ row }">
-              <el-tag :type="row.isEnabled ? 'success' : 'info'">{{ row.isEnabled ? '启用' : '停用' }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="180" />
-          <el-table-column label="操作" width="150" fixed="right">
-            <template #default="{ row }">
-              <el-button link type="primary" @click="openCategoryDialog(row)">编辑</el-button>
-              <el-button link type="danger" @click="removeCategory(row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+          </el-table>
+        </section>
       </el-tab-pane>
 
       <el-tab-pane label="积分商品" name="product">
-        <el-form :inline="true" class="filter-form">
-          <el-form-item label="商品名称">
-            <el-input v-model="productQuery.name" clearable placeholder="搜索商品" />
-          </el-form-item>
-          <el-form-item label="分类">
-            <el-select v-model="productQuery.categoryId" clearable placeholder="全部分类">
-              <el-option v-for="item in categories" :key="item.id" :label="item.name" :value="item.id" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="productQuery.isEnabled" clearable placeholder="全部状态">
-              <el-option label="已上架" :value="true" />
-              <el-option label="已下架" :value="false" />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="Search" @click="loadProducts(true)">查询</el-button>
-            <el-button @click="resetProductQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
-        <div class="toolbar-row">
-          <el-button type="primary" icon="Plus" @click="openProductDialog()">新增商品</el-button>
-        </div>
-        <el-table v-loading="loading" :data="products">
-          <el-table-column label="商品" min-width="260">
-            <template #default="{ row }">
-              <div class="product-cell">
-                <el-image :src="previewUrl(row.mainImage)" fit="cover" class="product-image" />
-                <div>
-                  <strong>{{ row.name }}</strong>
-                  <p>{{ row.subtitle || '暂无副标题' }}</p>
+        <section class="mall-filter-panel">
+          <el-form :inline="true" class="mall-query-form" @submit.prevent="loadProducts(true)">
+            <el-form-item label="商品名称">
+              <el-input v-model="productQuery.name" clearable placeholder="搜索积分商品" />
+            </el-form-item>
+            <el-form-item label="分类">
+              <el-select v-model="productQuery.categoryId" clearable placeholder="全部分类">
+                <el-option v-for="item in categories" :key="item.id" :label="item.name" :value="item.id" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-select v-model="productQuery.isEnabled" clearable placeholder="全部状态">
+                <el-option label="已上架" :value="true" />
+                <el-option label="已下架" :value="false" />
+              </el-select>
+            </el-form-item>
+            <el-form-item class="mall-query-actions">
+              <el-button @click="resetProductQuery">重置</el-button>
+              <el-button type="primary" native-type="submit">
+                <el-icon><Search /></el-icon>
+                查询
+              </el-button>
+            </el-form-item>
+          </el-form>
+          <div class="mall-business-actions">
+            <el-button type="primary" icon="Plus" @click="openProductDialog()">新增商品</el-button>
+          </div>
+        </section>
+        <section class="mall-table-panel">
+          <el-table data-ym-table="r41" v-loading="loading" :data="products">
+            <el-table-column label="商品" min-width="250">
+              <template #default="{ row }">
+                <div class="product-cell">
+                  <el-image v-if="row.mainImage" :src="previewUrl(row.mainImage)" fit="cover" class="product-image" />
+                  <span v-else class="product-image image-placeholder"><el-icon><Picture /></el-icon></span>
+                  <div class="product-cell-copy">
+                    <strong>{{ row.name }}</strong>
+                    <p>{{ row.subtitle || '暂无副标题' }}</p>
+                  </div>
                 </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="分类" width="120">
+              <template #default="{ row }">{{ categoryName(row.categoryId) }}</template>
+            </el-table-column>
+            <el-table-column label="类型 / 履约" width="160">
+              <template #default="{ row }">
+                <div class="points-cell-stack">
+                  <span>{{ productTypeText(row.productType) }}</span>
+                  <small class="muted">{{ fulfillmentText(row.fulfillmentType) }}</small>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="兑换时间" min-width="170">
+              <template #default="{ row }">
+                <div class="points-cell-stack">
+                  <span>{{ formatDate(row.beginTime) }}</span>
+                  <small class="points-mall-time-sub">至 {{ formatDate(row.endTime) }}</small>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="每人限兑" width="90">
+              <template #default="{ row }">{{ row.perMemberLimit > POINTS_UNLIMITED_PER_MEMBER_LIMIT ? row.perMemberLimit : '不限' }}</template>
+            </el-table-column>
+            <el-table-column label="状态" width="120">
+              <template #default="{ row }">
+                <div class="status-switch-cell">
+                  <el-switch
+                    :model-value="Boolean(row.isEnabled)"
+                    :loading="productStatusUpdatingId === row.id"
+                    @change="changeProductStatus(row, $event)"
+                  />
+                  <span>{{ row.isEnabled ? '已上架' : '已下架' }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="190" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openProductDialog(row)">编辑</el-button>
+                <el-button link type="warning" @click="openSkuDialog(row)">SKU管理</el-button>
+                <el-button link type="danger" @click="removeProduct(row)">删除</el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <div class="points-mall-empty">
+                <el-icon><Goods /></el-icon>
+                <strong>没有匹配的积分商品</strong>
+                <span>调整筛选条件后重试</span>
               </div>
             </template>
-          </el-table-column>
-          <el-table-column label="分类" width="130">
-            <template #default="{ row }">{{ categoryName(row.categoryId) }}</template>
-          </el-table-column>
-          <el-table-column label="类型 / 履约" width="190">
-            <template #default="{ row }">
-              <div>{{ productTypeText(row.productType) }}</div>
-              <span class="muted">{{ fulfillmentText(row.fulfillmentType) }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="兑换时间" min-width="210">
-            <template #default="{ row }">
-              <div>{{ row.beginTime }}</div>
-              <div class="muted">至 {{ row.endTime }}</div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="perMemberLimit" label="每人限兑" width="100">
-            <template #default="{ row }">{{ row.perMemberLimit > POINTS_UNLIMITED_PER_MEMBER_LIMIT ? row.perMemberLimit : '不限' }}</template>
-          </el-table-column>
-          <el-table-column label="状态" width="140">
-            <template #default="{ row }">
-              <div class="status-switch-cell">
-                <el-switch
-                  :model-value="Boolean(row.isEnabled)"
-                  :loading="productStatusUpdatingId === row.id"
-                  @change="changeProductStatus(row, $event)"
-                />
-                <span>{{ row.isEnabled ? '已上架' : '已下架' }}</span>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="220" fixed="right">
-            <template #default="{ row }">
-              <el-button link type="primary" @click="openProductDialog(row)">编辑</el-button>
-              <el-button link type="warning" @click="openSkuDialog(row)">SKU管理</el-button>
-              <el-button link type="danger" @click="removeProduct(row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <MallPagination
-          :total="productPage.total"
-          :page="productPage.current"
-          :limit="productPage.size"
-          @pagination="changeProductPage"
-        />
+          </el-table>
+          <MallPagination
+            :total="productPage.total"
+            :page="productPage.current"
+            :limit="productPage.size"
+            @pagination="changeProductPage"
+          />
+        </section>
       </el-tab-pane>
 
       <el-tab-pane label="兑换订单" name="order">
-        <el-form :inline="true" class="filter-form">
-          <el-form-item label="订单编号">
-            <el-input v-model="orderQuery.orderNo" clearable placeholder="订单编号" />
-          </el-form-item>
-          <el-form-item label="会员ID">
-            <el-input v-model="orderQuery.memberId" clearable placeholder="会员ID" />
-          </el-form-item>
-          <el-form-item label="订单状态">
-            <el-select v-model="orderQuery.status" clearable placeholder="全部状态">
-              <el-option v-for="item in orderStatuses" :key="item.value" :label="item.label" :value="item.value" />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="Search" @click="loadOrders(true)">查询</el-button>
-            <el-button @click="resetOrderQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
-        <el-table v-loading="loading" :data="orders">
-          <el-table-column prop="orderNo" label="订单编号" min-width="150" show-overflow-tooltip />
-          <el-table-column prop="memberId" label="会员ID" min-width="160" />
-          <el-table-column label="商品" min-width="230">
-            <template #default="{ row }">
-              <div class="product-cell compact">
-                <el-image :src="previewUrl(row.productImage)" fit="cover" class="table-image" />
-                <div><strong>{{ row.productName }}</strong><p>{{ row.skuName }}</p></div>
+        <section class="mall-filter-panel">
+          <el-form :inline="true" class="mall-query-form" @submit.prevent="loadOrders(true)">
+            <el-form-item label="订单编号">
+              <el-input v-model="orderQuery.orderNo" clearable placeholder="兑换订单编号" />
+            </el-form-item>
+            <el-form-item label="会员 ID">
+              <el-input v-model="orderQuery.memberId" clearable placeholder="会员 ID" />
+            </el-form-item>
+            <el-form-item label="订单状态">
+              <el-select v-model="orderQuery.status" clearable placeholder="全部状态">
+                <el-option v-for="item in orderStatuses" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+            <el-form-item class="mall-query-actions">
+              <el-button @click="resetOrderQuery">重置</el-button>
+              <el-button type="primary" native-type="submit">
+                <el-icon><Search /></el-icon>
+                查询
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </section>
+        <section class="mall-table-panel">
+          <el-table data-ym-table="r42" v-loading="loading" :data="orders">
+            <el-table-column label="订单编号" width="135" show-overflow-tooltip>
+              <template #default="{ row }">
+                <CopyableText :value="row.orderNo" label="订单编号" />
+              </template>
+            </el-table-column>
+            <el-table-column label="会员ID" width="125">
+              <template #default="{ row }">
+                <CopyableText :value="row.memberId" label="会员ID" />
+              </template>
+            </el-table-column>
+            <el-table-column label="商品" min-width="210">
+              <template #default="{ row }">
+                <div class="product-cell compact">
+                  <el-image v-if="row.productImage" :src="previewUrl(row.productImage)" fit="cover" class="table-image" />
+                  <span v-else class="table-image image-placeholder"><el-icon><Picture /></el-icon></span>
+                  <div class="product-cell-copy"><strong>{{ row.productName }}</strong><p>{{ row.skuName }}</p></div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="兑换" width="120">
+              <template #default="{ row }">
+                <div class="points-cell-stack">
+                  <span>{{ row.pointsPrice }} 积分 × {{ row.quantity }}</span>
+                  <small class="muted">合计 {{ row.totalPoints }} 积分</small>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="履约方式" width="95">
+              <template #default="{ row }">{{ fulfillmentText(row.fulfillmentType) }}</template>
+            </el-table-column>
+            <el-table-column label="状态" width="90">
+              <template #default="{ row }">
+                <el-tag :type="statusTag(row.status)">{{ statusText(row.status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="兑换时间" width="130">
+              <template #default="{ row }">
+                <div class="points-cell-stack">
+                  <span class="points-mall-time">{{ formatDate(row.createTime) }}</span>
+                  <small class="points-mall-time-sub">{{ formatTime(row.createTime) }}</small>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="190" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openOrderDetail(row)">详情</el-button>
+                <el-button v-if="canShip(row)" link type="success" @click="openOrderAction(row, POINTS_ORDER_ACTION.SHIP)">发货</el-button>
+                <el-button v-if="canFulfill(row)" link type="success" @click="openOrderAction(row, POINTS_ORDER_ACTION.FULFILL)">完成履约</el-button>
+                <el-button v-if="canCancel(row)" link type="danger" @click="openOrderAction(row, POINTS_ORDER_ACTION.CANCEL)">取消</el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <div class="points-mall-empty">
+                <el-icon><Tickets /></el-icon>
+                <strong>没有匹配的兑换订单</strong>
+                <span>调整筛选条件后重试</span>
               </div>
             </template>
-          </el-table-column>
-          <el-table-column label="兑换" width="130">
-            <template #default="{ row }">
-              <div>{{ row.pointsPrice }} 积分 × {{ row.quantity }}</div>
-              <span class="muted">合计 {{ row.totalPoints }} 积分</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="履约方式" width="110">
-            <template #default="{ row }">{{ fulfillmentText(row.fulfillmentType) }}</template>
-          </el-table-column>
-          <el-table-column label="状态" width="100">
-            <template #default="{ row }">
-              <el-tag :type="statusTag(row.status)">{{ statusText(row.status) }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="createTime" label="兑换时间" width="180" />
-          <el-table-column label="操作" width="240" fixed="right">
-            <template #default="{ row }">
-              <el-button link type="primary" @click="openOrderDetail(row)">详情</el-button>
-              <el-button v-if="canShip(row)" link type="success" @click="openOrderAction(row, POINTS_ORDER_ACTION.SHIP)">发货</el-button>
-              <el-button v-if="canFulfill(row)" link type="success" @click="openOrderAction(row, POINTS_ORDER_ACTION.FULFILL)">完成履约</el-button>
-              <el-button v-if="canCancel(row)" link type="danger" @click="openOrderAction(row, POINTS_ORDER_ACTION.CANCEL)">取消</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <MallPagination
-          :total="orderPage.total"
-          :page="orderPage.current"
-          :limit="orderPage.size"
-          @pagination="changeOrderPage"
-        />
+          </el-table>
+          <MallPagination
+            :total="orderPage.total"
+            :page="orderPage.current"
+            :limit="orderPage.size"
+            @pagination="changeOrderPage"
+          />
+        </section>
       </el-tab-pane>
     </el-tabs>
 
-    <el-dialog v-model="categoryDialog.visible" :title="categoryDialog.form.id ? '编辑分类' : '新增分类'" width="520px">
-      <el-form ref="categoryFormRef" :model="categoryDialog.form" :rules="categoryRules" label-width="100px">
+    <el-dialog v-model="categoryDialog.visible" width="520px">
+      <template #header>
+        <div class="points-dialog-kicker-head">
+          <span class="drawer-kicker">POINTS CATEGORY</span>
+          <h2>{{ categoryDialog.form.id ? '编辑分类' : '新增分类' }}</h2>
+        </div>
+      </template>
+      <el-form ref="categoryFormRef" :model="categoryDialog.form" :rules="categoryRules" label-position="top">
         <el-form-item label="父分类" prop="parentId">
           <el-select v-model="categoryDialog.form.parentId" style="width: 100%">
             <el-option label="一级分类" :value="POINTS_ROOT_CATEGORY_ID" />
@@ -202,17 +270,23 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="productDialog.visible" :title="productDialog.form.id ? '编辑积分商品' : '新增积分商品'" width="760px">
+    <el-dialog v-model="productDialog.visible" width="760px" class="points-product-dialog">
+      <template #header>
+        <div class="points-dialog-kicker-head">
+          <span class="drawer-kicker">POINTS PRODUCT</span>
+          <h2>{{ productDialog.form.id ? '编辑积分商品' : '新增积分商品' }}</h2>
+        </div>
+      </template>
       <el-alert v-if="!productDialog.form.id" title="请先下架保存商品，再配置 SKU，最后编辑上架。" type="info" :closable="false" show-icon />
-      <el-form ref="productFormRef" :model="productDialog.form" :rules="productRules" label-width="120px" class="dialog-form">
+      <el-form ref="productFormRef" :model="productDialog.form" :rules="productRules" label-position="top" class="dialog-form points-form-grid">
         <el-form-item label="商品分类" prop="categoryId">
           <el-select v-model="productDialog.form.categoryId" style="width: 100%">
-            <el-option v-for="item in enabledCategories" :key="item.id" :label="item.name" :value="item.id" />
+            <el-option v-for="item in productCategoryOptions" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="商品名称" prop="name"><el-input v-model="productDialog.form.name" maxlength="64" /></el-form-item>
-        <el-form-item label="商品副标题"><el-input v-model="productDialog.form.subtitle" maxlength="128" /></el-form-item>
-        <el-form-item label="商品主图" prop="mainImage"><image-uploader v-model="productDialog.form.mainImage" /></el-form-item>
+        <el-form-item label="商品副标题" class="wide"><el-input v-model="productDialog.form.subtitle" maxlength="128" /></el-form-item>
+        <el-form-item label="商品主图" prop="mainImage" class="wide"><image-uploader v-model="productDialog.form.mainImage" /></el-form-item>
         <el-form-item label="商品类型" prop="productType">
           <el-radio-group v-model="productDialog.form.productType" @change="syncFulfillmentType">
             <el-radio :label="POINTS_PRODUCT_TYPE.PHYSICAL">实物商品</el-radio>
@@ -223,7 +297,7 @@
         <el-form-item label="履约方式">
           <el-input :model-value="fulfillmentText(productDialog.form.fulfillmentType)" disabled />
         </el-form-item>
-        <el-form-item v-if="productDialog.form.productType === POINTS_PRODUCT_TYPE.COUPON" label="兑换优惠券" prop="couponId">
+        <el-form-item v-if="productDialog.form.productType === POINTS_PRODUCT_TYPE.COUPON" label="兑换优惠券" prop="couponId" class="wide">
           <el-select v-model="productDialog.form.couponId" filterable style="width: 100%" placeholder="选择已开放积分兑换的优惠券">
             <el-option
               v-for="coupon in coupons"
@@ -233,7 +307,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="兑换时间" prop="exchangeTime">
+        <el-form-item label="兑换时间" prop="exchangeTime" class="wide">
           <el-date-picker
             v-model="productDialog.form.exchangeTime"
             type="datetimerange"
@@ -247,9 +321,9 @@
           <el-input-number v-model="productDialog.form.perMemberLimit" :min="0" />
           <span class="form-tip">0 表示不限</span>
         </el-form-item>
-        <el-form-item label="商品详情"><el-input v-model="productDialog.form.detailDesc" type="textarea" :rows="5" /></el-form-item>
         <el-form-item label="排序"><el-input-number v-model="productDialog.form.sort" :min="0" /></el-form-item>
-        <el-form-item label="上架"><el-switch v-model="productDialog.form.isEnabled" :disabled="!productDialog.form.id" /></el-form-item>
+        <el-form-item label="商品详情" class="wide"><el-input v-model="productDialog.form.detailDesc" type="textarea" :rows="3" /></el-form-item>
+        <el-form-item label="上架" class="wide"><el-switch v-model="productDialog.form.isEnabled" :disabled="!productDialog.form.id" /></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="productDialog.visible = false">取消</el-button>
@@ -257,55 +331,87 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="skuDialog.visible" :title="`${skuDialog.product?.name || ''} · SKU管理`" width="820px">
-      <div class="toolbar-row"><el-button type="primary" icon="Plus" @click="openSkuEdit()">新增SKU</el-button></div>
-      <el-table v-loading="skuDialog.loading" :data="skuDialog.rows">
-        <el-table-column prop="name" label="SKU名称" min-width="180" />
-        <el-table-column label="图片" width="90">
-          <template #default="{ row }"><el-image :src="previewUrl(row.mainImage || skuDialog.product?.mainImage)" fit="cover" class="table-image" /></template>
+    <el-dialog v-model="skuDialog.visible" width="820px">
+      <template #header>
+        <div class="points-dialog-kicker-head">
+          <span class="drawer-kicker">POINTS SKU</span>
+          <h2>{{ skuDialog.product?.name || '' }} · SKU 管理</h2>
+        </div>
+      </template>
+      <el-form ref="skuFormRef" :model="skuEdit.form" :rules="skuRules" class="sku-inline-form" label-position="top">
+        <div class="sku-inline-main">
+          <el-form-item label="SKU名称" prop="name"><el-input v-model="skuEdit.form.name" placeholder="请输入 SKU 名称" /></el-form-item>
+          <el-form-item label="积分价格" prop="pointsPrice"><el-input-number v-model="skuEdit.form.pointsPrice" :min="1" controls-position="right" /></el-form-item>
+          <el-form-item label="可用库存" prop="stock"><el-input-number v-model="skuEdit.form.stock" :min="0" controls-position="right" /></el-form-item>
+          <el-form-item>
+            <template #label>SKU 图片 <small class="sku-label-tip">可选，为空使用商品主图</small></template>
+            <image-uploader v-model="skuEdit.form.mainImage" clearable compact />
+          </el-form-item>
+          <el-form-item class="sku-inline-actions">
+            <el-button type="primary" icon="Plus" @click="submitSku">{{ skuEdit.form.id ? '保存 SKU' : '新增 SKU' }}</el-button>
+          </el-form-item>
+        </div>
+      </el-form>
+      <el-table data-ym-table="r43" v-loading="skuDialog.loading" :data="skuDialog.rows">
+        <el-table-column prop="name" label="SKU名称" min-width="160" />
+        <el-table-column label="图片" width="80">
+          <template #default="{ row }">
+            <el-image
+              v-if="row.mainImage || skuDialog.product?.mainImage"
+              :src="previewUrl(row.mainImage || skuDialog.product?.mainImage)"
+              fit="cover"
+              class="table-image"
+            />
+            <span v-else class="table-image image-placeholder"><el-icon><Picture /></el-icon></span>
+          </template>
         </el-table-column>
-        <el-table-column prop="pointsPrice" label="积分价格" width="110" />
-        <el-table-column prop="stock" label="可用库存" width="100" />
-        <el-table-column prop="totalStock" label="累计库存" width="100" />
-        <el-table-column label="状态" width="90">
+        <el-table-column prop="pointsPrice" label="积分价格" width="90" />
+        <el-table-column prop="stock" label="可用库存" width="90" />
+        <el-table-column prop="totalStock" label="累计库存" width="90" />
+        <el-table-column label="状态" width="80">
           <template #default="{ row }"><el-tag :type="row.isEnabled ? 'success' : 'info'">{{ row.isEnabled ? '启用' : '停用' }}</el-tag></template>
         </el-table-column>
-        <el-table-column label="操作" width="140" fixed="right">
+        <el-table-column label="操作" width="130" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openSkuEdit(row)">编辑</el-button>
             <el-button link type="danger" @click="removeSku(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
-    </el-dialog>
-
-    <el-dialog v-model="skuEdit.visible" :title="skuEdit.form.id ? '编辑SKU' : '新增SKU'" width="560px" append-to-body>
-      <el-form ref="skuFormRef" :model="skuEdit.form" :rules="skuRules" label-width="110px">
-        <el-form-item label="SKU名称" prop="name"><el-input v-model="skuEdit.form.name" /></el-form-item>
-        <el-form-item label="SKU图片"><image-uploader v-model="skuEdit.form.mainImage" /></el-form-item>
-        <el-form-item label="积分价格" prop="pointsPrice"><el-input-number v-model="skuEdit.form.pointsPrice" :min="1" /></el-form-item>
-        <el-form-item label="可用库存" prop="stock"><el-input-number v-model="skuEdit.form.stock" :min="0" /></el-form-item>
-        <el-form-item label="排序"><el-input-number v-model="skuEdit.form.sort" :min="0" /></el-form-item>
-        <el-form-item label="启用"><el-switch v-model="skuEdit.form.isEnabled" /></el-form-item>
-      </el-form>
       <template #footer>
-        <el-button @click="skuEdit.visible = false">取消</el-button>
-        <el-button type="primary" @click="submitSku">保存</el-button>
+        <el-button @click="skuDialog.visible = false">关闭</el-button>
       </template>
     </el-dialog>
 
-    <el-drawer v-model="orderDetail.visible" title="积分订单详情" size="620px">
+    <el-drawer v-model="orderDetail.visible" class="points-order-drawer" size="620px">
+      <template #header>
+        <div class="points-order-drawer-heading">
+          <span>POINTS ORDER</span>
+          <strong>兑换订单详情</strong>
+        </div>
+      </template>
       <template v-if="orderDetail.data">
+        <div class="points-order-detail-head">
+          <div><span>订单编号</span><b class="points-order-no">{{ orderDetail.data.orderNo }}</b></div>
+          <el-tag :type="statusTag(orderDetail.data.status)">{{ statusText(orderDetail.data.status) }}</el-tag>
+        </div>
+        <div class="points-order-summary">
+          <el-image
+            v-if="orderDetail.data.productImage"
+            :src="previewUrl(orderDetail.data.productImage)"
+            fit="cover"
+            class="points-order-product-image"
+          />
+          <div class="points-order-summary-copy">
+            <strong>{{ orderDetail.data.productName }}</strong>
+            <span>{{ orderDetail.data.skuName }} × {{ orderDetail.data.quantity }}</span>
+            <span>合计 {{ orderDetail.data.totalPoints }} 积分</span>
+          </div>
+        </div>
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="订单编号" :span="2">{{ orderDetail.data.orderNo }}</el-descriptions-item>
           <el-descriptions-item label="会员ID">{{ orderDetail.data.memberId }}</el-descriptions-item>
-          <el-descriptions-item label="订单状态">{{ statusText(orderDetail.data.status) }}</el-descriptions-item>
-          <el-descriptions-item label="商品">{{ orderDetail.data.productName }}</el-descriptions-item>
-          <el-descriptions-item label="规格">{{ orderDetail.data.skuName }}</el-descriptions-item>
-          <el-descriptions-item label="数量">{{ orderDetail.data.quantity }}</el-descriptions-item>
-          <el-descriptions-item label="消耗积分">{{ orderDetail.data.totalPoints }}</el-descriptions-item>
           <el-descriptions-item label="履约方式">{{ fulfillmentText(orderDetail.data.fulfillmentType) }}</el-descriptions-item>
-          <el-descriptions-item label="兑换时间">{{ orderDetail.data.createTime }}</el-descriptions-item>
+          <el-descriptions-item label="兑换时间" :span="2">{{ orderDetail.data.createTime }}</el-descriptions-item>
           <el-descriptions-item v-if="orderDetail.data.receiverName" label="收货人" :span="2">
             {{ orderDetail.data.receiverName }} {{ orderDetail.data.receiverContact }}
           </el-descriptions-item>
@@ -323,16 +429,43 @@
           </el-descriptions-item>
         </el-descriptions>
         <h3 class="timeline-title">状态记录</h3>
-        <el-timeline>
+        <el-timeline v-if="orderDetail.logs.length">
           <el-timeline-item v-for="item in orderDetail.logs" :key="item.id" :timestamp="item.createTime">
             {{ statusText(item.statusTo) }} · {{ item.remark }}
           </el-timeline-item>
         </el-timeline>
+        <p v-else class="muted">暂无状态记录</p>
+      </template>
+      <template #footer>
+        <div class="points-order-drawer-actions">
+          <el-button @click="orderDetail.visible = false">关闭</el-button>
+          <el-button
+            v-if="orderDetail.data && canShip(orderDetail.data)"
+            type="success"
+            @click="openOrderActionFromDetail(orderDetail.data, POINTS_ORDER_ACTION.SHIP)"
+          >发货</el-button>
+          <el-button
+            v-if="orderDetail.data && canFulfill(orderDetail.data)"
+            type="success"
+            @click="openOrderActionFromDetail(orderDetail.data, POINTS_ORDER_ACTION.FULFILL)"
+          >完成履约</el-button>
+          <el-button
+            v-if="orderDetail.data && canCancel(orderDetail.data)"
+            type="danger"
+            @click="openOrderActionFromDetail(orderDetail.data, POINTS_ORDER_ACTION.CANCEL)"
+          >取消订单</el-button>
+        </div>
       </template>
     </el-drawer>
 
-    <el-dialog v-model="orderAction.visible" :title="orderActionTitle" width="520px">
-      <el-form label-width="110px">
+    <el-dialog v-model="orderAction.visible" width="520px">
+      <template #header>
+        <div class="points-dialog-kicker-head">
+          <span class="drawer-kicker">ORDER ACTION</span>
+          <h2>{{ orderActionTitle }}</h2>
+        </div>
+      </template>
+      <el-form label-position="top">
         <template v-if="orderAction.type === POINTS_ORDER_ACTION.SHIP">
           <el-form-item label="物流公司">
             <el-select
@@ -368,9 +501,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, h, onMounted, reactive, ref } from 'vue'
-import { ElButton, ElImage, ElMessage, ElMessageBox, ElUpload, type FormInstance } from 'element-plus'
+import { computed, defineComponent, h, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { ElButton, ElIcon, ElImage, ElMessage, ElMessageBox, ElUpload, type FormInstance } from 'element-plus'
+import { Goods, Picture, Search, Tickets } from '@element-plus/icons-vue'
 import MallPagination from '@/components/mall/MallPagination.vue'
+import CopyableText from '@/components/mall/CopyableText.vue'
 import { uploadStorageFile } from '@/api/storage'
 import { getStoragePreviewUrl } from '@/utils/storage'
 import {
@@ -409,7 +545,11 @@ import {
 } from '@/api/mall/pointsMall'
 
 const ImageUploader = defineComponent({
-  props: { modelValue: { type: String, default: '' } },
+  props: {
+    modelValue: { type: String, default: '' },
+    clearable: { type: Boolean, default: false },
+    compact: { type: Boolean, default: false },
+  },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
     const uploading = ref(false)
@@ -425,15 +565,29 @@ const ImageUploader = defineComponent({
         uploading.value = false
       }
     }
-    return () => h('div', { class: 'image-uploader' }, [
-      props.modelValue ? h(ElImage, { src: getStoragePreviewUrl(props.modelValue), fit: 'cover', class: 'upload-preview' }) : null,
+    return () => h('div', { class: ['image-uploader', { 'image-uploader-compact': props.compact }] }, [
+      props.modelValue
+        ? h(ElImage, { src: getStoragePreviewUrl(props.modelValue), fit: 'cover', class: 'upload-preview' })
+        : props.compact
+          ? h('span', { class: 'upload-preview upload-preview-empty' }, [h(ElIcon, null, () => h(Picture))])
+          : null,
       h(ElUpload, { httpRequest: upload, showFileList: false, accept: 'image/*' }, () =>
-        h(ElButton, { type: 'primary', plain: true, loading: uploading.value }, () => props.modelValue ? '更换图片' : '上传图片')),
+        h(ElButton, { type: 'primary', plain: true, loading: uploading.value }, () => props.modelValue ? '更换图片' : props.compact ? '选择图片' : '上传图片')),
+      props.modelValue && props.clearable
+        ? h(ElButton, { link: true, type: 'danger', onClick: () => emit('update:modelValue', '') }, () => '清除')
+        : null,
     ])
   },
 })
 
-const activeTab = ref('category')
+const route = useRoute()
+function resolveTab(value: unknown) {
+  const name = Array.isArray(value) ? value[0] : value
+  return name === '积分商品' || name === 'product' ? 'product'
+    : name === '兑换订单' || name === 'order' ? 'order'
+      : 'category'
+}
+const activeTab = ref(resolveTab(route.query.tab))
 const loading = ref(false)
 const categories = ref<any[]>([])
 const products = ref<any[]>([])
@@ -455,7 +609,7 @@ const orderStatuses = POINTS_ORDER_STATUS_OPTIONS
 const categoryDialog = reactive({ visible: false, form: emptyCategory() })
 const productDialog = reactive({ visible: false, form: emptyProduct() })
 const skuDialog = reactive({ visible: false, loading: false, product: null as any, rows: [] as any[] })
-const skuEdit = reactive({ visible: false, form: emptySku() })
+const skuEdit = reactive({ form: emptySku() })
 const orderDetail = reactive({ visible: false, data: null as any, logs: [] as any[] })
 const orderAction = reactive({ visible: false, type: '', order: null as any, providerCode: '', trackingNo: '', remark: '' })
 
@@ -473,7 +627,9 @@ const skuRules = {
   stock: [{ required: true, message: '请输入库存', trigger: 'change' }],
 }
 
-const enabledCategories = computed(() => categories.value.filter((item) => item.isEnabled))
+const productCategoryOptions = computed(() => categories.value.filter(
+  (item) => item.isEnabled || item.id === productDialog.form.categoryId
+))
 const parentCategoryOptions = computed(() => categories.value.filter((item) => item.id !== categoryDialog.form.id))
 const orderActionTitle = computed(() => {
   const titles: Record<string, string> = {
@@ -494,6 +650,8 @@ function fulfillmentText(value: number) { return getPointsFulfillmentText(value)
 function deliveryProviderName(code?: string) { return deliveryProviders.value.find((item) => item.code === code)?.name || code || '-' }
 function statusText(value: string) { return getPointsOrderStatusText(value) }
 function statusTag(value: string) { return getPointsOrderStatusTag(value) }
+function formatDate(value?: string) { return value ? value.slice(0, 10) : '-' }
+function formatTime(value?: string) { return value && value.length > 10 ? value.slice(11) : '' }
 function canShip(row: any) {
   return row.status === POINTS_ORDER_STATUS.PENDING_FULFILLMENT
     && row.fulfillmentType === POINTS_FULFILLMENT_TYPE.LOGISTICS
@@ -542,6 +700,15 @@ async function submitCategory() {
   ElMessage.success('分类保存成功'); categoryDialog.visible = false; await loadCategories()
 }
 async function removeCategory(row: any) {
+  if (categories.value.some((item) => String(item.parentId) === String(row.id))) {
+    ElMessage.warning('该分类下仍有子分类或商品，暂不可删除')
+    return
+  }
+  const productResponse = await queryPointsProducts({ categoryId: row.id, current: 1, size: 1 }) as { data?: { total?: number | string } }
+  if (Number(productResponse.data?.total || 0) > 0) {
+    ElMessage.warning('该分类下仍有子分类或商品，暂不可删除')
+    return
+  }
   await ElMessageBox.confirm(`确认删除分类“${row.name}”？`, '删除确认', { type: 'warning' })
   await deletePointsCategory(row.id); ElMessage.success('删除成功'); await loadCategories()
 }
@@ -581,12 +748,23 @@ async function removeProduct(row: any) {
 function resetProductQuery() { Object.assign(productQuery, { name: '', categoryId: '', isEnabled: '' }); loadProducts(true) }
 function changeProductPage({ page, limit }: any) { productPage.current = page; productPage.size = limit; loadProducts() }
 
-async function openSkuDialog(product: any) { skuDialog.product = product; skuDialog.visible = true; await loadSkus() }
+async function openSkuDialog(product: any) {
+  skuDialog.product = product
+  skuEdit.form = { ...emptySku(), spuId: product.id }
+  skuDialog.visible = true
+  await loadSkus()
+}
 async function loadSkus() { skuDialog.loading = true; try { const response: any = await queryPointsSkus(skuDialog.product.id); skuDialog.rows = response.data || [] } finally { skuDialog.loading = false } }
-function openSkuEdit(row?: any) { skuEdit.form = row ? { ...row } : { ...emptySku(), spuId: skuDialog.product.id }; skuEdit.visible = true }
+function openSkuEdit(row?: any) {
+  skuEdit.form = row ? { ...row } : { ...emptySku(), spuId: skuDialog.product.id }
+  skuFormRef.value?.clearValidate()
+}
 async function submitSku() {
-  await skuFormRef.value?.validate(); await savePointsSku(skuEdit.form)
-  ElMessage.success('SKU保存成功'); skuEdit.visible = false; await loadSkus()
+  await skuFormRef.value?.validate()
+  await savePointsSku(skuEdit.form)
+  ElMessage.success('SKU保存成功')
+  skuEdit.form = { ...emptySku(), spuId: skuDialog.product.id }
+  await loadSkus()
 }
 async function removeSku(row: any) {
   await ElMessageBox.confirm(`确认删除SKU“${row.name}”？`, '删除确认', { type: 'warning' })
@@ -604,11 +782,18 @@ function openOrderAction(row: any, type: string) {
   Object.assign(orderAction, { visible: true, type, order: row, providerCode: '', trackingNo: '', remark: '' })
   if (type === POINTS_ORDER_ACTION.SHIP) loadDeliveryProviders('')
 }
+function openOrderActionFromDetail(row: Parameters<typeof openOrderAction>[0], type: string) {
+  orderDetail.visible = false
+  openOrderAction(row, type)
+}
 async function loadDeliveryProviders(keyword = '') {
   deliveryProviderLoading.value = true
   try {
     const response: any = await queryPointsDeliveryProviders(keyword)
     deliveryProviders.value = response.data || []
+    if (!keyword && orderAction.visible && orderAction.type === POINTS_ORDER_ACTION.SHIP && !orderAction.providerCode) {
+      orderAction.providerCode = deliveryProviders.value[0]?.code || ''
+    }
   } finally { deliveryProviderLoading.value = false }
 }
 async function submitOrderAction() {
@@ -625,20 +810,67 @@ async function submitOrderAction() {
   ElMessage.success('操作成功'); orderAction.visible = false; await loadOrders()
 }
 
-onMounted(loadCategories)
+onMounted(() => { void loadActiveTab() })
+
+watch(() => route.query.tab, (value) => {
+  activeTab.value = resolveTab(value)
+  void loadActiveTab()
+})
 </script>
 
 <style scoped>
-.points-mall-page { --ink: var(--mall-ink); --sand: var(--mall-paper); --orange: var(--mall-price); color: var(--mall-ink); }
-.content-tabs { padding: 8px 22px 22px; border: 1px solid var(--mall-line); border-radius: 8px; background: #fff; }
-.toolbar-row { display: flex; justify-content: flex-end; margin: 8px 0 16px; }.filter-form { margin-top: 8px; padding: 14px 16px 0; border: 1px solid var(--mall-line); border-radius: 8px; background: #fafcfa; }
-.filter-form + .toolbar-row { margin: -1px 0 16px; padding: 0 16px 14px; border: 1px solid var(--mall-line); border-top: 0; border-radius: 0 0 8px 8px; background: #fafcfa; }
-.filter-form:has(+ .toolbar-row) { border-bottom: 0; border-radius: 8px 8px 0 0; }
-.product-cell { display: flex; align-items: center; gap: 12px; }.product-cell p { margin: 4px 0 0; color: var(--mall-muted); font-size: 12px; }.product-cell.compact { gap: 8px; }
-.status-switch-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-.status-switch-cell span { color: var(--mall-muted); font-size: 12px; }
-.product-image { width: 58px; height: 58px; border-radius: 9px; background: var(--sand); }.table-image { width: 44px; height: 44px; border-radius: 7px; background: var(--sand); }
-.muted { color: var(--mall-muted); font-size: 12px; }.form-tip { margin-left: 12px; color: var(--mall-muted); font-size: 12px; }.dialog-form { margin-top: 18px; }
-.timeline-title { margin: 26px 0 18px; font-size: 16px; }.image-uploader { display: flex; align-items: center; gap: 12px; }.upload-preview { width: 72px; height: 72px; border-radius: 9px; background: var(--sand); }
-:deep(.el-pagination) { justify-content: flex-end; margin-top: 20px; }
+.points-category-toolbar { display: flex; justify-content: flex-end; margin: 2px 0 8px; }
+.points-category-name { font-weight: 700; }
+.points-mall-page :deep(.mall-query-form .el-input),
+.points-mall-page :deep(.mall-query-form .el-select) { width: 188px; }
+.points-mall-page .mall-table-panel :deep(.mall-pagination) { display: flex; min-height: 48px; align-items: center; justify-content: flex-end; margin: 0; padding: 7px 12px; border-top: 1px solid var(--mall-line, #dce4de); }
+.product-cell { display: flex; width: 240px; max-width: 100%; min-width: 0; align-items: center; justify-content: flex-start; gap: 12px; margin: 0 auto; text-align: left; }
+.product-cell-copy { min-width: 0; flex: 1 1 auto; text-align: left; }
+.product-cell strong, .product-cell p { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.product-cell p { margin: 4px 0 0; color: var(--mall-muted, #65726a); font-size: 12px; }
+.product-cell.compact { gap: 8px; }
+.points-cell-stack { display: flex; width: max-content; max-width: 100%; margin: 0 auto; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+.status-switch-cell { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
+.status-switch-cell span { color: var(--mall-muted, #65726a); font-size: 12px; }
+.product-image { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 7px; background: var(--mall-paper, #f4f6f3); }.table-image { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 7px; background: var(--mall-paper, #f4f6f3); }
+.image-placeholder { display: inline-flex; align-items: center; justify-content: center; color: var(--mall-muted, #65726a); font-size: 16px; }
+:global(.el-overlay .el-dialog.points-product-dialog) { margin-top: 6vh; }
+:global(.el-overlay .el-dialog.points-product-dialog .el-dialog__body) { max-height: calc(100vh - 240px); }
+.muted { color: var(--mall-muted, #65726a); font-size: 12px; }.form-tip { margin-left: 12px; color: var(--mall-muted, #65726a); font-size: 12px; }.dialog-form { margin-top: 18px; }
+.timeline-title { margin: 26px 0 18px; font-size: 16px; }.image-uploader { display: flex; align-items: center; gap: 12px; }.image-uploader :deep(.upload-preview) { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 9px; background: var(--mall-paper, #f4f6f3); }
+.points-mall-empty { display: flex; min-height: 180px; align-items: center; justify-content: center; flex-direction: column; gap: 7px; color: var(--mall-muted, #65726a); }
+.points-mall-empty .el-icon { margin-bottom: 3px; color: var(--mall-brand, #24634f); font-size: 28px; }
+.points-mall-empty strong { color: var(--mall-ink, #17251f); font-size: 13px; }
+.points-mall-empty span { font-size: 12px; }
+.points-mall-time { display: block; color: var(--mall-ink, #17251f); font-size: 12px; }
+.points-mall-time-sub { display: block; margin-top: 0; color: var(--mall-muted, #65726a); font-family: var(--ym-font-mono, monospace); font-size: 10px; }
+.points-order-drawer-heading { display: flex; flex-direction: column; gap: 5px; }
+.points-order-drawer-heading span { color: var(--mall-brand, #24634f); font-family: var(--ym-font-mono, monospace); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; }
+.points-order-drawer-heading strong { color: var(--mall-ink, #17251f); font-size: 19px; }
+.points-order-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.points-order-detail-head > div { display: flex; flex-direction: column; gap: 5px; }
+.points-order-detail-head span { color: var(--mall-muted, #65726a); font-size: 9px; letter-spacing: .04em; }
+.points-order-detail-head .points-order-no { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--mall-ink, #17251f); }
+.points-order-summary { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--mall-line, #dce4de); }
+.points-order-product-image { width: 64px; height: 64px; flex: 0 0 64px; border-radius: 8px; background: var(--mall-paper, #f4f6f3); }
+.points-order-summary-copy { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; gap: 5px; }
+.points-order-summary-copy strong { color: var(--mall-ink, #17251f); font-size: 14px; }
+.points-order-summary-copy span { color: var(--mall-muted, #65726a); font-size: 11px; }
+.points-order-drawer-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.drawer-kicker { display: block; color: var(--mall-brand, #24634f); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.points-dialog-kicker-head { display: flex; flex-direction: column; gap: 5px; }
+.points-dialog-kicker-head h2 { margin: 0; color: var(--mall-ink, #17251f); font-size: 18px; font-weight: 700; }
+.points-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; margin-top: 18px; }
+.points-form-grid .el-form-item { margin-bottom: 0; }
+.points-form-grid .wide { grid-column: 1 / -1; }
+.sku-inline-form { margin-bottom: 14px; padding: 14px; border: 1px solid var(--mall-line, #dce4de); border-radius: 8px; background: #fafcfa; }
+.sku-inline-main { display: grid; grid-template-columns: minmax(150px, 1.4fr) 120px 120px minmax(172px, 1fr) auto; align-items: end; gap: 10px 12px; }
+.sku-inline-form :deep(.el-form-item) { margin-bottom: 0; }
+.sku-inline-form :deep(.el-input) { width: 100%; }
+.sku-inline-form :deep(.el-input-number) { width: 100%; }
+.sku-inline-form :deep(.el-form-item__label) { min-height: auto; padding-bottom: 6px; color: var(--mall-muted, #65726a); font-size: 12px; white-space: nowrap; }
+.sku-label-tip { color: var(--mall-muted, #65726a); font-size: 9px; font-weight: 400; }
+.image-uploader-compact { gap: 8px; }
+.image-uploader-compact :deep(.upload-preview) { width: 32px; height: 32px; flex: 0 0 32px; border-radius: 5px; }
+.image-uploader :deep(.upload-preview-empty) { display: inline-flex; align-items: center; justify-content: center; color: var(--mall-muted, #65726a); }
 </style>

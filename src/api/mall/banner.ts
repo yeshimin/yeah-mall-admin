@@ -5,6 +5,8 @@ export interface BannerRecord {
   id: string
   imageUrl: string
   target?: string
+  sort?: number
+  isEnabled?: boolean
   createTime?: string
   updateTime?: string
 }
@@ -29,12 +31,20 @@ export function queryPlatformBanners(params: Record<string, unknown>) {
   return request<PageResponse<BannerRecord>>({ url: '/admin/platBanner/crud/query', method: 'get', params })
 }
 
-export function createPlatformBanner(file: File, target = '') {
-  return request<void>({ url: '/admin/platBanner/create', method: 'post', data: bannerFormData(file, { target }) })
+export function createPlatformBanner(file: File, target = '', sort = 1, isEnabled = true) {
+  return request<void>({
+    url: '/admin/platBanner/create',
+    method: 'post',
+    data: bannerFormData(file, { target, sort: String(sort), isEnabled: String(isEnabled) }),
+  })
 }
 
-export function updatePlatformBanner(id: string, file: File | undefined, target = '') {
-  return request<void>({ url: '/admin/platBanner/update', method: 'post', data: bannerFormData(file, { id, target }) })
+export function updatePlatformBanner(id: string, file: File | undefined, target = '', sort = 1, isEnabled = true) {
+  return request<void>({
+    url: '/admin/platBanner/update',
+    method: 'post',
+    data: bannerFormData(file, { id, target, sort: String(sort), isEnabled: String(isEnabled) }),
+  })
 }
 
 export function deletePlatformBanners(ids: string[]) {

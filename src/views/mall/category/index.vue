@@ -17,7 +17,7 @@
     </section>
 
     <section class="mall-table-panel category-table-panel">
-      <el-table
+      <el-table data-ym-table="r1"
         ref="tableRef"
         v-loading="loading"
         :data="categories"

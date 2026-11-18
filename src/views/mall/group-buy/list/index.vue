@@ -45,7 +45,7 @@
     </section>
 
     <section class="mall-table-panel">
-    <el-table v-loading="loading" :data="activityList" style="width: 100%">
+    <el-table data-ym-table="r9" v-loading="loading" :data="activityList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="name" label="活动名称" width="200" />
       <el-table-column label="封面图片" width="120">
@@ -228,7 +228,7 @@
       width="1050px"
       destroy-on-close
     >
-      <el-table v-loading="groupOverviewLoading" :data="groupOverviewList" style="width: 100%">
+      <el-table data-ym-table="r10" v-loading="groupOverviewLoading" :data="groupOverviewList" style="width: 100%">
         <el-table-column prop="groupNo" label="团编号" min-width="150" />
         <el-table-column label="拼团商品" min-width="220">
           <template #default="scope">

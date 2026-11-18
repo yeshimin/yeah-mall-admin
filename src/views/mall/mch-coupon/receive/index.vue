@@ -65,7 +65,7 @@
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="receiveList" style="width: 100%">
+    <el-table data-ym-table="r15" v-loading="loading" :data="receiveList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="couponName" label="优惠券名称" min-width="150" />
       <el-table-column prop="couponType" label="优惠券类型" width="100">

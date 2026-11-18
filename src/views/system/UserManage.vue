@@ -91,7 +91,7 @@
         </div>
 
         <div class="table-container">
-          <el-table
+          <el-table data-ym-table="r70"
             ref="userTableRef"
             v-loading="tableLoading"
             :data="userList"

@@ -85,7 +85,7 @@
     </section>
 
     <section class="mall-table-panel">
-    <el-table v-loading="loading" :data="records">
+    <el-table data-ym-table="r45" v-loading="loading" :data="records">
       <el-table-column label="商品" min-width="220">
         <template #default="{ row }">
           <div class="review-product-cell">
@@ -370,9 +370,19 @@ onMounted(() => load())
 <style scoped>
 .query-form :deep(.el-select) { width: 120px; }
 .query-form :deep(.el-select.remote-select) { width: 230px; }
-.product-image { width: 52px; height: 52px; border-radius: 8px; }
-.review-product-cell { display: flex; min-width: 0; align-items: center; gap: 10px; }
-.review-product-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.product-image { width: 52px; height: 52px; flex: 0 0 auto; border-radius: 8px; }
+.review-product-cell {
+  display: flex;
+  width: 240px;
+  max-width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin: 0 auto;
+  text-align: left;
+}
+.review-product-copy { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; gap: 4px; text-align: left; }
 .review-product-copy strong { overflow: hidden; color: var(--mall-ink, #17251f); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .review-product-copy small { color: var(--mall-muted, #65726a); font-family: var(--ym-font-mono, monospace); font-size: 10px; }
 .review-product-placeholder { display: grid; place-items: center; background: #f4f6f3; color: var(--mall-muted, #65726a); }

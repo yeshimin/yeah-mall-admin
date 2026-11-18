@@ -99,7 +99,7 @@
           <h3>下级区域</h3>
         </div>
 
-        <el-table
+        <el-table data-ym-table="r59"
           v-loading="childLoading"
           :data="tableRows"
           row-key="id"

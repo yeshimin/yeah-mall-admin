@@ -63,7 +63,7 @@
     </div>
 
     <div class="table-container">
-      <el-table
+      <el-table data-ym-table="r69"
         ref="storageTableRef"
         v-loading="tableLoading"
         :data="storageList"

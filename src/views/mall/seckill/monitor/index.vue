@@ -21,7 +21,7 @@
 
       <el-card class="ranking-card" shadow="never" v-loading="loading">
         <template #header><span>商品实时排行</span></template>
-        <el-table :data="dashboard.productRanking || []" empty-text="暂无已审核秒杀商品">
+        <el-table data-ym-table="r49" :data="dashboard.productRanking || []" empty-text="暂无已审核秒杀商品">
           <el-table-column type="index" label="排名" width="70" />
           <el-table-column prop="name" label="商品名称" min-width="220" />
           <el-table-column prop="salesCount" label="已售数量" width="120" />

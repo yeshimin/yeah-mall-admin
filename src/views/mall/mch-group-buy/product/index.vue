@@ -38,7 +38,7 @@
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="productList" style="width: 100%">
+    <el-table data-ym-table="r23" v-loading="loading" :data="productList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="name" label="商品名称" min-width="200" />
       <el-table-column label="商品图片" width="120">

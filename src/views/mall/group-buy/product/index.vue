@@ -56,7 +56,7 @@
     </section>
 
     <section class="mall-table-panel">
-    <el-table v-loading="loading" :data="productList" style="width: 100%">
+    <el-table data-ym-table="r12" v-loading="loading" :data="productList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="name" label="商品名称" min-width="200" />
       <el-table-column label="商品图片" width="120">

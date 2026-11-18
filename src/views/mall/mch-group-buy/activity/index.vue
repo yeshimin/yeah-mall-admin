@@ -34,7 +34,7 @@
     </el-row>
 
     <!-- 活动列表 -->
-    <el-table
+    <el-table data-ym-table="r17"
       v-loading="loading"
       :data="activityList"
       style="width: 100%"
@@ -257,7 +257,7 @@
 
           <el-form-item label="SKU 拼团设置" required>
             <div class="stock-reservation-tip">审核通过后，填写的拼团库存会从对应源 SKU 中预留；活动结束时，未售库存将自动回补。</div>
-            <el-table v-loading="loadingApplySku" :data="applySkuList" border class="apply-sku-table" empty-text="该商品暂无可报名的 SKU">
+            <el-table data-ym-table="r18" v-loading="loadingApplySku" :data="applySkuList" border class="apply-sku-table" empty-text="该商品暂无可报名的 SKU">
               <el-table-column label="SKU 图片" width="170">
                 <template #default="scope">
                   <div class="sku-image-cell">
@@ -328,7 +328,7 @@
 
       <!-- SPU列表 -->
       <div v-if="spuList.length > 0" class="mb-4">
-        <el-table :data="spuList" style="width: 100%" @row-click="handleSpuRowClick">
+        <el-table data-ym-table="r19" :data="spuList" style="width: 100%" @row-click="handleSpuRowClick">
           <el-table-column type="index" label="序号" width="80" />
           <el-table-column prop="name" label="商品名称" min-width="300" />
           <el-table-column label="商品图片" width="120">
@@ -372,7 +372,7 @@
       width="1050px"
       destroy-on-close
     >
-      <el-table v-loading="groupOverviewLoading" :data="groupOverviewList" style="width: 100%">
+      <el-table data-ym-table="r20" v-loading="groupOverviewLoading" :data="groupOverviewList" style="width: 100%">
         <el-table-column prop="groupNo" label="团编号" min-width="150" />
         <el-table-column label="拼团商品" min-width="220">
           <template #default="scope">

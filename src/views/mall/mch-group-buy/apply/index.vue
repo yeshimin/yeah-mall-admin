@@ -47,7 +47,7 @@
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="applyList" style="width: 100%">
+    <el-table data-ym-table="r21" v-loading="loading" :data="applyList" style="width: 100%">
       <el-table-column label="序号" type="index" width="80" />
       <el-table-column prop="activityName" label="活动名称" min-width="200" />
       <el-table-column label="报名商品" min-width="220">

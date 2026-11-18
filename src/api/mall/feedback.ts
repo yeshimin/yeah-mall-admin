@@ -1,7 +1,11 @@
 import request from '@/utils/request'
 
 export function queryAdminFeedbacks(params: Record<string, unknown>) {
-  return request({ url: '/admin/feedback/crud/query', method: 'get', params })
+  return request({ url: '/admin/feedback/query', method: 'get', params })
+}
+
+export function queryAdminFeedbackStats(params: Record<string, unknown>) {
+  return request({ url: '/admin/feedback/stats', method: 'get', params })
 }
 
 export function getAdminFeedbackDetail(id: string | number) {

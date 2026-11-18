@@ -1,14 +1,14 @@
 <template>
   <div class="rich-text-editor" :class="{ readonly }" :style="{ height: `${height}px` }">
     <QuillEditor
-      v-model:content="content"
+      :content="readonly ? '' : content"
       content-type="html"
       theme="snow"
       :read-only="readonly"
       :placeholder="placeholder"
       :toolbar="toolbar"
       @ready="configureEditor"
-      @update:content="emit('update:modelValue', content)"
+      @update:content="handleContentUpdate"
     />
   </div>
 </template>
@@ -37,6 +37,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const content = ref(props.modelValue)
+let readonlyQuill: Quill | null = null
 const toolbar = props.readonly ? false : [
   ['bold', 'italic', 'underline', 'strike'],
   ['blockquote', 'code-block'],
@@ -50,11 +51,25 @@ const toolbar = props.readonly ? false : [
 ]
 
 watch(() => props.modelValue, (value) => {
+  if (props.readonly) {
+    readonlyQuill?.clipboard.dangerouslyPasteHTML(value || '', 'silent')
+    return
+  }
   if ((value || '') !== content.value) content.value = value || ''
 })
 
+function handleContentUpdate(value: string) {
+  content.value = value
+  emit('update:modelValue', value)
+}
+
 function configureEditor(editor: Quill) {
-  if (props.readonly) return
+  if (props.readonly) {
+    // vue-quill 1.x 只读态直接写 innerHTML，Quill 2 会丢弃无 data-list 的列表节点，改走剪贴板转换
+    readonlyQuill = editor
+    editor.clipboard.dangerouslyPasteHTML(props.modelValue || '', 'silent')
+    return
+  }
   const toolbarModule = editor.getModule('toolbar') as {
     addHandler?: (name: string, handler: () => void) => void
   }

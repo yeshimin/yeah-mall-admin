@@ -36,7 +36,7 @@
     </section>
 
     <section class="mall-table-panel">
-      <el-table v-loading="loading" :data="members">
+      <el-table data-ym-table="r33" v-loading="loading" :data="members">
         <el-table-column label="会员" min-width="220">
           <template #default="{ row }">
             <div class="member-cell">

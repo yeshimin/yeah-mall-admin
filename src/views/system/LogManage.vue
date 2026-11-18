@@ -39,7 +39,7 @@
       </el-form>
     </div>
 
-    <el-table
+    <el-table data-ym-table="r63"
       v-loading="tableLoading"
       :data="logList"
       stripe

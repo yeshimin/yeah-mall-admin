@@ -135,7 +135,7 @@
           </el-button>
         </div>
 
-        <el-table :data="logisticsList" style="width: 100%; margin-top: 20px;">
+        <el-table data-ym-table="r53" :data="logisticsList" style="width: 100%; margin-top: 20px;">
           <el-table-column prop="name" label="物流商名称" width="180"></el-table-column>
           <el-table-column prop="code" label="物流商编码" width="180"></el-table-column>
           <el-table-column prop="remark" label="备注" min-width="200"></el-table-column>

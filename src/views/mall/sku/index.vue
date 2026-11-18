@@ -23,7 +23,7 @@
       <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="tableData" @selection-change="handleSelectionChange" row-key="id">
+    <el-table data-ym-table="r55" v-loading="loading" :data="tableData" @selection-change="handleSelectionChange" row-key="id">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column prop="id" label="ID" align="center" />
       <el-table-column prop="name" label="名称" align="center" />

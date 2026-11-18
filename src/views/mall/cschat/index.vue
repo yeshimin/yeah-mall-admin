@@ -19,7 +19,7 @@
     </el-card>
 
     <el-card class="list-card mall-table-card" shadow="never">
-      <el-table v-loading="loading" :data="conversationList" style="width: 100%">
+      <el-table data-ym-table="r6" v-loading="loading" :data="conversationList" style="width: 100%">
         <el-table-column prop="id" label="会话ID" min-width="180"></el-table-column>
         <el-table-column prop="memberId" label="用户ID" min-width="120"></el-table-column>
         <el-table-column label="用户信息" min-width="200">

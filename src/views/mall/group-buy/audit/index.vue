@@ -56,7 +56,7 @@
     </section>
 
     <section class="mall-table-panel">
-    <el-table v-loading="loading" :data="applyList" style="width: 100%">
+    <el-table data-ym-table="r8" v-loading="loading" :data="applyList" style="width: 100%">
       <el-table-column label="序号" type="index" width="70" />
       <el-table-column prop="activityName" label="活动名称" min-width="160" show-overflow-tooltip />
       <el-table-column label="报名商品" min-width="240">

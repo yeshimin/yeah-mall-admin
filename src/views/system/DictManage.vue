@@ -118,7 +118,7 @@
           <h3>下级子节点</h3>
         </div>
 
-        <el-table
+        <el-table data-ym-table="r61"
           v-loading="tableLoading"
           :data="tableRows"
           row-key="id"

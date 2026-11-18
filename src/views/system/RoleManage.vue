@@ -45,7 +45,7 @@
     </div>
 
     <div class="table-container">
-      <el-table
+      <el-table data-ym-table="r68"
         ref="roleTableRef"
         v-loading="tableLoading"
         :data="roleList"

@@ -61,7 +61,7 @@
     </div>
 
     <div class="table-container">
-      <el-table
+      <el-table data-ym-table="r60"
         ref="configTableRef"
         v-loading="tableLoading"
         :data="configList"

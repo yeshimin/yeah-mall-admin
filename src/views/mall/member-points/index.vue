@@ -25,7 +25,7 @@
         </section>
 
         <section class="mall-table-panel">
-        <el-table v-loading="loading" :data="ledger" class="points-ledger-table">
+        <el-table data-ym-table="r31" v-loading="loading" :data="ledger" class="points-ledger-table">
           <el-table-column label="会员ID" min-width="150">
             <template #default="{ row }">
               <CopyableText :value="row.memberId" label="会员ID" />
@@ -82,7 +82,7 @@
 
       <el-tab-pane label="积分规则" name="rule">
         <section class="mall-table-panel points-rule-table">
-        <el-table v-loading="loading" :data="rules">
+        <el-table data-ym-table="r32" v-loading="loading" :data="rules">
           <el-table-column prop="name" label="规则" width="130" />
           <el-table-column prop="code" label="编码" width="160" />
           <el-table-column label="计算方式" width="120">

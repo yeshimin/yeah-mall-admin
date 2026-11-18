@@ -30,7 +30,7 @@
         </div>
       </div>
 
-      <el-table
+      <el-table data-ym-table="r39"
         ref="tableRef"
         v-loading="loading"
         :data="displayTree"

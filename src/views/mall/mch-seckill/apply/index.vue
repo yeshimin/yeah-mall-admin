@@ -35,7 +35,7 @@
     </el-row>
 
       <!-- 申请记录列表 -->
-      <el-table v-loading="loading" :data="recordList" style="width: 100%">
+      <el-table data-ym-table="r27" v-loading="loading" :data="recordList" style="width: 100%">
         <el-table-column label="序号" type="index" width="80" />
         <el-table-column prop="spuName" label="商品名称" width="200" />
         <el-table-column prop="activityName" label="活动名称" width="150" />
@@ -104,7 +104,7 @@
       <!-- SKU信息 -->
       <div class="mb-4" v-if="viewForm.skuList && viewForm.skuList.length > 0">
         <h4>SKU信息</h4>
-        <el-table :data="viewForm.skuList" style="width: 100%">
+        <el-table data-ym-table="r28" :data="viewForm.skuList" style="width: 100%">
           <el-table-column prop="name" label="SKU名称" min-width="200" />
           <el-table-column prop="specCode" label="规格编码" width="150" />
           <el-table-column prop="originPrice" label="原价" width="100" />

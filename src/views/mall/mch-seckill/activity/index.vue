@@ -34,7 +34,7 @@
     </el-row>
 
     <!-- 活动列表 -->
-    <el-table
+    <el-table data-ym-table="r25"
       v-loading="loading"
       :data="activityList"
       style="width: 100%"
@@ -316,7 +316,7 @@
 
       <!-- SPU列表 -->
       <div v-if="spuList.length > 0" class="mb-4">
-        <el-table :data="spuList" style="width: 100%" @row-click="handleSpuRowClick">
+        <el-table data-ym-table="r26" :data="spuList" style="width: 100%" @row-click="handleSpuRowClick">
           <el-table-column type="index" label="序号" width="80" />
           <el-table-column prop="name" label="商品名称" min-width="300" />
           <el-table-column label="商品图片" width="120">

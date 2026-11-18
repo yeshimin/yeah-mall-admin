@@ -1,0 +1,536 @@
+/* 表格对齐总规则：同列内容容器等宽 + 容器在列内左右居中 + 容器内内容左对齐。
+   容器宽度由 utils/table-align.ts 运行时按本列真实内容的最大宽度计算，此处不写死宽度。
+   前缀用 :is(#app, body)：append-to-body 的弹窗/抽屉会被传送到 #app 之外，
+   只写 #app 会让这些表格漏掉居中和左对齐；:is() 取最高特异性，仍压过主题样式。 */
+:is(#app, body) .el-table th.el-table__cell .cell { text-align: center !important; }
+:is(#app, body) .el-table td.el-table__cell .cell {
+  max-width: 100%;
+  /* Element Plus 给 show-overflow-tooltip 的 .cell.el-tooltip 设了 min-width:50px，
+     会把按内容算出的容器撑宽，等宽内容看起来就不居中了。 */
+  min-width: 0;
+  /* Element Plus 还会给这些 .cell 写内联 width（列宽-1），Vue 每次重渲染都原样写回，
+     直接改 style.width 会被覆盖（CSSOM 普通赋值会清掉 !important）。
+     宽度走自定义属性：框架只 patch width，碰不到 --ym-cw。 */
+  width: var(--ym-cw, auto) !important;
+  margin: 0 auto;
+  overflow-wrap: anywhere;
+  text-align: left !important;
+}
+:is(#app, body) .el-table td.el-table__cell .cell > * {
+  max-width: 100%;
+  min-width: 0;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+:is(#app, body) .el-table .table-row-actions,
+:is(#app, body) .el-table .mall-row-actions { justify-content: flex-start !important; }
+:is(#app, body) .el-table :is(.member-cell, .merchant-account-cell, .shop-cell, .product-cell, .admin-product-cell, .user-info-cell, .file-info) { justify-content: flex-start !important; }
+:is(#app, body) .el-table td.el-table-column--selection .cell,
+:is(#app, body) .el-table td.el-table-column--expand .cell { text-align: center !important; }
+/* 勾选/展开列的 .cell 是 inline-flex，宽度由内容决定，
+   只有把 td/th 本身设为居中，这个收缩盒才会在列里居中。 */
+:is(#app, body) .el-table th.el-table-column--selection,
+:is(#app, body) .el-table td.el-table-column--selection,
+:is(#app, body) .el-table th.el-table-column--expand,
+:is(#app, body) .el-table td.el-table-column--expand,
+:is(#app, body) .el-table th.el-table__expand-column,
+:is(#app, body) .el-table td.el-table__expand-column { text-align: center !important; }
+
+/* 单元素列（整列每格只有一个视觉原子：纯文本/数字/单标签/单图/开关）→ 纯居中。
+   内容超长 → 截断省略号 + hover 显示完整内容（title 由运行时写），截断时左对齐避免两侧被裁。
+   多元素列（图片+文本、名称+描述上下堆叠、多操作按钮）→ 上方基础规则：容器等宽居中 + 内容左对齐。
+   属性选择器 + :is(#app,body) 的特异性压过下方按列 nth-child 的 padding/居中规则。 */
+:is(#app, body) .el-table td.el-table__cell .cell[data-ym-align="center"] {
+  width: auto !important;
+  margin: 0 !important;
+  text-align: center !important;
+  overflow-wrap: normal;
+}
+:is(#app, body) .el-table td.el-table__cell .cell[data-ym-align="center"] > * {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+:is(#app, body) .el-table td.el-table__cell .cell[data-ym-align="trunc"] {
+  margin: 0 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  overflow-wrap: normal !important;
+}
+:is(#app, body) .el-table td.el-table__cell .cell[data-ym-align="trunc"] > * {
+  max-width: 100%;
+  white-space: nowrap !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+/* views/mall/category/index.vue #0 ← platform/categories */
+[data-ym-table="r1"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r1"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r1"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r1"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r1"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r1"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r1"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+
+/* views/mall/components/BannerManager.vue #0 ← platform/content */
+[data-ym-table="r2"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r2"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r2"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r2"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r2"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r2"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r2"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r2"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/components/PlatformPaymentChannelManager.vue #0 ← platform/settlement?tab=结算台账 [tab=支付通道] */
+[data-ym-table="r3"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r3"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r3"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r3"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r3"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r3"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+
+/* views/mall/components/SettlementAccountManager.vue #0 ← platform/settlement?tab=结算台账 [tab=账户审核] */
+[data-ym-table="r4"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r4"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r4"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r4"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r4"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r4"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r4"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+
+/* views/mall/components/SettlementManager.vue #0 ← platform/settlement?tab=结算台账 */
+[data-ym-table="r5"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r5"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r5"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r5"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r5"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r5"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r5"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r5"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+[data-ym-table="r5"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+
+/* views/mall/cschat/index.vue #0 ← platform/reviews */
+[data-ym-table="r6"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r6"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r6"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+
+/* views/mall/feedback/index.vue #0 ← platform/feedback */
+[data-ym-table="r7"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r7"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r7"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r7"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r7"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r7"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r7"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/mall/group-buy/audit/index.vue #0 ← platform/groupbuy?tab=活动管理 [tab=申请审核] */
+[data-ym-table="r8"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r8"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r8"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r8"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r8"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r8"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+
+/* views/mall/group-buy/list/index.vue #0 ← platform/groupbuy?tab=活动管理 */
+[data-ym-table="r9"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r9"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r9"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r9"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r9"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+[data-ym-table="r9"] .el-table__body td:nth-child(13) .cell { padding: 0 12px; }
+[data-ym-table="r9"] .el-table__body td:nth-child(14) .cell { padding: 0 12px; }
+
+/* views/mall/group-buy/order/index.vue #0 ← platform/groupbuy?tab=活动管理 [tab=商品管理] */
+[data-ym-table="r11"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/group-buy/product/index.vue #0 ← platform/groupbuy?tab=活动管理 [tab=商品管理] */
+[data-ym-table="r12"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/mch-coupon/list/index.vue #0 ← merchant/coupons?tab=优惠券 */
+[data-ym-table="r13"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/mch-coupon/list/index.vue #1 ← merchant/coupons?tab=优惠券 */
+[data-ym-table="r14"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/mch-coupon/receive/index.vue #0 ← merchant/coupons?tab=优惠券 [tab=领取记录] */
+[data-ym-table="r15"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r15"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r15"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r15"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r15"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r15"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+
+/* views/mall/mch-coupon/record/index.vue #0 ← merchant/coupons?tab=优惠券 [tab=使用记录] */
+[data-ym-table="r16"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/mch-group-buy/activity/index.vue #0 ← merchant/groupbuy?tab=活动列表 */
+[data-ym-table="r17"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r17"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r17"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r17"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r17"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r17"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r17"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/mch-group-buy/activity/index.vue #2 ← merchant/groupbuy?tab=活动列表 [tab=申请记录] */
+[data-ym-table="r19"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r19"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r19"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r19"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+
+/* views/mall/mch-group-buy/apply/index.vue #0 ← merchant/groupbuy?tab=活动列表 [tab=申请记录] */
+[data-ym-table="r21"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r21"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r21"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r21"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/mch-group-buy/order/index.vue #0 ← merchant/groupbuy?tab=活动列表 [tab=申请记录] */
+[data-ym-table="r22"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/mch-group-buy/product/index.vue #0 ← merchant/groupbuy?tab=活动列表 [tab=拼团商品] */
+[data-ym-table="r23"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/mch-review/index.vue #0 ← merchant/reviews */
+[data-ym-table="r24"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r24"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r24"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r24"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r24"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r24"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+
+/* views/mall/mch-seckill/activity/index.vue #0 ← merchant/seckill?tab=活动列表 */
+[data-ym-table="r25"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r25"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r25"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r25"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r25"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r25"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r25"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+
+/* views/mall/mch-seckill/activity/index.vue #1 ← merchant/seckill?tab=活动列表 [tab=秒杀商品] */
+[data-ym-table="r26"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r26"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r26"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r26"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+
+/* views/mall/mch-seckill/apply/index.vue #0 ← merchant/seckill?tab=活动列表 [tab=秒杀商品] */
+[data-ym-table="r27"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/mch-seckill/product/index.vue #0 ← merchant/seckill?tab=活动列表 [tab=秒杀商品] */
+[data-ym-table="r29"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/member-points/index.vue #0 ← platform/points */
+[data-ym-table="r31"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r31"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r31"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r31"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r31"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r31"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r31"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r31"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/member-points/index.vue #1 ← platform/points [tab=积分规则] */
+[data-ym-table="r32"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r32"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r32"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r32"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r32"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r32"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r32"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/mall/member/index.vue #0 ← platform/members */
+[data-ym-table="r33"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r33"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r33"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r33"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r33"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r33"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r33"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r33"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/merchant/index.vue #0 ← platform/merchants */
+[data-ym-table="r34"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r34"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r34"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r34"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r34"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r34"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+
+/* views/mall/merchant/index.vue #1 ← platform/merchants [商家详情抽屉] */
+[data-ym-table="r35"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r35"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r35"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r35"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+
+/* views/mall/order/index.vue #0 ← merchant/orders */
+[data-ym-table="r36"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(12) .cell { padding: 0 12px; }
+
+/* views/mall/platform-category/index.vue #0 ← platform/categories */
+[data-ym-table="r39"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r39"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r39"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r39"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r39"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r39"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r39"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r39"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/points-mall/index.vue #0 ← platform/points-mall */
+[data-ym-table="r40"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r40"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r40"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r40"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r40"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r40"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r40"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/mall/points-mall/index.vue #1 ← platform/points-mall [tab=积分商品] */
+[data-ym-table="r41"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r41"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r41"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r41"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r41"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r41"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r41"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/mall/points-mall/index.vue #2 ← platform/points-mall [tab=兑换订单] */
+[data-ym-table="r42"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r42"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r42"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r42"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r42"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r42"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r42"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r42"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/points-mall/index.vue #3 ← platform/points-mall [积分商品 SKU 弹窗] */
+[data-ym-table="r43"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r43"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r43"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r43"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r43"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r43"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r43"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/mall/quickEntry/index.vue #0 ← platform/content [tab=快捷入口] */
+[data-ym-table="r44"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r44"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r44"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r44"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r44"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r44"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r44"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r44"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/review/index.vue #0 ← platform/reviews */
+[data-ym-table="r45"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+[data-ym-table="r45"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+
+/* views/mall/seckill/analysis/index.vue #0 ← platform/seckill?tab=成交分析 */
+[data-ym-table="r46"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/seckill/audit/index.vue #0 ← platform/seckill?tab=报名审核 */
+[data-ym-table="r47"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r47"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r47"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r47"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r47"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r47"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r47"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r47"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/seckill/list/index.vue #0 ← platform/seckill?tab=活动管理 */
+[data-ym-table="r48"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r48"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r48"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r48"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r48"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r48"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r48"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r48"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/mall/seckill/monitor/index.vue #0 ← platform/seckill?tab=实时监控 */
+[data-ym-table="r49"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/seckill/product/index.vue #0 ← platform/seckill?tab=商品管理 */
+[data-ym-table="r50"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/mall/seckill/product/index.vue #1 ← platform/seckill?tab=报名审核 [报名审核弹窗] */
+[data-ym-table="r51"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r51"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r51"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r51"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r51"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r51"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+
+/* views/mall/seckill/session/index.vue #0 ← platform/seckill?tab=场次管理 */
+[data-ym-table="r52"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r52"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r52"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r52"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r52"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r52"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r52"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/mall/shop/index.vue #0 ← platform/shops */
+[data-ym-table="r54"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r54"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r54"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r54"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r54"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r54"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r54"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r54"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r54"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+
+/* views/mall/sku/index.vue #0 ← merchant/specs */
+[data-ym-table="r55"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r55"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r55"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/mall/specDef/index.vue #0 ← merchant/specs */
+[data-ym-table="r56"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r56"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r56"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+
+/* views/mall/specDef/index.vue #1 ← merchant/specs [tab=规格选项] */
+[data-ym-table="r57"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r57"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+
+/* views/mall/spu/index.vue #0 ← merchant/products */
+[data-ym-table="r58"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r58"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r58"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r58"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r58"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r58"] .el-table__body td:nth-child(12) .cell { padding: 0 12px; }
+
+/* views/system/AreaManage.vue #0 ← platform/system?view=area */
+[data-ym-table="r59"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+
+/* views/system/ConfigManage.vue #0 ← platform/system?view=config */
+[data-ym-table="r60"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r60"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r60"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r60"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r60"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+[data-ym-table="r60"] .el-table__body td:nth-child(12) .cell { padding: 0 12px; }
+
+/* views/system/DictManage.vue #0 ← platform/system?view=position */
+[data-ym-table="r61"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r61"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/system/FileManage.vue #0 ← platform/system?view=storage */
+[data-ym-table="r62"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/system/OrgManage.vue #0 ← platform/system?view=org */
+[data-ym-table="r64"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r64"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r64"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+
+/* views/system/PositionManage.vue #0 ← platform/system?view=position */
+[data-ym-table="r65"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r65"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r65"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r65"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r65"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r65"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/system/ResourceManage.vue #0 ← platform/system?view=resource */
+[data-ym-table="r66"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r66"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r66"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r66"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+
+/* views/system/ResourceManage.vue #1 ← platform/system?view=position */
+[data-ym-table="r67"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r67"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r67"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/system/RoleManage.vue #0 ← platform/system?view=role */
+[data-ym-table="r68"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r68"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r68"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r68"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r68"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/system/StorageManage.vue #0 ← platform/system?view=storage */
+[data-ym-table="r69"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+
+/* views/system/UserManage.vue #0 ← platform/system?view=user */
+[data-ym-table="r70"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+[data-ym-table="r70"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r70"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r70"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r70"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r70"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+
+/* 报名审核弹窗 SKU 明细（原生表格，与原型 t9 同宽） */
+:is(#app, body) .sa-sku-table th { text-align: center !important; }
+:is(#app, body) .sa-sku-table td { text-align: left !important; }
+:is(#app, body) .sa-sku-table td > .sa-cb {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  width: var(--ym-cw, auto) !important;
+  margin: 0 auto;
+  overflow-wrap: anywhere;
+  text-align: left !important;
+}
+:is(#app, body) .sa-sku-table td > .sa-cb > * {
+  max-width: 100%;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+:is(#app, body) .sa-sku-table td > .sa-cb[data-ym-align="center"] {
+  width: auto !important;
+  margin: 0 !important;
+  text-align: center !important;
+  overflow-wrap: normal;
+}
+:is(#app, body) .sa-sku-table td > .sa-cb[data-ym-align="center"] > * {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+:is(#app, body) .sa-sku-table td > .sa-cb[data-ym-align="trunc"] {
+  margin: 0 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  overflow-wrap: normal !important;
+}
+:is(#app, body) .sa-sku-table td > .sa-cb[data-ym-align="trunc"] > * {
+  white-space: nowrap !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+}

@@ -45,6 +45,24 @@ export function querySeckillActivityList(params) {
   })
 }
 
+// 分页查询秒杀活动（含场次数量）
+export function querySeckillActivityPage(params) {
+  return request({
+    url: '/admin/seckillActivity/query',
+    method: 'get',
+    params
+  })
+}
+
+// 查询秒杀活动状态统计
+export function querySeckillActivityStats(params) {
+  return request({
+    url: '/admin/seckillActivity/stats',
+    method: 'get',
+    params
+  })
+}
+
 // 关联秒杀商品
 export function addSeckillProduct(data) {
   return request({
@@ -111,7 +129,7 @@ export function updateSeckillActivityEnabled(data) {
 // 创建秒杀场次
 export function createSeckillSession(data) {
   return request({
-    url: '/admin/seckillSession/crud/create',
+    url: '/admin/seckillSession/create',
     method: 'post',
     data
   })
@@ -120,7 +138,7 @@ export function createSeckillSession(data) {
 // 更新秒杀场次
 export function updateSeckillSession(data) {
   return request({
-    url: '/admin/seckillSession/crud/update',
+    url: '/admin/seckillSession/update',
     method: 'post',
     data
   })
@@ -129,9 +147,27 @@ export function updateSeckillSession(data) {
 // 删除秒杀场次
 export function deleteSeckillSession(ids) {
   return request({
-    url: '/admin/seckillSession/crud/delete',
+    url: '/admin/seckillSession/delete',
     method: 'post',
     data: ids
+  })
+}
+
+// 更新秒杀场次是否启用
+export function updateSeckillSessionEnabled(data) {
+  return request({
+    url: '/admin/seckillSession/updateEnabled',
+    method: 'post',
+    data
+  })
+}
+
+// 查询场次商品数统计
+export function getSeckillSessionProductCounts(activityId) {
+  return request({
+    url: '/admin/seckillSession/productCounts',
+    method: 'get',
+    params: { activityId }
   })
 }
 
@@ -177,5 +213,41 @@ export function queryMchSpuList(params) {
     url: '/mch/productSpu/query',
     method: 'get',
     params
+  })
+}
+
+// 查询秒杀报名申请列表
+export function querySeckillApplyList(params) {
+  return request({
+    url: '/admin/seckillActivityApply/query',
+    method: 'get',
+    params
+  })
+}
+
+// 查询秒杀报名申请统计
+export function getSeckillApplyStats(params) {
+  return request({
+    url: '/admin/seckillActivityApply/stats',
+    method: 'get',
+    params
+  })
+}
+
+// 获取秒杀报名申请详情
+export function getSeckillApplyDetail(id) {
+  return request({
+    url: '/admin/seckillActivityApply/detail',
+    method: 'get',
+    params: { id }
+  })
+}
+
+// 审核秒杀报名申请
+export function auditSeckillApply(data) {
+  return request({
+    url: '/admin/seckillActivityApply/audit',
+    method: 'post',
+    data
   })
 }
