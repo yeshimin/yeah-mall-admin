@@ -132,28 +132,60 @@
 [data-ym-table="r7"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
 [data-ym-table="r7"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
 
-/* views/mall/group-buy/audit/index.vue #0 ← platform/groupbuy?tab=活动管理 [tab=申请审核] */
-[data-ym-table="r8"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
-[data-ym-table="r8"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
-[data-ym-table="r8"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
-[data-ym-table="r8"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
-[data-ym-table="r8"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
-[data-ym-table="r8"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
-
 /* views/mall/group-buy/list/index.vue #0 ← platform/groupbuy?tab=活动管理 */
-[data-ym-table="r9"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
-[data-ym-table="r9"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
-[data-ym-table="r9"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
-[data-ym-table="r9"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
-[data-ym-table="r9"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
-[data-ym-table="r9"] .el-table__body td:nth-child(13) .cell { padding: 0 12px; }
-[data-ym-table="r9"] .el-table__body td:nth-child(14) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+[data-ym-table="r71"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
 
-/* views/mall/group-buy/order/index.vue #0 ← platform/groupbuy?tab=活动管理 [tab=商品管理] */
-[data-ym-table="r11"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+/* views/mall/group-buy/audit/index.vue #0 ← platform/groupbuy?tab=申请审核 */
+[data-ym-table="r72"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r72"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r72"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r72"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r72"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r72"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r72"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r72"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
 
-/* views/mall/group-buy/product/index.vue #0 ← platform/groupbuy?tab=活动管理 [tab=商品管理] */
-[data-ym-table="r12"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
+/* views/mall/group-buy/product/index.vue #0 ← platform/groupbuy?tab=商品管理 */
+[data-ym-table="r73"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r73"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r73"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r73"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r73"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r73"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r73"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r73"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r73"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+
+/* views/mall/group-buy/order/index.vue #0 ← platform/groupbuy?tab=订单管理（订单列表） */
+[data-ym-table="r74"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r74"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r74"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r74"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r74"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r74"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r74"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r74"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r74"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+
+/* views/mall/group-buy/order/index.vue #1 ← platform/groupbuy?tab=订单管理（团概览） */
+[data-ym-table="r75"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r75"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r75"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r75"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r75"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r75"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r75"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r75"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
+[data-ym-table="r75"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
 
 /* views/mall/mch-coupon/list/index.vue #0 ← merchant/coupons?tab=优惠券 */
 [data-ym-table="r13"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }

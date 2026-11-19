@@ -1,237 +1,1079 @@
 <template>
-  <div class="mall-page">
-    <section class="mall-filter-panel">
-    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch" class="mall-query-form">
-      <el-form-item label="订单号">
-        <el-input
-          v-model="queryParams.orderNo"
-          placeholder="请输入订单号"
-          clearable
-          style="width: 200px"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="拼团状态">
-        <el-select
-          v-model="queryParams.groupStatus"
-          placeholder="请选择拼团状态"
-          clearable
-          style="width: 120px"
-        >
-          <el-option label="待团长支付" value="1" />
-          <el-option label="拼团中" value="2" />
-          <el-option label="已成团" value="3" />
-          <el-option label="拼团失败" value="4" />
-          <el-option label="已关闭" value="5" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="参与状态">
-        <el-select v-model="queryParams.status" placeholder="请选择参与状态" clearable style="width: 120px">
-          <el-option label="待支付" value="1" />
-          <el-option label="已支付" value="2" />
-          <el-option label="已关闭" value="3" />
-          <el-option label="退款中" value="4" />
-          <el-option label="已退款" value="5" />
-          <el-option label="退款失败" value="6" />
-        </el-select>
-      </el-form-item>
-      <el-form-item class="mall-query-actions">
-        <el-button @click="resetQuery">
-          <el-icon><Refresh /></el-icon>
-          重置
-        </el-button>
-        <el-button type="primary" @click="handleQuery">
-          <el-icon><Search /></el-icon>
-          查询
-        </el-button>
-      </el-form-item>
-    </el-form>
+  <div class="mall-page groupbuy-page groupbuy-order-page">
+    <template v-if="activity">
+      <div class="ss-activity-bar">
+        <span class="ss-activity-icon"><el-icon><Tickets /></el-icon></span>
+        <div class="ss-activity-copy">
+          <div class="ss-activity-title">
+            <h2>{{ activity.name || '未命名活动' }}</h2>
+            <span class="status-ticket" :class="`tone-${state.tone}`">
+              <span class="ss-status-live">
+                <i v-if="state.key === 'ongoing'" class="ss-live-dot"></i>{{ state.label }}
+              </span>
+            </span>
+          </div>
+          <div class="ss-activity-meta">
+            <span><el-icon><Lightning /></el-icon>活动 {{ activityRangeText }}</span>
+            <span><el-icon><Avatar /></el-icon>{{ ruleText }}</span>
+            <span><el-icon><Tickets /></el-icon>订单 {{ activityOrders.length }} 单</span>
+            <span><el-icon><Tickets /></el-icon>开团 {{ activityGroups.length }} 个</span>
+          </div>
+        </div>
+        <div class="ss-activity-controls">
+          <label class="ss-activity-switch">
+            <span>切换活动</span>
+            <el-select
+              v-model="activityId"
+              class="ss-activity-select"
+              placeholder="选择活动"
+              filterable
+              :disabled="activitiesLoading || !activities.length"
+              @change="handleActivityChange"
+            >
+              <el-option
+                v-for="item in activities"
+                :key="String(item.id)"
+                :label="item.name || String(item.id)"
+                :value="String(item.id)"
+              />
+            </el-select>
+          </label>
+          <button type="button" class="ss-back-link" @click="goBackActivities">
+            <el-icon><Back /></el-icon>返回活动管理
+          </button>
+        </div>
+      </div>
 
-    <div class="mall-business-actions">
-      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
-    </div>
+      <div class="gb-view-bar">
+        <div class="gb-view-toggle" role="tablist" aria-label="订单视图">
+          <button type="button" :class="{ active: view === 'orders' }" @click="switchView('orders')">
+            <el-icon><Tickets /></el-icon>订单列表
+          </button>
+          <button type="button" :class="{ active: view === 'groups' }" @click="switchView('groups')">
+            <el-icon><Avatar /></el-icon>团概览
+          </button>
+        </div>
+        <span class="gb-view-hint">
+          <el-icon><Avatar /></el-icon>
+          {{ view === 'orders'
+            ? '按订单维度查看支付与退款状态，点击详情可查看所属团与结算时间线。'
+            : '按团维度查看成团进度与成员，满团后于活动结束统一结算发货。' }}
+        </span>
+      </div>
+
+      <template v-if="view === 'orders'">
+        <div class="ss-queue">
+          <div class="ss-tabs">
+            <button
+              v-for="tab in ORDER_TABS"
+              :key="tab.key"
+              type="button"
+              :data-status="tab.key"
+              :class="{ active: orderTab === tab.key }"
+              @click="switchOrderTab(tab.key)"
+            >
+              {{ tab.label }}<span class="ss-tab-count">{{ orderCounts[tab.key] }}</span>
+            </button>
+          </div>
+          <div class="ss-queue-summary">
+            <span :class="{ 'is-warning': waitpayOrders > 0 }">
+              <i v-if="waitpayOrders > 0" class="ss-live-dot"></i>待支付 <b>{{ waitpayOrders }}</b> 单
+            </span>
+            <span><el-icon><Avatar /></el-icon>拼团中 <b>{{ formingGroups }}</b> 团</span>
+          </div>
+        </div>
+
+        <section class="mall-filter-panel">
+          <el-form :inline="true" class="mall-query-form" @submit.prevent="search">
+            <el-form-item label="订单号 / 会员">
+              <el-input
+                v-model="filters.keyword"
+                clearable
+                placeholder="搜索订单编号或会员名"
+                @keyup.enter="search"
+              />
+            </el-form-item>
+            <el-form-item label="团编号">
+              <el-input
+                v-model="filters.secondary"
+                clearable
+                placeholder="搜索所属团编号"
+                @keyup.enter="search"
+              />
+            </el-form-item>
+            <el-form-item class="mall-query-actions">
+              <el-button @click="resetFilters">
+                <el-icon><Refresh /></el-icon>重置
+              </el-button>
+              <el-button type="primary" native-type="submit">
+                <el-icon><Search /></el-icon>查询
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </section>
+
+        <section class="mall-table-panel">
+          <div class="ss-table-intro">
+            <span>
+              <el-icon><Tickets /></el-icon>
+              拼团订单每人限购 1 件；团长支付后开团，满 {{ minPeople }} 人成团，活动结束统一结算——满团待发货、未满团退款。
+            </span>
+            <div class="sa-intro-right">
+              <b>筛选 {{ filteredOrders.length }} 单</b>
+              <span v-if="waitpayOrders > 0" class="sa-pending-chip">待支付 {{ waitpayOrders }}</span>
+            </div>
+          </div>
+
+          <el-table data-ym-table="r74" v-loading="ordersLoading" :data="pagedOrders" row-key="id" style="width: 100%">
+            <el-table-column label="订单编号" min-width="176" align="center">
+              <template #default="{ row }">
+                <span class="mono"><CopyableText :value="row.orderNo" label="订单编号" /></span>
+              </template>
+            </el-table-column>
+            <el-table-column label="会员" min-width="140" align="center">
+              <template #default="{ row }">
+                <div class="gb-member-cell">
+                  <span class="avatar" style="width: 30px; height: 30px">{{ avatarChar(row.memberName) }}</span>
+                  <div class="gb-member-copy">
+                    <b :title="row.memberName">{{ row.memberName || '—' }}</b>
+                    <small :class="{ 'is-leader': row.isLeader }">{{ row.isLeader ? '团长' : '团员' }}</small>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="拼团商品" min-width="220" align="center">
+              <template #default="{ row }">
+                <div class="sa-product-cell">
+                  <span class="sa-product-art">
+                    <el-image v-if="row.productImage" :src="storageUrl(row.productImage)" fit="cover">
+                      <template #error>
+                        <span class="sa-image-fallback"><el-icon><Picture /></el-icon></span>
+                      </template>
+                    </el-image>
+                    <span v-else class="sa-image-fallback"><el-icon><Picture /></el-icon></span>
+                  </span>
+                  <div class="sa-product-copy">
+                    <b :title="row.productName">{{ row.productName || '—' }}</b>
+                    <small>{{ row.groupNo || '—' }}</small>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="拼团价" min-width="140" align="center">
+              <template #default="{ row }">
+                <div class="skp-price-cell">
+                  <b>{{ seckillMoney(row.groupPrice) }}</b>
+                  <small>实付 {{ seckillMoney(row.actualAmount) }}</small>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="团编号" min-width="160" align="center">
+              <template #default="{ row }">
+                <span class="mono"><CopyableText :value="row.groupNo" label="团编号" /></span>
+              </template>
+            </el-table-column>
+            <el-table-column label="订单状态" min-width="100" align="center">
+              <template #default="{ row }">
+                <span class="status-ticket" :class="`tone-${orderStatusMeta(row.orderStatus).tone}`">
+                  {{ orderStatusMeta(row.orderStatus).label }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column label="团状态" min-width="100" align="center">
+              <template #default="{ row }">
+                <span class="status-ticket is-small" :class="`tone-${orderGroupMeta(row).tone}`">
+                  {{ orderGroupMeta(row).label }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column label="下单时间" min-width="122" align="center">
+              <template #default="{ row }">
+                <div class="sa-time-cell">
+                  <b>{{ dateOnly(row.createTime) }}</b>
+                  <small>{{ clockOnly(row.createTime) }}</small>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="76" fixed="right" class-name="mall-actions-column" align="right" header-align="center">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openOrderDetail(row)">详情</el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <div class="gb-empty">
+                <el-icon><Tickets /></el-icon>
+                <b>{{ activityOrders.length ? '没有匹配的拼团订单' : '当前活动还没有拼团订单' }}</b>
+                <span>{{ activityOrders.length ? '调整订单号、会员或团编号筛选后重试' : '活动开始并有人开团后，订单会出现在这里' }}</span>
+              </div>
+            </template>
+          </el-table>
+
+          <MallPagination
+            :total="page.total"
+            :page="page.current"
+            :limit="page.size"
+            @pagination="changePage"
+          />
+        </section>
+      </template>
+
+      <template v-else>
+        <div class="ss-queue">
+          <div class="ss-tabs">
+            <button
+              v-for="tab in GROUP_TABS"
+              :key="tab.key"
+              type="button"
+              :data-status="tab.key"
+              :class="{ active: groupTab === tab.key }"
+              @click="switchGroupTab(tab.key)"
+            >
+              {{ tab.label }}<span class="ss-tab-count">{{ groupCounts[tab.key] }}</span>
+            </button>
+          </div>
+          <div class="ss-queue-summary">
+            <span :class="{ 'is-warning': formingGroups > 0 }">
+              <i v-if="formingGroups > 0" class="ss-live-dot"></i>拼团中 <b>{{ formingGroups }}</b> 团
+            </span>
+            <span><el-icon><Check /></el-icon>已成团 <b>{{ successGroups }}</b> 团</span>
+          </div>
+        </div>
+
+        <section class="mall-filter-panel">
+          <el-form :inline="true" class="mall-query-form" @submit.prevent="search">
+            <el-form-item label="团编号 / 团长">
+              <el-input
+                v-model="filters.keyword"
+                clearable
+                placeholder="搜索团编号或团长名"
+                @keyup.enter="search"
+              />
+            </el-form-item>
+            <el-form-item label="商品名称">
+              <el-input
+                v-model="filters.secondary"
+                clearable
+                placeholder="搜索拼团商品名称"
+                @keyup.enter="search"
+              />
+            </el-form-item>
+            <el-form-item class="mall-query-actions">
+              <el-button @click="resetFilters">
+                <el-icon><Refresh /></el-icon>重置
+              </el-button>
+              <el-button type="primary" native-type="submit">
+                <el-icon><Search /></el-icon>查询
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </section>
+
+        <section class="mall-table-panel">
+          <div class="ss-table-intro">
+            <span>
+              <el-icon><Avatar /></el-icon>
+              每团满 {{ minPeople }} 人即成团；开团上限 {{ limitText }}。点击详情可查看成员名单与成团时间线。
+            </span>
+            <div class="sa-intro-right">
+              <b>筛选 {{ filteredGroups.length }} 团</b>
+              <span v-if="formingGroups > 0" class="sa-pending-chip">拼团中 {{ formingGroups }}</span>
+            </div>
+          </div>
+
+          <el-table data-ym-table="r75" v-loading="groupsLoading" :data="pagedGroups" row-key="id" style="width: 100%">
+            <el-table-column label="团编号" min-width="160" align="center">
+              <template #default="{ row }">
+                <span class="mono"><CopyableText :value="row.groupNo" label="团编号" /></span>
+              </template>
+            </el-table-column>
+            <el-table-column label="拼团商品" min-width="220" align="center">
+              <template #default="{ row }">
+                <div class="sa-product-cell">
+                  <span class="sa-product-art">
+                    <el-image v-if="row.productImage" :src="storageUrl(row.productImage)" fit="cover">
+                      <template #error>
+                        <span class="sa-image-fallback"><el-icon><Picture /></el-icon></span>
+                      </template>
+                    </el-image>
+                    <span v-else class="sa-image-fallback"><el-icon><Picture /></el-icon></span>
+                  </span>
+                  <div class="sa-product-copy">
+                    <b :title="row.productName">{{ row.productName || '—' }}</b>
+                    <small>团长 {{ row.leaderMemberName || '—' }}</small>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="团长" min-width="140" align="center">
+              <template #default="{ row }">
+                <div class="gb-member-cell">
+                  <span class="avatar" style="width: 30px; height: 30px">{{ avatarChar(row.leaderMemberName) }}</span>
+                  <div class="gb-member-copy">
+                    <b :title="row.leaderMemberName">{{ row.leaderMemberName || '—' }}</b>
+                    <small class="is-leader">团长</small>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="成团人数" min-width="92" align="center">
+              <template #default="{ row }">
+                {{ Number(row.minPeople || 0) }} 人
+              </template>
+            </el-table-column>
+            <el-table-column label="已参团" min-width="92" align="center">
+              <template #default="{ row }">
+                {{ memberCountOf(row) }} / {{ reservedCountOf(row) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="成团进度" min-width="150" align="center">
+              <template #default="{ row }">
+                <div class="gb-progress" :class="{ 'is-full': progressOf(row).full, 'is-fail': progressOf(row).fail }">
+                  <span class="gb-progress-track"><em :style="{ width: `${progressOf(row).percent}%` }"></em></span>
+                  <span class="gb-progress-label">
+                    <b :class="{ 'is-full': progressOf(row).full }">{{ memberCountOf(row) }}/{{ Number(row.minPeople || 0) }}</b>
+                    <span>{{ progressOf(row).text }}</span>
+                  </span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="团状态" min-width="100" align="center">
+              <template #default="{ row }">
+                <span class="status-ticket" :class="`tone-${groupStatusMeta(row.status).tone}`">
+                  {{ groupStatusMeta(row.status).label }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column label="开团时间" min-width="122" align="center">
+              <template #default="{ row }">
+                <div class="sa-time-cell">
+                  <b>{{ dateOnly(row.createTime) }}</b>
+                  <small>{{ clockOnly(row.createTime) }}</small>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="76" fixed="right" class-name="mall-actions-column" align="right" header-align="center">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openGroupDetail(row)">详情</el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <div class="gb-empty">
+                <el-icon><Avatar /></el-icon>
+                <b>{{ activityGroups.length ? '没有匹配的团' : '当前活动还没有开团' }}</b>
+                <span>{{ activityGroups.length ? '调整团编号、团长或商品筛选后重试' : '活动开始后用户开团，团会出现在这里' }}</span>
+              </div>
+            </template>
+          </el-table>
+
+          <MallPagination
+            :total="page.total"
+            :page="page.current"
+            :limit="page.size"
+            @pagination="changePage"
+          />
+        </section>
+      </template>
+    </template>
+
+    <section v-else-if="activitiesLoading" class="gb-page-empty">
+      <span class="gb-page-empty-icon"><el-icon><Tickets /></el-icon></span>
+      <strong>正在加载拼团活动</strong>
+      <span>请稍候…</span>
     </section>
 
-    <section class="mall-table-panel">
-    <el-table data-ym-table="r11" v-loading="loading" :data="orderList" style="width: 100%">
-      <el-table-column label="序号" type="index" width="80" />
-      <el-table-column prop="orderNo" label="订单号" min-width="180" />
-      <el-table-column prop="memberName" label="用户" width="120" />
-      <el-table-column prop="activityName" label="拼团活动" min-width="160" />
-      <el-table-column prop="productName" label="商品" min-width="200" />
-      <el-table-column prop="groupPrice" label="拼团价" width="100">
-        <template #default="scope">
-          ¥{{ scope.row.groupPrice }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="actualAmount" label="实付金额" width="100">
-        <template #default="scope">
-          ¥{{ scope.row.actualAmount }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="groupStatus" label="拼团状态" width="120">
-        <template #default="scope">
-          <el-tag :type="getGroupStatusTagType(scope.row.groupStatus)">
-            {{ getGroupStatusText(scope.row.groupStatus) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="orderStatus" label="参与状态" width="120">
-        <template #default="scope">
-          <el-tag :type="getOrderStatusTagType(scope.row.orderStatus)">
-            {{ getOrderStatusText(scope.row.orderStatus) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" width="180" />
-    </el-table>
-
-    <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="pagination.current"
-        v-model:page-size="pagination.size"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="Number(pagination.total)"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+    <section v-else class="gb-page-empty">
+      <span class="gb-page-empty-icon"><el-icon><Tickets /></el-icon></span>
+      <strong>暂无可管理的拼团活动</strong>
+      <span>请先在活动管理中创建并发布拼团活动，再回来查看订单与开团情况。</span>
+      <button type="button" class="gb-page-empty-action" @click="goBackActivities">前往活动管理</button>
     </section>
+
+    <el-drawer
+      v-model="orderDrawer.visible"
+      size="560px"
+      class="gb-scope"
+      :with-header="false"
+      :show-close="false"
+      @closed="resetOrderDrawer"
+    >
+      <div v-if="orderDrawer.row" class="sk-detail">
+        <div class="sk-dialog-head">
+          <div>
+            <span class="sk-kicker">GROUP BUY ORDER</span>
+            <h2>拼团订单详情</h2>
+          </div>
+          <button type="button" class="sk-close-btn" @click="orderDrawer.visible = false">
+            <el-icon><Close /></el-icon>
+          </button>
+        </div>
+
+        <div class="sk-detail-meta">
+          <div>
+            <span>订单编号</span>
+            <b class="mono"><CopyableText :value="orderDrawer.row.orderNo" label="订单编号" /></b>
+          </div>
+          <div>
+            <span>订单状态</span>
+            <b>
+              <span class="status-ticket" :class="`tone-${orderStatusMeta(orderDrawer.row.orderStatus).tone}`">
+                {{ orderStatusMeta(orderDrawer.row.orderStatus).label }}
+              </span>
+            </b>
+          </div>
+          <div>
+            <span>会员</span>
+            <b>{{ orderDrawer.row.memberName || '—' }}{{ orderDrawer.row.isLeader ? '（团长）' : '（团员）' }}</b>
+          </div>
+          <div>
+            <span>拼团商品</span>
+            <b>{{ orderDrawer.row.productName || '—' }}</b>
+          </div>
+          <div>
+            <span>拼团价 / 实付</span>
+            <b>{{ seckillMoney(orderDrawer.row.groupPrice) }} / {{ seckillMoney(orderDrawer.row.actualAmount) }}</b>
+          </div>
+          <div>
+            <span>下单时间</span>
+            <b>{{ dateTimeText(orderDrawer.row.createTime) }}</b>
+          </div>
+        </div>
+
+        <div v-if="orderGroup" class="gb-group-card">
+          <div class="gb-group-card-head">
+            <b>{{ orderGroup.groupNo || '—' }}</b>
+            <span class="status-ticket" :class="`tone-${groupStatusMeta(orderGroup.status).tone}`">
+              {{ groupStatusMeta(orderGroup.status).label }}
+            </span>
+          </div>
+          <div class="gb-group-card-meta">
+            <span><el-icon><Avatar /></el-icon>团长 {{ orderGroup.leaderMemberName || '—' }}</span>
+            <span><el-icon><Goods /></el-icon>{{ orderGroup.productName || '—' }}</span>
+            <span><el-icon><Clock /></el-icon>开团 {{ dateTimeText(orderGroup.createTime) }}</span>
+          </div>
+          <div class="gb-progress" :class="{ 'is-full': orderGroupProgress?.full, 'is-fail': orderGroupProgress?.fail }">
+            <span class="gb-progress-track"><em :style="{ width: `${orderGroupProgress?.percent || 0}%` }"></em></span>
+            <span class="gb-progress-label">
+              <b :class="{ 'is-full': orderGroupProgress?.full }">{{ memberCountOf(orderGroup) }}/{{ Number(orderGroup.minPeople || 0) }} 人</b>
+              <span>{{ orderGroupProgress?.text }}</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="sk-drawer-section">
+          <h3>订单时间线</h3>
+          <div class="gb-timeline">
+            <div
+              v-for="(step, index) in orderTimelineSteps"
+              :key="index"
+              class="gb-timeline-step"
+              :class="{ 'is-done': step.done, 'is-muted': step.muted }"
+            >
+              <span class="gb-timeline-dot"></span>
+              <div class="gb-timeline-copy"><b>{{ step.label }}</b><small>{{ step.time }}</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sk-drawer-actions">
+          <el-button @click="orderDrawer.visible = false">关闭</el-button>
+          <el-button v-if="orderGroup" type="primary" @click="viewGroupFromOrder">查看团详情</el-button>
+        </div>
+      </div>
+    </el-drawer>
+
+    <el-drawer
+      v-model="groupDrawer.visible"
+      size="560px"
+      class="gb-scope"
+      :with-header="false"
+      :show-close="false"
+      @closed="resetGroupDrawer"
+    >
+      <div v-if="groupDrawer.row" class="sk-detail">
+        <div class="sk-dialog-head">
+          <div>
+            <span class="sk-kicker">GROUP BUY TEAM</span>
+            <h2>团详情</h2>
+          </div>
+          <button type="button" class="sk-close-btn" @click="groupDrawer.visible = false">
+            <el-icon><Close /></el-icon>
+          </button>
+        </div>
+
+        <div class="gb-group-card">
+          <div class="gb-group-card-head">
+            <b>{{ groupDrawer.row.groupNo || '—' }}</b>
+            <span class="status-ticket" :class="`tone-${groupStatusMeta(groupDrawer.row.status).tone}`">
+              {{ groupStatusMeta(groupDrawer.row.status).label }}
+            </span>
+          </div>
+          <div class="gb-group-card-meta">
+            <span><el-icon><Goods /></el-icon>{{ groupDrawer.row.productName || '—' }}</span>
+            <span><el-icon><Avatar /></el-icon>团长 {{ groupDrawer.row.leaderMemberName || '—' }}</span>
+            <span><el-icon><Clock /></el-icon>开团 {{ dateTimeText(groupDrawer.row.createTime) }}</span>
+          </div>
+          <div class="gb-progress" :class="{ 'is-full': groupProgress?.full, 'is-fail': groupProgress?.fail }">
+            <span class="gb-progress-track"><em :style="{ width: `${groupProgress?.percent || 0}%` }"></em></span>
+            <span class="gb-progress-label">
+              <b :class="{ 'is-full': groupProgress?.full }">{{ memberCountOf(groupDrawer.row) }}/{{ Number(groupDrawer.row.minPeople || 0) }} 人成团</b>
+              <span>{{ groupProgress?.text }}</span>
+            </span>
+          </div>
+        </div>
+
+        <div v-loading="groupDrawer.loading" :style="groupDrawer.loading && !groupDrawer.detail ? 'min-height: 240px' : undefined">
+          <template v-if="groupDrawer.detail">
+            <div class="sk-drawer-section">
+              <h3>成员名单 <small>已参团 {{ groupMemberCount }} 人 · 含待支付共 {{ groupReservedCount }} 人</small></h3>
+              <div class="gb-member-list">
+                <div v-for="(member, index) in groupMembers" :key="String(member.orderId ?? member.id ?? index)" class="gb-member-row">
+                  <span class="avatar" style="width: 34px; height: 34px">{{ avatarChar(member.memberName) }}</span>
+                  <div class="gb-member-row-copy">
+                    <b>{{ member.memberName || '—' }}<span v-if="member.isLeader" class="gb-leader-chip">团长</span></b>
+                    <small>下单 {{ dateTimeText(member.createTime) }}<template v-if="member.payTime"> · 支付 {{ clockOnly(member.payTime) }}</template></small>
+                  </div>
+                  <span class="gb-member-row-amount">{{ seckillMoney(member.actualAmount) }}</span>
+                  <span class="status-ticket is-small" :class="`tone-${orderStatusMeta(member.orderStatus).tone}`">
+                    {{ orderStatusMeta(member.orderStatus).label }}
+                  </span>
+                </div>
+                <div v-if="!groupMembers.length" class="sa-empty-sku">暂无成员订单</div>
+              </div>
+            </div>
+
+            <div class="sk-drawer-section">
+              <h3>成团时间线</h3>
+              <div class="gb-timeline">
+                <div
+                  v-for="(step, index) in groupTimelineSteps"
+                  :key="index"
+                  class="gb-timeline-step"
+                  :class="{ 'is-done': step.done, 'is-muted': step.muted }"
+                >
+                  <span class="gb-timeline-dot"></span>
+                  <div class="gb-timeline-copy"><b>{{ step.label }}</b><small>{{ step.time }}</small></div>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div v-else-if="!groupDrawer.loading" class="sa-detail-failed">
+            <el-icon><WarningFilled /></el-icon>团详情加载失败
+          </div>
+        </div>
+
+        <div class="sk-drawer-actions">
+          <el-button @click="groupDrawer.visible = false">关闭</el-button>
+          <el-button type="primary" @click="openGroupOrders">查看该团订单</el-button>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { Search, Refresh } from '@element-plus/icons-vue'
-import MallListTools from '@/components/mall/MallListTools.vue'
-import { queryGroupBuyOrderList } from '@/api/mall/groupBuy'
-
-// 响应式数据
-const loading = ref(false)
-const showSearch = ref(true)
-
-// 查询参数
-const queryParams = reactive({
-  orderNo: '',
-  status: '',
-  groupStatus: ''
-})
-
-// 分页参数
-const pagination = reactive({
-  current: 1,
-  size: 10,
-  total: 0
-})
-
-// 订单列表
-const orderList = ref([])
-
-// 初始化
-onMounted(() => {
-  getList()
-})
-
-// 获取订单列表
-function getList() {
-  loading.value = true
-  queryGroupBuyOrderList({
-    current: pagination.current,
-    size: pagination.size,
-    orderNo: queryParams.orderNo || undefined,
-    status: queryParams.status || undefined,
-    groupStatus: queryParams.groupStatus || undefined,
-  }).then((res) => {
-    orderList.value = res.data?.records || []
-    pagination.total = Number(res.data?.total || 0)
-  }).finally(() => {
-    loading.value = false
-  })
-}
-
-// 查询
-function handleQuery() {
-  pagination.current = 1
-  getList()
-}
-
-// 重置
-function resetQuery() {
-  Object.assign(queryParams, {
-    orderNo: '',
-    status: '',
-    groupStatus: ''
-  })
-  handleQuery()
-}
-
-// 分页大小变化
-function handleSizeChange(size) {
-  pagination.size = size
-  getList()
-}
-
-// 当前页码变化
-function handleCurrentChange(current) {
-  pagination.current = current
-  getList()
-}
-
-// 获取拼团状态文本
-function getGroupStatusText(status) {
-  const statusMap = {
-    '1': '待团长支付',
-    '2': '拼团中',
-    '3': '已成团',
-    '4': '拼团失败',
-    '5': '已关闭'
-  }
-  return statusMap[status] || '未知'
-}
-
-// 获取拼团状态标签类型
-function getGroupStatusTagType(status) {
-  const typeMap = {
-    '1': 'info',
-    '2': 'warning',
-    '3': 'success',
-    '4': 'danger'
-  }
-  return typeMap[status] || 'info'
-}
-
-// 获取订单状态文本
-function getOrderStatusText(status) {
-  const statusMap = {
-    '1': '待支付',
-    '2': '已支付',
-    '3': '已关闭',
-    '4': '退款中',
-    '5': '已退款',
-    '6': '退款失败'
-  }
-  return statusMap[status] || '未知'
-}
-
-// 获取订单状态标签类型
-function getOrderStatusTagType(status) {
-  const typeMap = {
-    '1': 'warning',
-    '2': 'info',
-    '3': 'info',
-    '4': 'warning',
-    '5': 'success',
-    '6': 'danger'
-  }
-  return typeMap[status] || 'info'
-}
+<script lang="ts">
+// LayoutContent 以 fullPath 作 router-view key，切换活动的 query-only replace 会重建本页；
+// 用模块级记忆让「订单列表 / 团概览」在同页重建后保持，重新进入页面或刷新时回到默认订单视图。
+let orderViewMemory: { path: string; fullPath: string; view: 'orders' | 'groups' } | null = null
 </script>
 
-<style scoped>
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import {
+  Avatar,
+  Back,
+  Check,
+  Clock,
+  Close,
+  Goods,
+  Lightning,
+  Picture,
+  Refresh,
+  Search,
+  Tickets,
+  WarningFilled,
+} from '@element-plus/icons-vue'
+import CopyableText from '@/components/mall/CopyableText.vue'
+import MallPagination from '@/components/mall/MallPagination.vue'
+import { getStoragePreviewUrl } from '@/utils/storage'
+import {
+  getGroupBuyGroupDetail,
+  queryGroupBuyApplyList,
+  queryGroupBuyGroupList,
+  queryGroupBuyOrderList,
+} from '@/api/mall/groupBuy'
+import {
+  dateOnly,
+  dateTimeText,
+  seckillMoney,
+  type PageResponse,
+  type StateMeta,
+} from '../../seckill/insight-shared'
+import {
+  GROUP_TABS,
+  ORDER_TABS,
+  groupStatusMeta,
+  groupbuyGroupProgress,
+  groupbuyInsightActivityId,
+  groupbuyLimitText,
+  isPaidOrder,
+  orderStatusMeta,
+  useGroupBuyContext,
+  type GroupBuyApply,
+  type GroupBuyGroup,
+  type GroupBuyGroupDetail,
+  type GroupBuyMember,
+  type GroupBuyOrder,
+} from '../groupbuy-shared'
+import '@/assets/yeah-mall-seckill-insight.css'
+
+defineOptions({ name: 'MallGroupBuyOrderManage' })
+
+interface TimelineStep {
+  label: string
+  time: string
+  done?: boolean
+  muted?: boolean
 }
-</style>
+
+const {
+  route,
+  activities,
+  activityId,
+  activitiesLoading,
+  initialized,
+  now,
+  activity,
+  state,
+  activityRangeText,
+  ruleText,
+  loadActivities,
+  selectActivity,
+  resolveInitialActivityId,
+  goBackActivities,
+} = useGroupBuyContext({ onRouteActivityChange: handleActivitySwitch })
+
+const allOrders = ref<GroupBuyOrder[]>([])
+const allApplies = ref<GroupBuyApply[]>([])
+const groups = ref<GroupBuyGroup[]>([])
+const ordersLoading = ref(false)
+const groupsLoading = ref(false)
+
+function resolveInitialView(): 'orders' | 'groups' {
+  if (
+    orderViewMemory
+    && window.history.state?.replaced === true
+    && orderViewMemory.path === route.path
+    && orderViewMemory.fullPath !== route.fullPath
+  ) {
+    return orderViewMemory.view
+  }
+  return 'orders'
+}
+
+const view = ref<'orders' | 'groups'>(resolveInitialView())
+
+function rememberView() {
+  orderViewMemory = { path: route.path, fullPath: route.fullPath, view: view.value }
+}
+rememberView()
+
+const orderTab = ref('all')
+const groupTab = ref('all')
+const filters = reactive({ keyword: '', secondary: '' })
+const applied = reactive({ keyword: '', secondary: '' })
+const page = reactive({ current: 1, size: 10, total: 0 })
+
+const orderDrawer = reactive<{ visible: boolean; row: GroupBuyOrder | null }>({ visible: false, row: null })
+const groupDrawer = reactive<{
+  visible: boolean
+  loading: boolean
+  row: GroupBuyGroup | null
+  detail: GroupBuyGroupDetail | null
+}>({ visible: false, loading: false, row: null, detail: null })
+
+let orderSeq = 0
+let applySeq = 0
+let groupSeq = 0
+let groupDetailSeq = 0
+
+const activityOrders = computed(() => (
+  allOrders.value.filter((row) => String(row.activityId ?? '') === String(activity.value?.id ?? ''))
+))
+const activityGroups = computed(() => groups.value)
+
+const orderBase = computed(() => {
+  const keyword = applied.keyword.trim().toLowerCase()
+  const secondary = applied.secondary.trim().toLowerCase()
+  return activityOrders.value
+    .filter((row) => (
+      (!keyword || `${row.orderNo || ''}${row.memberName || ''}`.toLowerCase().includes(keyword))
+      && (!secondary || String(row.groupNo || '').toLowerCase().includes(secondary))
+    ))
+    .slice()
+    .sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')))
+})
+
+const orderCounts = computed(() => {
+  const result: Record<string, number> = { all: orderBase.value.length, waitpay: 0, paid: 0, closed: 0, refunding: 0, refunded: 0, refundfail: 0 }
+  orderBase.value.forEach((row) => {
+    const key = orderStatusMeta(row.orderStatus).key
+    if (key in result) result[key] = (result[key] || 0) + 1
+  })
+  return result
+})
+
+const filteredOrders = computed(() => (
+  orderTab.value === 'all'
+    ? orderBase.value
+    : orderBase.value.filter((row) => orderStatusMeta(row.orderStatus).key === orderTab.value)
+))
+
+const groupBase = computed(() => {
+  const keyword = applied.keyword.trim().toLowerCase()
+  const secondary = applied.secondary.trim().toLowerCase()
+  return activityGroups.value
+    .filter((row) => (
+      (!keyword || `${row.groupNo || ''}${row.leaderMemberName || ''}`.toLowerCase().includes(keyword))
+      && (!secondary || String(row.productName || '').toLowerCase().includes(secondary))
+    ))
+    .slice()
+    .sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')))
+})
+
+const groupCounts = computed(() => {
+  const result: Record<string, number> = { all: groupBase.value.length, waitpay: 0, forming: 0, success: 0, failed: 0, closed: 0 }
+  groupBase.value.forEach((row) => {
+    const key = groupStatusMeta(row.status).key
+    if (key in result) result[key] = (result[key] || 0) + 1
+  })
+  return result
+})
+
+const filteredGroups = computed(() => (
+  groupTab.value === 'all'
+    ? groupBase.value
+    : groupBase.value.filter((row) => groupStatusMeta(row.status).key === groupTab.value)
+))
+
+const pagedOrders = computed(() => {
+  const start = (page.current - 1) * page.size
+  return filteredOrders.value.slice(start, start + page.size)
+})
+const pagedGroups = computed(() => {
+  const start = (page.current - 1) * page.size
+  return filteredGroups.value.slice(start, start + page.size)
+})
+const filteredActive = computed(() => (view.value === 'orders' ? filteredOrders.value : filteredGroups.value))
+
+const waitpayOrders = computed(() => activityOrders.value.filter((row) => String(row.orderStatus ?? '') === '1').length)
+const formingGroups = computed(() => activityGroups.value.filter((row) => String(row.status ?? '') === '2').length)
+const successGroups = computed(() => activityGroups.value.filter((row) => String(row.status ?? '') === '3').length)
+
+const minPeople = computed(() => Number(activity.value?.minPeople || 0))
+const limitText = computed(() => groupbuyLimitText(activity.value?.groupLimit))
+
+const orderGroup = computed(() => {
+  const row = orderDrawer.row
+  if (!row) return null
+  return groups.value.find((item) => String(item.id) === String(row.groupId ?? '')) || null
+})
+const orderGroupProgress = computed(() => (orderGroup.value ? groupbuyGroupProgress(orderGroup.value) : null))
+const orderTimelineSteps = computed(() => (
+  orderDrawer.row ? buildOrderTimeline(orderDrawer.row, orderGroup.value) : []
+))
+
+const groupProgress = computed(() => (groupDrawer.row ? groupbuyGroupProgress(groupDrawer.row) : null))
+const groupMembers = computed<GroupBuyMember[]>(() => groupDrawer.detail?.members || [])
+const groupMemberCount = computed(() => Number(groupDrawer.detail?.memberCount ?? groupDrawer.row?.memberCount ?? 0))
+const groupReservedCount = computed(() => Number(groupDrawer.detail?.reservedMemberCount ?? groupDrawer.row?.reservedMemberCount ?? 0))
+const groupTimelineSteps = computed(() => (
+  groupDrawer.row ? buildGroupTimeline(groupDrawer.row, groupMembers.value) : []
+))
+
+watch(filteredActive, (rows) => {
+  page.total = rows.length
+  const maxPage = Math.max(1, Math.ceil(rows.length / page.size))
+  if (page.current > maxPage) page.current = maxPage
+}, { immediate: true })
+
+onMounted(() => {
+  void initialize()
+})
+
+async function initialize() {
+  await loadActivities()
+  if (!activities.value.length) {
+    initialized.value = true
+    return
+  }
+  await Promise.all([loadOrders(), loadApplies()])
+  resolveInitialActivityId(() => groupbuyInsightActivityId(activities.value, allApplies.value, allOrders.value, now.value))
+  await loadGroups()
+}
+
+async function loadOrders() {
+  const token = ++orderSeq
+  ordersLoading.value = true
+  try {
+    const result = await queryGroupBuyOrderList({ current: 1, size: 500 }) as unknown as PageResponse<GroupBuyOrder>
+    if (token !== orderSeq) return
+    allOrders.value = (result.data?.records || [])
+      .filter((row) => row && row.id !== undefined && row.id !== null)
+      .map((row) => ({
+        ...row,
+        createTime: normalizeTime(row.createTime),
+        payTime: normalizeTime(row.payTime),
+        updateTime: normalizeTime(row.updateTime),
+      }))
+  } catch {
+    // 请求错误已由全局拦截器提示，这里仅清空数据
+    if (token === orderSeq) allOrders.value = []
+  } finally {
+    if (token === orderSeq) ordersLoading.value = false
+  }
+}
+
+async function loadApplies() {
+  const token = ++applySeq
+  try {
+    const result = await queryGroupBuyApplyList({ current: 1, size: 500 }) as unknown as PageResponse<GroupBuyApply>
+    if (token !== applySeq) return
+    allApplies.value = (result.data?.records || [])
+      .filter((row) => row && row.id !== undefined && row.id !== null)
+  } catch {
+    if (token === applySeq) allApplies.value = []
+  }
+}
+
+async function loadGroups() {
+  const token = ++groupSeq
+  const id = activityId.value
+  if (!id) {
+    groups.value = []
+    return
+  }
+  groupsLoading.value = true
+  try {
+    const result = await queryGroupBuyGroupList({ activityId: id, current: 1, size: 500 }) as unknown as PageResponse<GroupBuyGroup>
+    if (token !== groupSeq) return
+    groups.value = (result.data?.records || [])
+      .filter((row) => row && row.id !== undefined && row.id !== null)
+      .map((row) => ({
+        ...row,
+        createTime: normalizeTime(row.createTime),
+        successTime: normalizeTime(row.successTime),
+        failedTime: normalizeTime(row.failedTime),
+      }))
+  } catch {
+    // 请求错误已由全局拦截器提示，这里仅清空数据
+    if (token === groupSeq) groups.value = []
+  } finally {
+    if (token === groupSeq) groupsLoading.value = false
+  }
+}
+
+function handleActivitySwitch() {
+  orderTab.value = 'all'
+  groupTab.value = 'all'
+  filters.keyword = ''
+  filters.secondary = ''
+  applied.keyword = ''
+  applied.secondary = ''
+  page.current = 1
+  orderDrawer.visible = false
+  groupDrawer.visible = false
+  void loadGroups()
+}
+
+function handleActivityChange(value: string) {
+  selectActivity(value)
+}
+
+function switchView(next: 'orders' | 'groups') {
+  view.value = next
+  rememberView()
+  filters.keyword = ''
+  filters.secondary = ''
+  applied.keyword = ''
+  applied.secondary = ''
+  page.current = 1
+}
+
+function search() {
+  applied.keyword = filters.keyword.trim()
+  applied.secondary = filters.secondary.trim()
+  page.current = 1
+}
+
+function resetFilters() {
+  filters.keyword = ''
+  filters.secondary = ''
+  applied.keyword = ''
+  applied.secondary = ''
+  orderTab.value = 'all'
+  groupTab.value = 'all'
+  page.current = 1
+}
+
+function switchOrderTab(key: string) {
+  orderTab.value = key
+  page.current = 1
+}
+
+function switchGroupTab(key: string) {
+  groupTab.value = key
+  page.current = 1
+}
+
+function changePage(value: { page: number; limit: number }) {
+  page.current = value.page
+  page.size = value.limit
+}
+
+function orderGroupMeta(row: GroupBuyOrder): StateMeta {
+  const group = groups.value.find((item) => String(item.id) === String(row.groupId ?? ''))
+  return group ? groupStatusMeta(group.status) : { key: 'none', label: '—', tone: 'neutral' }
+}
+
+function memberCountOf(row: GroupBuyGroup): number {
+  return Number(row.memberCount || 0)
+}
+
+function reservedCountOf(row: GroupBuyGroup): number {
+  return Number(row.reservedMemberCount || 0)
+}
+
+function progressOf(row: GroupBuyGroup) {
+  return groupbuyGroupProgress(row)
+}
+
+function openOrderDetail(row: GroupBuyOrder) {
+  orderDrawer.row = row
+  orderDrawer.visible = true
+}
+
+function resetOrderDrawer() {
+  orderDrawer.row = null
+}
+
+function viewGroupFromOrder() {
+  const group = orderGroup.value
+  if (!group) return
+  orderDrawer.visible = false
+  openGroupDetail(group)
+}
+
+async function openGroupDetail(row: GroupBuyGroup) {
+  const token = ++groupDetailSeq
+  groupDrawer.row = row
+  groupDrawer.detail = null
+  groupDrawer.visible = true
+  groupDrawer.loading = true
+  try {
+    const result = await getGroupBuyGroupDetail(row.id) as unknown as { data?: GroupBuyGroupDetail }
+    if (token !== groupDetailSeq) return
+    const detail = result.data
+    groupDrawer.detail = detail
+      ? {
+        ...detail,
+        createTime: normalizeTime(detail.createTime),
+        successTime: normalizeTime(detail.successTime),
+        failedTime: normalizeTime(detail.failedTime),
+        members: (detail.members || []).map((member) => ({
+          ...member,
+          createTime: normalizeTime(member.createTime),
+          payTime: normalizeTime(member.payTime),
+        })),
+      }
+      : null
+  } catch {
+    // 请求错误已由全局拦截器提示，这里仅展示失败态
+    if (token === groupDetailSeq) groupDrawer.detail = null
+  } finally {
+    if (token === groupDetailSeq) groupDrawer.loading = false
+  }
+}
+
+function resetGroupDrawer() {
+  groupDetailSeq++
+  groupDrawer.row = null
+  groupDrawer.detail = null
+  groupDrawer.loading = false
+}
+
+function openGroupOrders() {
+  const group = groupDrawer.row
+  if (!group) return
+  groupDrawer.visible = false
+  view.value = 'orders'
+  rememberView()
+  orderTab.value = 'all'
+  filters.keyword = ''
+  filters.secondary = String(group.groupNo || '')
+  applied.keyword = ''
+  applied.secondary = String(group.groupNo || '')
+  page.current = 1
+}
+
+function buildOrderTimeline(order: GroupBuyOrder, group: GroupBuyGroup | null): TimelineStep[] {
+  const paid = isPaidOrder(order.orderStatus)
+  const steps: TimelineStep[] = [
+    { label: '提交订单', time: dateTimeText(order.createTime), done: true },
+    { label: '支付订单', time: paid ? (order.payTime ? dateTimeText(order.payTime) : '已支付') : '等待支付', done: paid, muted: !paid },
+  ]
+  if (group) {
+    const gs = String(group.status ?? '')
+    if (gs === '3') steps.push({ label: '拼团成功', time: group.successTime ? dateTimeText(group.successTime) : '已成团', done: true })
+    else if (gs === '4') steps.push({ label: '拼团失败', time: group.failedTime ? dateTimeText(group.failedTime) : '未成团', done: true })
+    else if (gs === '5') steps.push({ label: '团已关闭', time: group.failedTime ? dateTimeText(group.failedTime) : '已关闭', done: true })
+    else if (gs === '2') steps.push({ label: '等待成团', time: `还差 ${Math.max(0, Number(group.minPeople || 0) - Number(group.memberCount || 0))} 人`, muted: true })
+    else steps.push({ label: '等待团长支付', time: '待支付', muted: true })
+  }
+  const os = String(order.orderStatus ?? '')
+  if (os === '5') steps.push({ label: '退款完成', time: '已退款', done: true })
+  else if (os === '4') steps.push({ label: '退款处理中', time: '退款中' })
+  else if (os === '6') steps.push({ label: '退款失败', time: '需人工处理' })
+  else if (os === '3') steps.push({ label: '订单已关闭', time: '已关闭', done: true })
+  else if (group && String(group.status ?? '') === '3' && paid) steps.push({ label: '待发货', time: '活动结束统一结算发货', muted: true })
+  return steps
+}
+
+function buildGroupTimeline(group: GroupBuyGroup, members: GroupBuyMember[]): TimelineStep[] {
+  const leader = members.find((member) => member.isLeader)
+  const leaderPaid = leader ? isPaidOrder(leader.orderStatus) : false
+  const member = Number(group.memberCount || 0)
+  const min = Number(group.minPeople || 0)
+  const gs = String(group.status ?? '')
+  const steps: TimelineStep[] = [
+    { label: '发起开团', time: dateTimeText(group.createTime), done: true },
+    { label: '团长支付', time: leaderPaid ? (leader?.payTime ? dateTimeText(leader.payTime) : '已支付') : '等待团长支付', done: leaderPaid, muted: !leaderPaid },
+  ]
+  if (gs === '3') steps.push({ label: '满员成团', time: group.successTime ? dateTimeText(group.successTime) : `${member}/${min} 人`, done: true })
+  else if (gs === '4') steps.push({ label: '拼团失败', time: group.failedTime ? dateTimeText(group.failedTime) : '超时未成团', done: true })
+  else if (gs === '5') steps.push({ label: '团已关闭', time: group.failedTime ? dateTimeText(group.failedTime) : '活动结束关闭', done: true })
+  else steps.push({ label: '等待参团', time: `${member}/${min} 人 · 还差 ${Math.max(0, min - member)} 人`, muted: true })
+  if (gs === '3') {
+    const ended = state.value.key === 'ended'
+    steps.push({ label: '统一结算', time: ended ? '满团订单进入待发货' : '活动结束统一结算发货', done: ended, muted: !ended })
+  } else if (gs === '4' || gs === '5') {
+    steps.push({ label: '退款 / 释放库存', time: '未满团自动退款并释放预留库存', done: true })
+  }
+  return steps
+}
+
+function normalizeTime(value?: string) {
+  return value ? String(value).replace('T', ' ') : value
+}
+
+function clockOnly(value?: string) {
+  return value ? String(value).replace('T', ' ').slice(11, 16) : '—'
+}
+
+function storageUrl(key?: string) {
+  return key ? getStoragePreviewUrl(key) : ''
+}
+
+function avatarChar(name?: string) {
+  return String(name || '会').slice(0, 1)
+}
+</script>

@@ -99,6 +99,33 @@ export function getSeckillMonitorData(activityId) {
   })
 }
 
+// 获取活动监控成交动态
+export function getSeckillMonitorEvents(activityId, limit = 24) {
+  return request({
+    url: `/admin/seckill/monitor/events`,
+    method: 'get',
+    params: { activityId, limit }
+  })
+}
+
+// 查询秒杀报名商品列表（含库存、成交额、场次与报名审核时间）
+export function querySeckillSpuList(params) {
+  return request({
+    url: '/admin/seckillSpu/query',
+    method: 'get',
+    params
+  })
+}
+
+// 获取秒杀报名商品详情（含图片、SKU与报名审核信息）
+export function getSeckillSpuDetail(id) {
+  return request({
+    url: '/admin/seckillSpu/detail',
+    method: 'get',
+    params: { id }
+  })
+}
+
 // 获取秒杀经营分析数据
 export function getSeckillAnalysisData(activityId) {
   return request({

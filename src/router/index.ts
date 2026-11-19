@@ -386,8 +386,12 @@ router.beforeEach(async (to) => {
   const hasConcreteRoute = router.getRoutes().some((route) => route.path === to.path)
   const matchedConcreteRoute = to.matched.some((record) => record.path === to.path)
   if (hasConcreteRoute && !matchedConcreteRoute) {
+    // 动态路由刚注册完需重导航才能匹配；vue-router 会丢弃 path 字符串里内嵌的 query，
+    // 必须显式带上 query/hash，否则首屏深链（如 ?activityId=3）的参数会丢失。
     return {
-      path: to.fullPath,
+      path: to.path,
+      query: to.query,
+      hash: to.hash,
       replace: true,
     }
   }

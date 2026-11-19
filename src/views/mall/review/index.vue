@@ -380,6 +380,7 @@ onMounted(() => load())
   justify-content: flex-start;
   gap: 12px;
   margin: 0 auto;
+  padding: 12px 0;
   text-align: left;
 }
 .review-product-copy { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; gap: 4px; text-align: left; }

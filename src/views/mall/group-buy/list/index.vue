@@ -1,349 +1,832 @@
 <template>
-  <div class="mall-page">
-    <section class="mall-filter-panel">
-    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch" class="mall-query-form">
-      <el-form-item label="活动名称">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入活动名称"
-          clearable
-          style="width: 200px"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="活动状态">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择活动状态"
-          clearable
-          style="width: 120px"
-        >
-          <el-option label="新建" value="1" />
-          <el-option label="发布" value="2" />
-          <el-option label="报名中" value="3" />
-          <el-option label="报名结束" value="4" />
-          <el-option label="活动中" value="5" />
-          <el-option label="活动结束" value="6" />
-        </el-select>
-      </el-form-item>
-      <el-form-item class="mall-query-actions">
-        <el-button @click="resetQuery">
-          <el-icon><Refresh /></el-icon>
-          重置
-        </el-button>
-        <el-button type="primary" @click="handleQuery">
-          <el-icon><Search /></el-icon>
-          查询
-        </el-button>
-      </el-form-item>
-    </el-form>
-
-    <div class="mall-business-actions">
-      <el-button type="primary" icon="Plus" @click="handleAdd">新增活动</el-button>
-      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
+  <div class="mall-page groupbuy-page groupbuy-activity-page">
+    <div class="sk-status-tabs">
+      <button
+        type="button"
+        data-status="all"
+        class="sk-tab"
+        :class="{ active: activeTab === 'all' }"
+        @click="switchTab('all')"
+      >
+        全部<span class="sk-tab-count">{{ stats.total }}</span>
+      </button>
+      <button
+        v-for="status in STATUS_ORDER"
+        :key="status"
+        type="button"
+        :data-status="status"
+        class="sk-tab"
+        :class="{ active: activeTab === status }"
+        @click="switchTab(status)"
+      >
+        {{ groupbuyStatusMeta(status).label }}<span class="sk-tab-count">{{ tabCount(status) }}</span>
+      </button>
     </div>
+
+    <section class="mall-filter-panel">
+      <el-form :inline="true" class="mall-query-form" @submit.prevent="search">
+        <el-form-item label="活动名称">
+          <el-input
+            v-model="filters.keyword"
+            clearable
+            placeholder="搜索活动名称或描述"
+            @keyup.enter="search"
+          />
+        </el-form-item>
+        <el-form-item label="启用状态">
+          <el-select v-model="filters.enabled" placeholder="全部状态">
+            <el-option label="全部状态" value="" />
+            <el-option label="启用" :value="true" />
+            <el-option label="停用" :value="false" />
+          </el-select>
+        </el-form-item>
+        <el-form-item class="mall-query-actions">
+          <el-button @click="resetFilters">重置</el-button>
+          <el-button type="primary" native-type="submit"><el-icon><Search /></el-icon>查询</el-button>
+        </el-form-item>
+      </el-form>
+      <div class="mall-business-actions">
+        <el-button type="primary" @click="openCreate"><el-icon><Plus /></el-icon>新建活动</el-button>
+      </div>
     </section>
 
     <section class="mall-table-panel">
-    <el-table data-ym-table="r9" v-loading="loading" :data="activityList" style="width: 100%">
-      <el-table-column label="序号" type="index" width="80" />
-      <el-table-column prop="name" label="活动名称" width="200" />
-      <el-table-column label="封面图片" width="120">
-        <template #default="scope">
-          <el-image
-            v-if="scope.row.coverImage"
-            :src="getImagePreviewUrl(scope.row.coverImage)"
-            fit="cover"
-            style="width: 80px; height: 40px"
-          >
-            <template #error>
-              <div class="image-slot">
-                <el-icon><Picture /></el-icon>
-              </div>
-            </template>
-          </el-image>
-          <el-empty v-else description="" style="width: 80px; height: 40px" />
-        </template>
-      </el-table-column>
-      <el-table-column prop="applyBeginTime" label="报名开始时间" width="180" />
-      <el-table-column prop="applyEndTime" label="报名结束时间" width="180" />
-      <el-table-column prop="activityBeginTime" label="活动开始时间" width="180" />
-      <el-table-column prop="activityEndTime" label="活动结束时间" width="180" />
-      <el-table-column prop="minPeople" label="每团人数" width="120" />
-      <el-table-column label="最大开团数" width="120">
-        <template #default="scope">
-          {{ formatGroupLimit(scope.row.groupLimit) }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="status" label="状态" width="120">
-        <template #default="scope">
-          <el-tag :type="getStatusTagType(scope.row.status)">
-            {{ getStatusText(scope.row.status) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="sort" label="排序" width="80" />
-      <el-table-column prop="isEnabled" label="是否启用" width="100">
-        <template #default="scope">
-          <el-switch
-            v-model="scope.row.isEnabled"
-            @change="handleEnabledChange(scope.row)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="description" label="活动描述" />
-      <el-table-column label="操作" width="220" fixed="right">
-        <template #default="scope">
-          <el-button link type="primary" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button v-if="getNextStatus(scope.row.status)" link type="primary" @click="handleStatusChange(scope.row)">
-            {{ getNextStatusText(scope.row.status) }}
-          </el-button>
-          <el-dropdown @command="handleActivityAction($event, scope.row)">
-            <el-button link type="primary">更多</el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="product">商品管理</el-dropdown-item>
-                <el-dropdown-item command="groups">查看拼团</el-dropdown-item>
-                <el-dropdown-item command="audit">申请审核</el-dropdown-item>
-                <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </template>
-      </el-table-column>
-    </el-table>
+      <div class="sk-table-intro">
+        <span><el-icon><Clock /></el-icon>发布前需设置成团人数（≥2）与最大开团数；报名与活动时间段允许重叠，但各自起止需有效。</span>
+        <div class="sk-intro-right">
+          <span v-if="stats.pendingSetup > 0" class="sk-setup-chip">
+            <el-icon><WarningFilled /></el-icon>{{ stats.pendingSetup }} 个待完善规则
+          </span>
+          <b>共 {{ page.total }} 个活动</b>
+        </div>
+      </div>
 
-    <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="pagination.current"
-        v-model:page-size="pagination.size"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="Number(pagination.total)"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
+      <el-table data-ym-table="r71"
+        v-loading="loading"
+        :data="pagedRows"
+        row-key="id"
+      >
+        <el-table-column label="活动信息" min-width="260">
+          <template #default="{ row }">
+            <div class="sk-activity-cell">
+              <span class="sk-cover-art">
+                <StorageImage
+                  v-if="row.coverImage"
+                  :src="row.coverImage"
+                  :preview="false"
+                  :width="88"
+                  :height="44"
+                />
+                <span v-else class="sk-cover-fallback"><el-icon><Picture /></el-icon></span>
+              </span>
+              <span class="sk-activity-copy">
+                <button type="button" class="sk-name-link" :title="row.name" @click="openDetail(row)">
+                  {{ row.name || '未命名活动' }}
+                </button>
+                <small :title="row.description">{{ row.description || '暂无活动描述' }}</small>
+              </span>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="报名时间" width="200">
+          <template #default="{ row }">
+            <div
+              class="sk-when-cell"
+              :title="`${displayTime(row.applyBeginTime)} 至 ${displayTime(row.applyEndTime)}`"
+            >
+              <template v-if="row.applyBeginTime && row.applyEndTime">
+                <span>{{ shortTime(row.applyBeginTime) }}</span>
+                <i>→</i>
+                <span>{{ shortTime(row.applyEndTime) }}</span>
+              </template>
+              <span v-else class="sk-when-empty">待设置</span>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="活动时间" width="200">
+          <template #default="{ row }">
+            <div
+              class="sk-when-cell"
+              :title="`${displayTime(row.activityBeginTime)} 至 ${displayTime(row.activityEndTime)}`"
+            >
+              <template v-if="row.activityBeginTime && row.activityEndTime">
+                <span>{{ shortTime(row.activityBeginTime) }}</span>
+                <i>→</i>
+                <span>{{ shortTime(row.activityEndTime) }}</span>
+              </template>
+              <span v-else class="sk-when-empty">待设置</span>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="成团人数" width="90">
+          <template #default="{ row }">{{ row.minPeople }} 人</template>
+        </el-table-column>
+
+        <el-table-column label="开团上限" width="90">
+          <template #default="{ row }">{{ groupbuyLimitText(row.groupLimit) }}</template>
+        </el-table-column>
+
+        <el-table-column label="报名 / 商品" width="110">
+          <template #default="{ row }">
+            <div class="gb-link-stack">
+              <el-button
+                link
+                type="primary"
+                :class="{ 'is-zero': !row.applyCount }"
+                @click="goAudit(row)"
+              >
+                报名 {{ row.applyCount }}
+              </el-button>
+              <el-button
+                link
+                type="primary"
+                :class="{ 'is-zero': !row.productCount }"
+                @click="goProduct(row)"
+              >
+                商品 {{ row.productCount }}
+              </el-button>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <span class="status-ticket" :class="`tone-${groupbuyStatusMeta(row.status).tone}`">
+              {{ groupbuyStatusMeta(row.status).label }}
+            </span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="sort" label="排序" width="60" />
+
+        <el-table-column label="启用" width="96">
+          <template #default="{ row }">
+            <div class="sk-switch">
+              <el-switch
+                v-model="row.isEnabled"
+                :loading="toggleLoadingId === row.id"
+                :disabled="toggleLoadingId === row.id"
+                @change="toggleEnabled(row)"
+              />
+              <span :class="{ 'is-on': row.isEnabled }">{{ row.isEnabled ? '启用' : '停用' }}</span>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="190" fixed="right" class-name="mall-actions-column">
+          <template #default="{ row }">
+            <div class="gb-operations">
+              <el-button
+                v-if="groupbuyStatusMeta(row.status).action"
+                link
+                type="primary"
+                class="gb-next-link"
+                @click="openTransition(row)"
+              >
+                {{ groupbuyStatusMeta(row.status).action }}
+              </el-button>
+              <el-button v-else link type="primary" @click="openDetail(row)">详情</el-button>
+              <el-button
+                link
+                type="primary"
+                :disabled="!canEdit(row)"
+                :title="canEdit(row) ? '' : '活动已结束，不可编辑'"
+                @click="canEdit(row) && openEditor(row)"
+              >
+                编辑
+              </el-button>
+              <el-dropdown
+                trigger="click"
+                popper-class="gb-row-menu"
+                @command="handleRowCommand($event, row)"
+              >
+                <el-button link class="gb-more-btn">
+                  更多<el-icon class="gb-more-icon"><ArrowDown /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="detail">查看详情</el-dropdown-item>
+                    <el-dropdown-item command="audit">申请审核</el-dropdown-item>
+                    <el-dropdown-item command="product">商品管理</el-dropdown-item>
+                    <el-dropdown-item command="order">订单管理</el-dropdown-item>
+                    <el-dropdown-item
+                      command="delete"
+                      divided
+                      :disabled="row.status !== '1'"
+                      :title="row.status !== '1' ? '仅新建状态的活动可删除' : ''"
+                      class="gb-danger-action"
+                    >
+                      删除
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+          </template>
+        </el-table-column>
+
+        <template #empty>
+          <div class="gb-empty">
+            <el-icon><Calendar /></el-icon>
+            <b>没有匹配的拼团活动</b>
+            <span>调整筛选条件，或新建一个活动</span>
+          </div>
+        </template>
+      </el-table>
+
+      <MallPagination
+        v-if="page.total > 0"
+        :total="page.total"
+        :page="page.current"
+        :limit="page.size"
+        :page-sizes="[10, 20, 50]"
+        :background="true"
+        layout="sizes, prev, pager, next"
+        @pagination="handlePageChange"
       />
-    </div>
     </section>
 
-    <!-- 新增/编辑对话框 -->
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="900px">
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
-        <el-form-item label="活动名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入活动名称" />
-        </el-form-item>
-        <el-form-item label="活动描述" prop="description">
-          <el-input v-model="form.description" type="textarea" placeholder="请输入活动描述" rows="3" />
-        </el-form-item>
-        <el-form-item label="封面图片" prop="coverImage">
-          <el-upload
-            class="upload-demo"
-            :action="storageUploadUrl"
-            :headers="{ Authorization: 'Bearer ' + getToken() }"
-            :data="{ isPublic: true, isUsed: false }"
-            :on-success="handleUploadSuccess"
-            :on-error="handleUploadError"
-            :auto-upload="true"
-            :show-file-list="false"
-          >
-            <el-button type="primary">
-              <el-icon><Upload /></el-icon>
-              上传图片
-            </el-button>
-          </el-upload>
-          <div v-if="form.coverImage" class="mt-2">
-            <div>
-              <el-image
-                :src="getImagePreviewUrl(form.coverImage)"
-                fit="cover"
-                style="width: 200px; height: 100px"
-              >
-                <template #error>
-                  <div class="image-slot">
-                    <el-icon><Picture /></el-icon>
-                  </div>
-                </template>
-              </el-image>
+    <el-drawer v-model="detailVisible" size="560px" class="gb-scope" :with-header="false" :show-close="false">
+      <div v-if="detailRow" class="sk-detail">
+        <div class="sk-dialog-head">
+          <div>
+            <span class="sk-kicker">GROUP BUY ACTIVITY</span>
+            <h2>活动详情</h2>
+          </div>
+          <button type="button" class="sk-close-btn" @click="detailVisible = false">
+            <el-icon><Close /></el-icon>
+          </button>
+        </div>
+
+        <div class="sk-detail-hero">
+          <span class="sk-detail-cover">
+            <el-image
+              v-if="detailRow.coverImage"
+              :src="getStoragePreviewUrl(detailRow.coverImage)"
+              fit="cover"
+              style="width: 100%; height: 100%"
+            />
+            <span v-else class="sk-cover-fallback"><el-icon><Picture /></el-icon></span>
+          </span>
+          <span class="sk-detail-copy">
+            <h3>{{ detailRow.name }}</h3>
+            <span class="status-ticket" :class="`tone-${groupbuyStatusMeta(detailRow.status).tone}`">
+              {{ groupbuyStatusMeta(detailRow.status).label }}
+            </span>
+            <p>{{ detailRow.description || '暂无活动描述' }}</p>
+          </span>
+        </div>
+
+        <div class="sk-detail-times">
+          <div>
+            <span>报名时间</span>
+            <b>{{ fullRange(detailRow.applyBeginTime, detailRow.applyEndTime) }}</b>
+          </div>
+          <div>
+            <span>活动时间</span>
+            <b>{{ fullRange(detailRow.activityBeginTime, detailRow.activityEndTime) }}</b>
+          </div>
+        </div>
+
+        <div class="sk-detail-meta">
+          <div>
+            <span>成团人数</span>
+            <b>{{ detailRow.minPeople }} 人 / 团</b>
+          </div>
+          <div>
+            <span>最大开团数</span>
+            <b>{{ groupbuyLimitText(detailRow.groupLimit) }}</b>
+          </div>
+          <div>
+            <span>报名 / 通过商品</span>
+            <b>{{ detailRow.applyCount }} 条 / {{ detailRow.productCount }} 款</b>
+          </div>
+          <div>
+            <span>排序</span>
+            <b>{{ detailRow.sort }}</b>
+          </div>
+          <div>
+            <span>启用状态</span>
+            <b>{{ detailRow.isEnabled ? '启用' : '停用' }}</b>
+          </div>
+          <div>
+            <span>最近更新</span>
+            <b>{{ displayTime(detailRow.updateTime) || '—' }}</b>
+          </div>
+        </div>
+
+        <div class="gb-play-note">
+          <el-icon><Avatar /></el-icon>
+          <span>拼团玩法：用户开团后邀请好友参团，每团满 {{ detailRow.minPeople }} 人即成团；活动结束时统一结算——满团订单进入待发货，未满团自动关闭或退款，并释放剩余预留库存。</span>
+        </div>
+
+        <div class="sk-drawer-section">
+          <h3>活动进度</h3>
+          <div class="sk-flow">
+            <span
+              v-for="(step, index) in GROUPBUY_FLOW"
+              :key="step.value"
+              class="sk-flow-step"
+              :class="{ 'is-done': index <= currentFlowIndex, 'is-current': index === currentFlowIndex }"
+            >
+              <i></i><small>{{ step.label }}</small>
+            </span>
+          </div>
+        </div>
+
+        <div class="sk-drawer-section">
+          <h3>备注</h3>
+          <p class="sk-detail-remark">{{ detailRow.remark || '暂无备注' }}</p>
+        </div>
+
+        <div class="sk-drawer-actions">
+          <el-button @click="detailVisible = false">关闭</el-button>
+          <el-button @click="goOrder(detailRow)">订单管理</el-button>
+          <el-button type="primary" :disabled="!canEdit(detailRow)" @click="canEdit(detailRow) && openEditor(detailRow)">
+            编辑活动
+          </el-button>
+        </div>
+      </div>
+    </el-drawer>
+
+    <el-dialog
+      v-model="editorVisible"
+      width="780px"
+      class="sk-custom-dialog sk-editor-dialog gb-scope"
+      :with-header="false"
+      :show-close="false"
+      :close-on-click-modal="false"
+      @closed="handleEditorClosed"
+    >
+      <div class="sk-editor">
+        <div class="sk-dialog-head">
+          <div>
+            <span class="sk-kicker">GROUP BUY ACTIVITY</span>
+            <h2>{{ editorId ? '编辑活动' : '新建活动' }}</h2>
+          </div>
+          <button type="button" class="sk-close-btn" @click="editorVisible = false">
+            <el-icon><Close /></el-icon>
+          </button>
+        </div>
+
+        <div class="sk-dialog-note">
+          <el-icon><Avatar /></el-icon>
+          <span>拼团活动需设置成团人数与最大开团数；报名与活动时间段允许重叠。保存后可在列表按阶段推进活动状态，活动结束将统一结算。</span>
+        </div>
+
+        <div class="sk-form-grid">
+          <label class="sk-field" :class="{ 'is-invalid': editorErrors.name }">
+            <span>活动名称 <em class="sk-required">*</em></span>
+            <el-input
+              v-model="editorForm.name"
+              maxlength="64"
+              placeholder="例如：秋日好物双人团"
+              @input="clearEditorError('name')"
+            />
+            <small v-if="editorErrors.name" class="sk-field-error">{{ editorErrors.name }}</small>
+          </label>
+
+          <label class="sk-field" :class="{ 'is-invalid': editorErrors.sort }">
+            <span>排序 <em class="sk-required">*</em></span>
+            <el-input-number
+              v-model="editorForm.sort"
+              :min="1"
+              :precision="0"
+              :controls="false"
+              style="width: 100%"
+              @change="clearEditorError('sort')"
+            />
+            <small v-if="editorErrors.sort" class="sk-field-error">{{ editorErrors.sort }}</small>
+          </label>
+
+          <label class="sk-field wide" :class="{ 'is-invalid': editorErrors.description }">
+            <span>活动描述 <em class="sk-required">*</em></span>
+            <el-input
+              v-model="editorForm.description"
+              type="textarea"
+              :rows="3"
+              maxlength="500"
+              resize="none"
+              placeholder="简要说明活动商品与拼团玩法"
+              @input="clearEditorError('description')"
+            />
+            <small v-if="editorErrors.description" class="sk-field-error">{{ editorErrors.description }}</small>
+          </label>
+
+          <div class="sk-field wide">
+            <span>活动封面 <em class="sk-required">*</em></span>
+            <div class="sk-cover-editor">
+              <span class="sk-cover-preview">
+                <el-image
+                  v-if="coverPreviewUrl"
+                  :src="coverPreviewUrl"
+                  fit="cover"
+                  style="width: 100%; height: 100%"
+                />
+                <span v-else class="sk-cover-fallback"><el-icon><Picture /></el-icon></span>
+              </span>
+              <span class="sk-cover-copy">
+                <el-upload
+                  :show-file-list="false"
+                  :http-request="uploadCover"
+                  :before-upload="beforeCoverUpload"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  :disabled="coverUploading"
+                >
+                  <el-button class="sk-upload-btn" :loading="coverUploading">
+                    <el-icon v-if="!coverUploading"><Upload /></el-icon>
+                    {{ editorForm.coverImage ? '更换封面' : '选择封面' }}
+                  </el-button>
+                </el-upload>
+                <small>
+                  {{
+                    editorForm.coverImage
+                      ? '保存后用于活动列表与 App 展示；建议 640×320（2:1），单张不超过 2MB。'
+                      : '建议 640×320（2:1），支持 JPG / PNG / WebP，单张不超过 2MB；未上传时使用示意封面。'
+                  }}
+                </small>
+              </span>
             </div>
           </div>
-        </el-form-item>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="报名开始时间" prop="applyBeginTime">
-              <el-date-picker v-model="form.applyBeginTime" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="选择报名开始时间" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="报名结束时间" prop="applyEndTime">
-              <el-date-picker v-model="form.applyEndTime" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="选择报名结束时间" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="活动开始时间" prop="activityBeginTime">
-              <el-date-picker v-model="form.activityBeginTime" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="选择活动开始时间" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="活动结束时间" prop="activityEndTime">
-              <el-date-picker v-model="form.activityEndTime" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="选择活动结束时间" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="每团成团人数" prop="minPeople">
-          <el-input-number v-model="form.minPeople" :min="2" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="最大开团数" prop="groupLimit">
-          <el-radio-group v-model="groupLimitMode" @change="handleGroupLimitModeChange">
-            <el-radio label="limited">限制团数</el-radio>
-            <el-radio label="unlimited">不限制</el-radio>
-          </el-radio-group>
-          <el-input-number
-            v-if="groupLimitMode === 'limited'"
-            v-model="form.groupLimit"
-            :min="1"
-            :precision="0"
-            placeholder="请输入 1 到 N 的整数"
-            style="width: 100%; margin-top: 8px"
-          />
-          <div class="form-tip">限制时填写活动期间最多可创建的团数；选择“不限制”将保存为 -1。</div>
-        </el-form-item>
-        <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="form.sort" :min="1" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入备注信息" rows="2" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSubmit">确定</el-button>
-        </span>
-      </template>
+
+          <div class="sk-field wide">
+            <span>拼团规则 <em class="sk-required">*</em></span>
+            <div class="gb-rule-grid">
+              <label class="sk-field" :class="{ 'is-invalid': editorErrors.minPeople }">
+                <span>成团人数</span>
+                <el-input-number
+                  v-model="editorForm.minPeople"
+                  :min="2"
+                  :precision="0"
+                  :controls="false"
+                  style="width: 100%"
+                  @change="clearEditorError('minPeople')"
+                />
+                <small class="gb-rule-hint">每团满此人数即成团，至少 2 人。</small>
+                <small v-if="editorErrors.minPeople" class="sk-field-error">{{ editorErrors.minPeople }}</small>
+              </label>
+              <label class="sk-field" :class="{ 'is-invalid': editorErrors.groupLimit }">
+                <span>最大开团数</span>
+                <el-input-number
+                  :model-value="limitUnlimited ? null : editorForm.groupLimit"
+                  :min="1"
+                  :precision="0"
+                  :controls="false"
+                  :disabled="limitUnlimited"
+                  style="width: 100%"
+                  @update:model-value="handleGroupLimitInput"
+                />
+                <span class="gb-limit-toggle">
+                  <el-checkbox :model-value="limitUnlimited" @change="handleLimitToggle">不限制开团数</el-checkbox>
+                </span>
+                <small v-if="editorErrors.groupLimit" class="sk-field-error">{{ editorErrors.groupLimit }}</small>
+              </label>
+            </div>
+          </div>
+
+          <div class="sk-field wide" :class="{ 'is-invalid': editorErrors.applyTime }">
+            <span>报名时间 <em class="sk-required">*</em></span>
+            <div class="sk-time-inputs">
+              <label>
+                <small>开始</small>
+                <el-date-picker
+                  v-model="editorForm.applyBeginTime"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  format="YYYY-MM-DD HH:mm"
+                  placeholder="选择开始时间"
+                  style="width: 100%"
+                  @change="handleTimeChange"
+                />
+              </label>
+              <i>→</i>
+              <label>
+                <small>结束</small>
+                <el-date-picker
+                  v-model="editorForm.applyEndTime"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  format="YYYY-MM-DD HH:mm"
+                  placeholder="选择结束时间"
+                  style="width: 100%"
+                  @change="handleTimeChange"
+                />
+              </label>
+            </div>
+            <small v-if="editorErrors.applyTime" class="sk-field-error">{{ editorErrors.applyTime }}</small>
+          </div>
+
+          <div class="sk-field wide" :class="{ 'is-invalid': editorErrors.activityTime }">
+            <span>活动时间 <em class="sk-required">*</em></span>
+            <div class="sk-time-inputs">
+              <label>
+                <small>开始</small>
+                <el-date-picker
+                  v-model="editorForm.activityBeginTime"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  format="YYYY-MM-DD HH:mm"
+                  placeholder="选择开始时间"
+                  style="width: 100%"
+                  @change="handleTimeChange"
+                />
+              </label>
+              <i>→</i>
+              <label>
+                <small>结束</small>
+                <el-date-picker
+                  v-model="editorForm.activityEndTime"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  format="YYYY-MM-DD HH:mm"
+                  placeholder="选择结束时间"
+                  style="width: 100%"
+                  @change="handleTimeChange"
+                />
+              </label>
+            </div>
+            <small v-if="editorErrors.activityTime" class="sk-field-error">{{ editorErrors.activityTime }}</small>
+          </div>
+
+          <label class="sk-field wide">
+            <span>备注 <small>选填</small></span>
+            <el-input
+              v-model="editorForm.remark"
+              type="textarea"
+              :rows="2"
+              maxlength="255"
+              resize="none"
+              placeholder="补充运营说明或发布注意事项"
+            />
+          </label>
+        </div>
+
+        <div class="sk-dialog-actions">
+          <el-button @click="editorVisible = false">取消</el-button>
+          <el-button
+            type="primary"
+            :loading="editorSaving"
+            :disabled="coverUploading"
+            @click="saveEditor"
+          >
+            {{ editorId ? '保存修改' : '创建活动' }}
+          </el-button>
+        </div>
+      </div>
     </el-dialog>
 
     <el-dialog
-      v-model="groupOverviewVisible"
-      :title="`拼团情况 - ${currentGroupActivity.name || ''}`"
-      width="1050px"
-      destroy-on-close
+      v-model="transition.visible"
+      width="580px"
+      class="sk-custom-dialog gb-scope"
+      :with-header="false"
+      :show-close="false"
     >
-      <el-table data-ym-table="r10" v-loading="groupOverviewLoading" :data="groupOverviewList" style="width: 100%">
-        <el-table-column prop="groupNo" label="团编号" min-width="150" />
-        <el-table-column label="拼团商品" min-width="220">
-          <template #default="scope">
-            <div class="group-product-cell">
-              <el-image
-                v-if="scope.row.productImage"
-                :src="getImagePreviewUrl(scope.row.productImage)"
-                fit="cover"
-                class="group-product-image"
-              />
-              <span>{{ scope.row.productName || '-' }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="leaderMemberName" label="团长" width="120" />
-        <el-table-column label="成员" width="130">
-          <template #default="scope">
-            {{ scope.row.memberCount || 0 }}/{{ scope.row.minPeople || '-' }}
-            <span class="reserved-count">占席 {{ scope.row.reservedMemberCount || 0 }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="团状态" width="120">
-          <template #default="scope">
-            <el-tag :type="getGroupStatusType(scope.row.status)">
-              {{ getGroupStatusText(scope.row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="开团时间" width="180" />
-        <el-table-column label="完成/失败时间" width="180">
-          <template #default="scope">{{ scope.row.successTime || scope.row.failedTime || '-' }}</template>
-        </el-table-column>
-      </el-table>
-      <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="groupOverviewPagination.current"
-          v-model:page-size="groupOverviewPagination.size"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="Number(groupOverviewPagination.total)"
-          @size-change="handleGroupOverviewSizeChange"
-          @current-change="handleGroupOverviewCurrentChange"
-        />
+      <div v-if="transition.row && transition.meta" class="sk-transition">
+        <div class="sk-dialog-head">
+          <div>
+            <span class="sk-kicker">GROUP BUY WORKFLOW</span>
+            <h2>{{ transition.meta.action }}活动</h2>
+          </div>
+          <button type="button" class="sk-close-btn" @click="transition.visible = false">
+            <el-icon><Close /></el-icon>
+          </button>
+        </div>
+
+        <div class="sk-transition-context">
+          <span class="sk-cover-art small">
+            <StorageImage
+              v-if="transition.row.coverImage"
+              :src="transition.row.coverImage"
+              :preview="false"
+              :width="72"
+              :height="36"
+            />
+            <span v-else class="sk-cover-fallback"><el-icon><Picture /></el-icon></span>
+          </span>
+          <span class="sk-transition-copy">
+            <b>{{ transition.row.name }}</b>
+            <small>报名 {{ shortTime(transition.row.applyBeginTime) }} → {{ shortTime(transition.row.applyEndTime) }}</small>
+            <small>活动 {{ shortTime(transition.row.activityBeginTime) }} → {{ shortTime(transition.row.activityEndTime) }}</small>
+          </span>
+          <span class="sk-transition-shift">
+            <span class="status-ticket" :class="`tone-${transition.meta.tone}`">{{ transition.meta.label }}</span>
+            <el-icon><ArrowRight /></el-icon>
+            <span
+              v-if="transitionNextMeta"
+              class="status-ticket"
+              :class="`tone-${transitionNextMeta.tone}`"
+            >
+              {{ transitionNextMeta.label }}
+            </span>
+          </span>
+        </div>
+
+        <div
+          v-if="isPublishTransition"
+          class="sk-check"
+          :class="transitionChecks.fail ? 'is-fail' : 'is-pass'"
+        >
+          <b>
+            <el-icon v-if="transitionChecks.fail"><WarningFilled /></el-icon>
+            <el-icon v-else><Check /></el-icon>
+            {{ transitionChecks.fail ? '发布前检查未通过' : '发布前检查通过' }}
+          </b>
+          <ul class="sk-check-list">
+            <li :class="{ 'is-bad': !transitionChecks.timeConfigured }"><i></i>报名与活动时间段已配置</li>
+            <li :class="{ 'is-bad': !transitionChecks.orderOk }"><i></i>各时间段起止有效</li>
+            <li :class="{ 'is-bad': !transitionChecks.minPeopleOk }"><i></i>成团人数 ≥ 2 人（当前 {{ transition.row.minPeople }} 人）</li>
+            <li :class="{ 'is-bad': !transitionChecks.limitOk }"><i></i>最大开团数已设置（{{ groupbuyLimitText(transition.row.groupLimit) }}）</li>
+          </ul>
+        </div>
+
+        <p class="sk-transition-hint">{{ transition.meta.hint }}</p>
+
+        <div class="sk-dialog-actions">
+          <el-button @click="transition.visible = false">取消</el-button>
+          <el-button
+            v-if="isPublishTransition && transitionChecks.fail"
+            @click="goEditFromTransition"
+          >
+            前往完善规则
+          </el-button>
+          <el-button
+            type="primary"
+            :disabled="transitionChecks.fail"
+            :loading="transitionSaving"
+            @click="confirmTransition"
+          >
+            确认{{ transition.meta.action }}
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+      v-model="deleteVisible"
+      width="460px"
+      class="sk-custom-dialog gb-scope"
+      :with-header="false"
+      :show-close="false"
+      @closed="deletingRow = null"
+    >
+      <div v-if="deletingRow" class="sk-delete">
+        <div class="sk-dialog-head">
+          <div>
+            <span class="sk-kicker">DELETE ACTIVITY</span>
+            <h2>删除活动</h2>
+          </div>
+          <button type="button" class="sk-close-btn" @click="deleteVisible = false">
+            <el-icon><Close /></el-icon>
+          </button>
+        </div>
+
+        <div class="sk-danger-confirm">
+          <el-icon><WarningFilled /></el-icon>
+          <div>
+            <b>删除后不可恢复</b>
+            <span>仅【新建】状态的活动可以删除。删除后活动基础信息将被移除，后续需重新创建。</span>
+            <small>当前活动：{{ deletingRow.name }}</small>
+          </div>
+        </div>
+
+        <p class="sk-delete-context">如需保留活动记录，请改为停用或推进至活动下架。</p>
+
+        <div class="sk-dialog-actions">
+          <el-button @click="deleteVisible = false">取消</el-button>
+          <el-button
+            type="danger"
+            class="sk-delete-confirm-btn"
+            :loading="deleteSaving"
+            @click="confirmDelete"
+          >
+            确认删除
+          </el-button>
+        </div>
       </div>
     </el-dialog>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { getStoragePreviewUrl } from '@/utils/storage'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search, Refresh, Edit, Delete, Goods, Upload, Picture, Check, View } from '@element-plus/icons-vue'
-import { getToken } from '@/utils/auth'
-import { resolveApiUrl } from '@/utils/download'
-import MallListTools from '@/components/mall/MallListTools.vue'
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { createGroupBuyActivity, deleteGroupBuyActivity, queryGroupBuyActivityList, queryGroupBuyGroupList, updateGroupBuyActivity, updateGroupBuyActivityEnabled, updateGroupBuyActivityStatus } from '@/api/mall/groupBuy'
+import { ElMessage } from 'element-plus'
+import type { UploadRequestOptions } from 'element-plus'
+import {
+  ArrowDown,
+  ArrowRight,
+  Avatar,
+  Calendar,
+  Check,
+  Clock,
+  Close,
+  Picture,
+  Plus,
+  Search,
+  Upload,
+  WarningFilled,
+} from '@element-plus/icons-vue'
+import {
+  createGroupBuyActivity,
+  deleteGroupBuyActivity,
+  queryGroupBuyActivityList,
+  queryGroupBuyActivityStats,
+  updateGroupBuyActivity,
+  updateGroupBuyActivityEnabled,
+  updateGroupBuyActivityStatus,
+} from '@/api/mall/groupBuy'
+import { uploadStorageFile } from '@/api/storage'
+import { getStoragePreviewUrl } from '@/utils/storage'
+import MallPagination from '@/components/mall/MallPagination.vue'
+import StorageImage from '@/components/mall/StorageImage.vue'
+import { fullRange, type PageResponse } from '../../seckill/insight-shared'
+import {
+  GROUPBUY_AUDIT_PATH,
+  GROUPBUY_FLOW,
+  GROUPBUY_ORDER_PATH,
+  GROUPBUY_PRODUCT_PATH,
+  groupbuyLimitText,
+  groupbuyPublishIssues,
+  groupbuyStatusMeta,
+  shortTime,
+  type GroupBuyActivity,
+  type GroupBuyStatusMeta,
+} from '../groupbuy-shared'
 
-// 响应式数据
-const loading = ref(false)
-const dialogVisible = ref(false)
-const dialogTitle = ref('新增活动')
-const formRef = ref(null)
-const groupLimitMode = ref('limited')
-const groupOverviewVisible = ref(false)
-const groupOverviewLoading = ref(false)
-const currentGroupActivity = ref({})
-const groupOverviewList = ref([])
+interface ActivityStats {
+  total: number
+  created: number
+  published: number
+  applyStarted: number
+  applyFinished: number
+  activityStarted: number
+  activityFinished: number
+  activityDown: number
+  pendingSetup: number
+}
+
+const STATUS_ORDER = ['1', '2', '3', '4', '5', '6', '7']
+const STATUS_COUNT_KEY: Record<string, keyof ActivityStats> = {
+  1: 'created',
+  2: 'published',
+  3: 'applyStarted',
+  4: 'applyFinished',
+  5: 'activityStarted',
+  6: 'activityFinished',
+  7: 'activityDown',
+}
+
 const router = useRouter()
-const showSearch = ref(true)
-const storageUploadUrl = resolveApiUrl('/basic/storage/upload')
 
-// 上传成功处理
-function handleUploadSuccess(response) {
-  if (response.code === 0 && response.data) {
-    form.coverImage = response.data.fileKey
-    ElMessage.success('图片上传成功')
-  } else {
-    ElMessage.error('图片上传失败: ' + (response.message || '未知错误'))
-  }
-}
+const activeTab = ref('all')
+const loading = ref(false)
+const allRows = ref<GroupBuyActivity[]>([])
+const page = reactive({ current: 1, size: 10, total: 0 })
+const filters = reactive<{ keyword: string; enabled: boolean | '' }>({ keyword: '', enabled: '' })
+const applied = reactive<{ keyword: string; enabled: boolean | '' }>({ keyword: '', enabled: '' })
+const stats = reactive<ActivityStats>({
+  total: 0,
+  created: 0,
+  published: 0,
+  applyStarted: 0,
+  applyFinished: 0,
+  activityStarted: 0,
+  activityFinished: 0,
+  activityDown: 0,
+  pendingSetup: 0,
+})
+const toggleLoadingId = ref<string | number | null>(null)
 
-// 上传失败处理
-function handleUploadError(error) {
-  ElMessage.error('图片上传失败: ' + (error.message || '网络错误'))
-}
+const filtered = computed(() => (
+  activeTab.value === 'all'
+    ? allRows.value
+    : allRows.value.filter((row) => String(row.status) === activeTab.value)
+))
+const pagedRows = computed(() => filtered.value.slice((page.current - 1) * page.size, page.current * page.size))
 
-// 获取图片预览URL
-function getImagePreviewUrl(fileKey) {
-  return getStoragePreviewUrl(fileKey)
-}
+watch(filtered, (rows) => {
+  page.total = rows.length
+  const maxPage = Math.max(1, Math.ceil(rows.length / page.size))
+  if (page.current > maxPage) page.current = maxPage
+}, { immediate: true })
 
-// 查询参数
-const queryParams = reactive({
-  name: '',
-  status: ''
+const detailVisible = ref(false)
+const detailRow = ref<GroupBuyActivity | null>(null)
+const currentFlowIndex = computed(() => {
+  if (!detailRow.value) return -1
+  return GROUPBUY_FLOW.findIndex((step) => step.value === String(detailRow.value?.status))
 })
 
-// 分页参数
-const pagination = reactive({
-  current: 1,
-  size: 10,
-  total: 0
-})
-
-const groupOverviewPagination = reactive({
-  current: 1,
-  size: 10,
-  total: 0
-})
-
-// 表单数据
-const form = reactive({
-  id: '',
+const editorVisible = ref(false)
+const editorId = ref<string | number | ''>('')
+const editorSaving = ref(false)
+const coverUploading = ref(false)
+const localCoverUrl = ref('')
+const editorForm = reactive({
   name: '',
   description: '',
   coverImage: '',
@@ -351,455 +834,512 @@ const form = reactive({
   applyEndTime: '',
   activityBeginTime: '',
   activityEndTime: '',
-  minPeople: 2,
-  groupLimit: 0,
-  sort: 1,
-  remark: ''
+  minPeople: 2 as number | null,
+  groupLimit: 0 as number | null,
+  sort: 1 as number | null,
+  remark: '',
+})
+const editorErrors = reactive({
+  name: '',
+  description: '',
+  sort: '',
+  minPeople: '',
+  groupLimit: '',
+  applyTime: '',
+  activityTime: '',
+})
+const coverPreviewUrl = computed(() => {
+  if (localCoverUrl.value) return localCoverUrl.value
+  return editorForm.coverImage ? getStoragePreviewUrl(editorForm.coverImage) : ''
+})
+const limitUnlimited = computed(() => Number(editorForm.groupLimit) === -1)
+
+const transition = reactive<{
+  visible: boolean
+  row: GroupBuyActivity | null
+  meta: GroupBuyStatusMeta | null
+}>({ visible: false, row: null, meta: null })
+const transitionSaving = ref(false)
+const transitionNextMeta = computed(() => {
+  if (!transition.meta?.next) return null
+  return groupbuyStatusMeta(transition.meta.next)
+})
+const isPublishTransition = computed(() => transition.meta?.next === '2')
+const transitionIssues = computed(() => (
+  isPublishTransition.value && transition.row ? groupbuyPublishIssues(transition.row) : []
+))
+const transitionChecks = computed(() => {
+  const row = transition.row
+  if (!row) {
+    return { timeConfigured: false, orderOk: false, minPeopleOk: false, limitOk: false, fail: true }
+  }
+  const timeConfigured = Boolean(row.applyBeginTime && row.applyEndTime && row.activityBeginTime && row.activityEndTime)
+  const orderOk = timeConfigured
+    && String(row.applyBeginTime) <= String(row.applyEndTime)
+    && String(row.activityBeginTime) <= String(row.activityEndTime)
+  const minPeopleOk = Number(row.minPeople) >= 2
+  const limitOk = Number(row.groupLimit) !== 0
+  return { timeConfigured, orderOk, minPeopleOk, limitOk, fail: transitionIssues.value.length > 0 }
 })
 
-// 表单规则
-const rules = reactive({
-  name: [{ required: true, message: '请输入活动名称', trigger: 'blur' }],
-  description: [{ required: true, message: '请输入活动描述', trigger: 'blur' }],
-  applyBeginTime: [{ required: true, message: '请选择报名开始时间', trigger: 'change' }],
-  applyEndTime: [{ required: true, message: '请选择报名结束时间', trigger: 'change' }],
-  activityBeginTime: [{ required: true, message: '请选择活动开始时间', trigger: 'change' }],
-  activityEndTime: [{ required: true, message: '请选择活动结束时间', trigger: 'change' }],
-  minPeople: [{ required: true, message: '请输入每团成团人数', trigger: 'blur' }],
-  groupLimit: [{ required: true, message: '请输入最大开团数', trigger: 'blur' }]
-})
+const deleteVisible = ref(false)
+const deleteSaving = ref(false)
+const deletingRow = ref<GroupBuyActivity | null>(null)
 
-// 活动列表
-const activityList = ref([])
+function tabCount(status: string) {
+  const key = STATUS_COUNT_KEY[status]
+  return key ? stats[key] : 0
+}
 
-// 初始化
-onMounted(() => {
-  getList()
-})
+function displayTime(value?: string | null) {
+  return String(value || '').replace('T', ' ').slice(0, 19)
+}
 
-// 获取活动列表
-function getList() {
+function canEdit(row: GroupBuyActivity) {
+  return !['6', '7'].includes(String(row.status))
+}
+
+function buildQuery(source: { keyword: string; enabled: boolean | '' }) {
+  const params: Record<string, unknown> = {}
+  if (source.keyword) params.keyword = source.keyword
+  if (source.enabled !== '') params.isEnabled = source.enabled
+  return params
+}
+
+async function loadStats() {
+  try {
+    const response = await queryGroupBuyActivityStats(buildQuery(applied)) as { data?: Partial<ActivityStats> }
+    const data = response?.data || {}
+    const keys: (keyof ActivityStats)[] = [
+      'total', 'created', 'published', 'applyStarted', 'applyFinished',
+      'activityStarted', 'activityFinished', 'activityDown', 'pendingSetup',
+    ]
+    keys.forEach((key) => {
+      stats[key] = Number(data[key] || 0)
+    })
+  } catch {
+    // 请求错误已由全局拦截器提示
+  }
+}
+
+async function loadList() {
   loading.value = true
-  const params = {
-    conditions_: `sort:sort:asc`,
-    size: pagination.size,
-    current: pagination.current
+  try {
+    const result = await queryGroupBuyActivityList({
+      current: 1,
+      size: 500,
+      ...buildQuery(applied),
+    }) as unknown as PageResponse<GroupBuyActivity>
+    allRows.value = (result.data?.records || [])
+      .filter((row) => row && row.id !== undefined && row.id !== null)
+      .map((row) => ({
+        ...row,
+        name: String(row.name || ''),
+        description: String(row.description || ''),
+        coverImage: String(row.coverImage || ''),
+        applyBeginTime: displayTime(row.applyBeginTime),
+        applyEndTime: displayTime(row.applyEndTime),
+        activityBeginTime: displayTime(row.activityBeginTime),
+        activityEndTime: displayTime(row.activityEndTime),
+        status: String(row.status ?? '1'),
+        sort: Number(row.sort || 0),
+        isEnabled: Boolean(row.isEnabled),
+        minPeople: Number(row.minPeople || 0),
+        groupLimit: Number(row.groupLimit ?? 0),
+        applyCount: Number(row.applyCount || 0),
+        productCount: Number(row.productCount || 0),
+        remark: String(row.remark || ''),
+        createTime: displayTime(row.createTime),
+        updateTime: displayTime(row.updateTime),
+      }))
+  } catch {
+    // 请求错误已由全局拦截器提示
+  } finally {
+    loading.value = false
   }
-
-  // 合并查询参数
-  if (queryParams.name) {
-    params.conditions_ += `,name:${queryParams.name}:like`
-  }
-  if (queryParams.status) {
-    params.conditions_ += `,status:${queryParams.status}:eq`
-  }
-
-  queryGroupBuyActivityList(params)
-    .then((response) => {
-      const data = response.data || {}
-      activityList.value = data.records || []
-      pagination.total = Number(data.total) || 0
-    })
-    .catch((error) => {
-      ElMessage.error(error.message || '获取拼团活动失败')
-      activityList.value = []
-      pagination.total = 0
-    })
-    .finally(() => {
-      loading.value = false
-    })
 }
 
-// 新增活动
-function handleAdd() {
-  dialogTitle.value = '新增活动'
-  form.id = ''
-  form.name = ''
-  form.description = ''
-  form.coverImage = ''
-  form.applyBeginTime = ''
-  form.applyEndTime = ''
-  form.activityBeginTime = ''
-  form.activityEndTime = ''
-  form.minPeople = 2
-  form.groupLimit = 0
-  groupLimitMode.value = 'limited'
-  form.sort = 1
-  form.remark = ''
-  dialogVisible.value = true
+async function refreshAll() {
+  await Promise.all([loadList(), loadStats()])
 }
 
-// 编辑活动
-function handleEdit(row) {
-  dialogTitle.value = '编辑活动'
-  // 复制所有字段
-  form.id = row.id
-  form.name = row.name
-  form.description = row.description
-  form.coverImage = row.coverImage
-  form.applyBeginTime = row.applyBeginTime
-  form.applyEndTime = row.applyEndTime
-  form.activityBeginTime = row.activityBeginTime
-  form.activityEndTime = row.activityEndTime
-  form.minPeople = row.minPeople
-  form.groupLimit = row.groupLimit ?? 0
-  groupLimitMode.value = form.groupLimit === -1 ? 'unlimited' : 'limited'
-  form.sort = row.sort
-  form.remark = row.remark
-  dialogVisible.value = true
+function switchTab(status: string) {
+  if (activeTab.value === status) return
+  activeTab.value = status
+  page.current = 1
 }
 
-// 格式化日期时间
-function validateTimeRanges() {
-  const applyBegin = new Date(form.applyBeginTime.replace(/-/g, '/'))
-  const applyEnd = new Date(form.applyEndTime.replace(/-/g, '/'))
-  const activityBegin = new Date(form.activityBeginTime.replace(/-/g, '/'))
-  const activityEnd = new Date(form.activityEndTime.replace(/-/g, '/'))
+function search() {
+  applied.keyword = filters.keyword.trim()
+  applied.enabled = filters.enabled
+  page.current = 1
+  void refreshAll()
+}
 
-  if ([applyBegin, applyEnd, activityBegin, activityEnd].some((time) => Number.isNaN(time.getTime()))) {
-    ElMessage.error('活动时间格式不正确')
+function resetFilters() {
+  filters.keyword = ''
+  filters.enabled = ''
+  applied.keyword = ''
+  applied.enabled = ''
+  activeTab.value = 'all'
+  page.current = 1
+  void refreshAll()
+}
+
+function handlePageChange({ page: nextPage, limit }: { page: number; limit: number }) {
+  page.current = nextPage
+  page.size = limit
+}
+
+function openDetail(row: GroupBuyActivity) {
+  detailRow.value = row
+  detailVisible.value = true
+}
+
+function goAudit(row: GroupBuyActivity) {
+  detailVisible.value = false
+  router.push({
+    path: GROUPBUY_AUDIT_PATH,
+    query: { activityId: String(row.id), activityName: row.name || '' },
+  })
+}
+
+function goProduct(row: GroupBuyActivity) {
+  detailVisible.value = false
+  router.push({
+    path: GROUPBUY_PRODUCT_PATH,
+    query: { activityId: String(row.id), activityName: row.name || '' },
+  })
+}
+
+function goOrder(row: GroupBuyActivity) {
+  detailVisible.value = false
+  router.push({
+    path: GROUPBUY_ORDER_PATH,
+    query: { activityId: String(row.id), activityName: row.name || '' },
+  })
+}
+
+function handleRowCommand(command: string, row: GroupBuyActivity) {
+  if (command === 'detail') {
+    openDetail(row)
+  } else if (command === 'audit') {
+    goAudit(row)
+  } else if (command === 'product') {
+    goProduct(row)
+  } else if (command === 'order') {
+    goOrder(row)
+  } else if (command === 'delete' && row.status === '1') {
+    deletingRow.value = row
+    deleteVisible.value = true
+  }
+}
+
+function clearEditorErrors() {
+  editorErrors.name = ''
+  editorErrors.description = ''
+  editorErrors.sort = ''
+  editorErrors.minPeople = ''
+  editorErrors.groupLimit = ''
+  editorErrors.applyTime = ''
+  editorErrors.activityTime = ''
+}
+
+function clearEditorError(key: keyof typeof editorErrors) {
+  editorErrors[key] = ''
+}
+
+function resetEditorForm() {
+  editorForm.name = ''
+  editorForm.description = ''
+  editorForm.coverImage = ''
+  editorForm.applyBeginTime = ''
+  editorForm.applyEndTime = ''
+  editorForm.activityBeginTime = ''
+  editorForm.activityEndTime = ''
+  editorForm.minPeople = 2
+  editorForm.groupLimit = 0
+  editorForm.sort = 1
+  editorForm.remark = ''
+}
+
+function revokeLocalCover() {
+  if (localCoverUrl.value) {
+    URL.revokeObjectURL(localCoverUrl.value)
+    localCoverUrl.value = ''
+  }
+}
+
+function openCreate() {
+  detailVisible.value = false
+  revokeLocalCover()
+  clearEditorErrors()
+  editorId.value = ''
+  resetEditorForm()
+  editorVisible.value = true
+}
+
+function openEditor(row: GroupBuyActivity) {
+  detailVisible.value = false
+  revokeLocalCover()
+  clearEditorErrors()
+  editorId.value = row.id
+  editorForm.name = row.name || ''
+  editorForm.description = row.description || ''
+  editorForm.coverImage = row.coverImage || ''
+  editorForm.applyBeginTime = displayTime(row.applyBeginTime)
+  editorForm.applyEndTime = displayTime(row.applyEndTime)
+  editorForm.activityBeginTime = displayTime(row.activityBeginTime)
+  editorForm.activityEndTime = displayTime(row.activityEndTime)
+  editorForm.minPeople = Number(row.minPeople) || 2
+  editorForm.groupLimit = Number(row.groupLimit ?? 0)
+  editorForm.sort = Number(row.sort) || 1
+  editorForm.remark = row.remark || ''
+  editorVisible.value = true
+}
+
+function handleTimeChange() {
+  editorErrors.applyTime = ''
+  editorErrors.activityTime = ''
+}
+
+function handleEditorClosed() {
+  revokeLocalCover()
+  clearEditorErrors()
+}
+
+function handleGroupLimitInput(value: number | null | undefined) {
+  editorForm.groupLimit = value ?? 0
+  clearEditorError('groupLimit')
+}
+
+function handleLimitToggle(value: boolean | string | number) {
+  editorForm.groupLimit = value === true ? -1 : 1
+  clearEditorError('groupLimit')
+}
+
+function validateEditor() {
+  clearEditorErrors()
+  if (!editorForm.name.trim()) editorErrors.name = '请输入活动名称'
+  if (!editorForm.description.trim()) editorErrors.description = '请输入活动描述'
+  if (!editorForm.sort || Number(editorForm.sort) < 1) editorErrors.sort = '排序需大于等于 1'
+  if (!editorForm.minPeople || Number(editorForm.minPeople) < 2) editorErrors.minPeople = '成团人数需大于等于 2 人'
+  if (editorForm.groupLimit === null || editorForm.groupLimit === undefined || Number(editorForm.groupLimit) === 0) {
+    editorErrors.groupLimit = '请设置最大开团数，或勾选不限'
+  } else if (Number(editorForm.groupLimit) < -1) {
+    editorErrors.groupLimit = '最大开团数需为正整数或 -1（不限）'
+  }
+
+  const applyBegin = displayTime(editorForm.applyBeginTime)
+  const applyEnd = displayTime(editorForm.applyEndTime)
+  const activityBegin = displayTime(editorForm.activityBeginTime)
+  const activityEnd = displayTime(editorForm.activityEndTime)
+
+  if (!applyBegin || !applyEnd) {
+    editorErrors.applyTime = '请选择完整的报名开始和结束时间'
+  } else if (applyBegin > applyEnd) {
+    editorErrors.applyTime = '报名开始时间需早于或等于结束时间'
+  }
+  if (!activityBegin || !activityEnd) {
+    editorErrors.activityTime = '请选择完整的活动开始和结束时间'
+  } else if (activityBegin > activityEnd) {
+    editorErrors.activityTime = '活动开始时间需早于或等于结束时间'
+  }
+
+  return !Object.values(editorErrors).some(Boolean)
+}
+
+async function saveEditor() {
+  if (coverUploading.value) {
+    ElMessage.warning('封面正在上传，请稍候')
+    return
+  }
+  if (!validateEditor() || !editorForm.sort || !editorForm.minPeople || editorForm.groupLimit === null) {
+    return
+  }
+
+  const payload = {
+    name: editorForm.name.trim(),
+    description: editorForm.description.trim(),
+    coverImage: editorForm.coverImage,
+    applyBeginTime: displayTime(editorForm.applyBeginTime),
+    applyEndTime: displayTime(editorForm.applyEndTime),
+    activityBeginTime: displayTime(editorForm.activityBeginTime),
+    activityEndTime: displayTime(editorForm.activityEndTime),
+    minPeople: Number(editorForm.minPeople),
+    groupLimit: Number(editorForm.groupLimit),
+    sort: Number(editorForm.sort),
+    remark: editorForm.remark.trim(),
+  }
+
+  editorSaving.value = true
+  try {
+    if (editorId.value) {
+      await updateGroupBuyActivity({ ...payload, id: editorId.value })
+      ElMessage.success('活动信息已保存')
+    } else {
+      await createGroupBuyActivity(payload)
+      activeTab.value = 'all'
+      page.current = 1
+      ElMessage.success('活动已创建，完善规则后即可发布')
+    }
+    editorVisible.value = false
+    await refreshAll()
+  } catch {
+    // 请求错误已由全局拦截器提示
+  } finally {
+    editorSaving.value = false
+  }
+}
+
+function beforeCoverUpload(file: File) {
+  const extension = file.name.split('.').pop()?.toLowerCase() || ''
+  if (!['jpg', 'jpeg', 'png', 'webp'].includes(extension)) {
+    ElMessage.warning('仅支持 JPG、PNG、WebP 格式的图片')
     return false
   }
-  if (applyBegin >= applyEnd) {
-    ElMessage.error('报名开始时间必须早于报名结束时间')
-    return false
-  }
-  if (activityBegin >= activityEnd) {
-    ElMessage.error('活动开始时间必须早于活动结束时间')
+  if (file.size > 2 * 1024 * 1024) {
+    ElMessage.warning('封面图片不能超过 2MB')
     return false
   }
   return true
 }
 
-function formatGroupLimit(groupLimit) {
-  if (Number(groupLimit) === -1) {
-    return '不限'
+async function uploadCover(options: UploadRequestOptions) {
+  coverUploading.value = true
+  revokeLocalCover()
+  localCoverUrl.value = URL.createObjectURL(options.file)
+  try {
+    const response = await uploadStorageFile({
+      file: options.file,
+      isPublic: true,
+      isUsed: false,
+    }) as { data: { fileKey: string } }
+    editorForm.coverImage = response.data.fileKey
+    options.onSuccess(response.data)
+    ElMessage.success('封面上传成功')
+  } catch (error) {
+    revokeLocalCover()
+    options.onError(error as Parameters<typeof options.onError>[0])
+  } finally {
+    coverUploading.value = false
   }
-  return Number(groupLimit) > 0 ? groupLimit : '未设置'
 }
 
-function handleGroupLimitModeChange(mode) {
-  if (mode === 'unlimited') {
-    form.groupLimit = -1
-  } else if (form.groupLimit < 1) {
-    form.groupLimit = 1
-  }
-}
-
-// 提交表单
-function handleSubmit() {
-  formRef.value.validate((valid) => {
-    if (valid) {
-      if (!validateTimeRanges()) {
-        return
-      }
-      if (groupLimitMode.value === 'limited' && form.groupLimit < 1) {
-        ElMessage.error('最大开团数必须为 1 到 N 的整数')
-        return
-      }
-      loading.value = true
-      const submitData = {
-        name: form.name,
-        description: form.description,
-        coverImage: form.coverImage,
-        applyBeginTime: form.applyBeginTime,
-        applyEndTime: form.applyEndTime,
-        activityBeginTime: form.activityBeginTime,
-        activityEndTime: form.activityEndTime,
-        minPeople: form.minPeople,
-        groupLimit: groupLimitMode.value === 'unlimited' ? -1 : form.groupLimit,
-        sort: form.sort,
-        remark: form.remark
-      }
-
-      const request = form.id
-        ? updateGroupBuyActivity({ ...submitData, id: form.id })
-        : createGroupBuyActivity(submitData)
-      request
-        .then(() => {
-          ElMessage.success(form.id ? '编辑成功' : '新增成功')
-          dialogVisible.value = false
-          getList()
-        })
-        // request 已统一展示后端业务错误，避免同一错误重复弹窗。
-        .catch(() => {})
-        .finally(() => {
-          loading.value = false
-        })
+async function toggleEnabled(row: GroupBuyActivity) {
+  const nextEnabled = row.isEnabled
+  toggleLoadingId.value = row.id
+  try {
+    await updateGroupBuyActivityEnabled({ id: row.id, isEnabled: nextEnabled })
+    ElMessage.success(`活动已${nextEnabled ? '启用' : '停用'}`)
+    if (detailRow.value?.id === row.id) {
+      detailRow.value.isEnabled = nextEnabled
     }
-  })
-}
-
-// 删除活动
-function handleDelete(id) {
-  ElMessageBox.confirm('确定要删除该活动吗？', '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    loading.value = true
-    deleteGroupBuyActivity([id])
-      .then(() => {
-        ElMessage.success('删除成功')
-        getList()
-      })
-      .catch((error) => ElMessage.error(error.message || '删除失败'))
-      .finally(() => {
-        loading.value = false
-      })
-  })
-}
-
-// 查询
-function handleQuery() {
-  pagination.current = 1
-  getList()
-}
-
-// 重置
-function resetQuery() {
-  Object.assign(queryParams, {
-    name: '',
-    status: ''
-  })
-  handleQuery()
-}
-
-// 分页大小变化
-function handleSizeChange(size) {
-  pagination.size = size
-  getList()
-}
-
-// 当前页码变化
-function handleCurrentChange(current) {
-  pagination.current = current
-  getList()
-}
-
-// 商品管理
-function handleProduct(row) {
-  router.push(`/mall/group-buy/product?activityId=${row.id}&activityName=${encodeURIComponent(row.name)}`)
-}
-
-// 申请审核
-function handleAudit(row) {
-  router.push(`/mall/group-buy/audit?activityId=${row.id}`)
-}
-
-function handleActivityAction(command, row) {
-  if (command === 'product') return handleProduct(row)
-  if (command === 'groups') return handleGroupOverview(row)
-  if (command === 'audit') return handleAudit(row)
-  if (command === 'delete') return handleDelete(row.id)
-}
-
-/**
- * 查看活动下当前所有团的状态。
- */
-function handleGroupOverview(row) {
-  currentGroupActivity.value = row
-  groupOverviewPagination.current = 1
-  groupOverviewVisible.value = true
-  getGroupOverviewList()
-}
-
-/**
- * 查询活动下的团概览。
- */
-function getGroupOverviewList() {
-  if (!currentGroupActivity.value.id) {
-    return
+    const listChanged = applied.enabled !== '' && applied.enabled !== nextEnabled
+    await Promise.all([loadStats(), listChanged ? loadList() : Promise.resolve()])
+  } catch {
+    row.isEnabled = !nextEnabled
+  } finally {
+    toggleLoadingId.value = null
   }
-  groupOverviewLoading.value = true
-  queryGroupBuyGroupList({
-    activityId: currentGroupActivity.value.id,
-    current: groupOverviewPagination.current,
-    size: groupOverviewPagination.size
-  }).then((response) => {
-    const data = response.data || {}
-    groupOverviewList.value = data.records || []
-    groupOverviewPagination.total = Number(data.total) || 0
-  }).finally(() => {
-    groupOverviewLoading.value = false
-  })
 }
 
-function handleGroupOverviewSizeChange(size) {
-  groupOverviewPagination.size = size
-  groupOverviewPagination.current = 1
-  getGroupOverviewList()
+function openTransition(row: GroupBuyActivity) {
+  const meta = groupbuyStatusMeta(row.status)
+  if (!meta.action) return
+  transition.row = { ...row }
+  transition.meta = meta
+  transition.visible = true
 }
 
-function handleGroupOverviewCurrentChange(current) {
-  groupOverviewPagination.current = current
-  getGroupOverviewList()
+function goEditFromTransition() {
+  const row = transition.row
+  if (!row) return
+  transition.visible = false
+  openEditor(row)
 }
 
-// 获取状态文本
-function getStatusText(status) {
-  const statusMap = {
-    '1': '新建',
-    '2': '发布',
-    '3': '报名中',
-    '4': '报名结束',
-    '5': '活动中',
-    '6': '活动结束',
-    '7': '活动下架'
-  }
-  return statusMap[status] || '未知'
-}
-
-// 获取状态标签类型
-function getStatusTagType(status) {
-  const typeMap = {
-    '1': 'info',
-    '2': 'primary',
-    '3': 'success',
-    '4': 'warning',
-    '5': 'danger',
-    '6': 'info',
-    '7': 'danger'
-  }
-  return typeMap[status] || 'info'
-}
-
-function getGroupStatusText(status) {
-  const statusMap = {
-    '1': '待团长支付',
-    '2': '拼团中',
-    '3': '已成团',
-    '4': '拼团失败',
-    '5': '已关闭'
-  }
-  return statusMap[status] || '未知'
-}
-
-function getGroupStatusType(status) {
-  const typeMap = {
-    '1': 'warning',
-    '2': 'primary',
-    '3': 'success',
-    '4': 'danger',
-    '5': 'info'
-  }
-  return typeMap[status] || 'info'
-}
-
-function getNextStatus(status) {
-  const nextStatusMap = {
-    '1': '2',
-    '2': '3',
-    '3': '4',
-    '4': '5',
-    '5': '6',
-    '6': '7'
-  }
-  return nextStatusMap[String(status)]
-}
-
-function getNextStatusText(status) {
-  const textMap = {
-    '1': '发布',
-    '2': '开始报名',
-    '3': '结束报名',
-    '4': '开始活动',
-    '5': '结束活动',
-    '6': '下架'
-  }
-  return textMap[String(status)] || ''
-}
-
-async function handleStatusChange(row) {
-  const status = getNextStatus(row.status)
-  if (!status) {
-    return
-  }
-  if (status === '6' && isBeforeActivityEnd(row.activityEndTime)) {
-    try {
-      await ElMessageBox.confirm(
-        '提前结束将统一结算活动：满团订单转为待发货，未满团订单将关闭或退款。',
-        '提前结束活动',
-        { confirmButtonText: '继续', cancelButtonText: '取消', type: 'warning' }
-      )
-      await ElMessageBox.confirm(
-        '该操作不可撤销，确认结束当前拼团活动？',
-        '二次确认',
-        { confirmButtonText: '确认结束', cancelButtonText: '取消', type: 'warning' }
-      )
-    } catch {
-      return
+async function confirmTransition() {
+  if (!transition.row || !transition.meta || transitionChecks.value.fail) return
+  const rowId = transition.row.id
+  const nextStatus = transition.meta.next
+  const action = transition.meta.action
+  transitionSaving.value = true
+  try {
+    await updateGroupBuyActivityStatus({ id: rowId, status: nextStatus })
+    ElMessage.success(`活动已${action}`)
+    if (detailRow.value?.id === rowId) {
+      detailRow.value.status = nextStatus
     }
+    transition.visible = false
+    await refreshAll()
+  } catch {
+    // 请求错误已由全局拦截器提示
+  } finally {
+    transitionSaving.value = false
   }
-  loading.value = true
-  updateGroupBuyActivityStatus({ id: row.id, status })
-    .then(() => {
-      ElMessage.success('活动状态更新成功')
-      getList()
-    })
-    .catch((error) => ElMessage.error(error.message || '活动状态更新失败'))
-    .finally(() => {
-      loading.value = false
-    })
 }
 
-function isBeforeActivityEnd(activityEndTime) {
-  if (!activityEndTime) {
-    return false
+async function confirmDelete() {
+  if (!deletingRow.value) return
+  const rowId = deletingRow.value.id
+  deleteSaving.value = true
+  try {
+    await deleteGroupBuyActivity([rowId])
+    ElMessage.success('活动已删除')
+    if (detailRow.value?.id === rowId) {
+      detailRow.value = null
+      detailVisible.value = false
+    }
+    deleteVisible.value = false
+    await refreshAll()
+  } catch {
+    // 请求错误已由全局拦截器提示
+  } finally {
+    deleteSaving.value = false
   }
-  const endTime = new Date(String(activityEndTime).replace(/-/g, '/')).getTime()
-  return !Number.isNaN(endTime) && Date.now() < endTime
 }
 
-// 是否启用变更
-function handleEnabledChange(row) {
-  loading.value = true
-  updateGroupBuyActivityEnabled({ id: row.id, isEnabled: row.isEnabled })
-    .then(() => ElMessage.success('启用状态更新成功'))
-    .catch((error) => {
-      row.isEnabled = !row.isEnabled
-      ElMessage.error(error.message || '启用状态更新失败')
-    })
-    .finally(() => {
-      loading.value = false
-    })
-}
+onMounted(() => {
+  void refreshAll()
+})
+
+onBeforeUnmount(() => {
+  revokeLocalCover()
+})
 </script>
 
 <style scoped>
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.dialog-footer {
-  text-align: right;
-}
-
-.form-tip {
-  width: 100%;
-  margin-top: 8px;
-  color: var(--mall-muted, #65726a);
-  font-size: 12px;
-}
-
-.group-product-cell {
-  display: flex;
+.sk-switch {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  color: var(--ym-muted);
+  font-size: 12px;
+  white-space: nowrap;
 }
 
-.group-product-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
+.sk-switch span.is-on {
+  color: var(--ym-brand);
 }
 
-.reserved-count {
-  display: block;
-  margin-top: 2px;
-  color: var(--mall-muted, #65726a);
+.sk-switch :deep(.el-switch) {
+  --el-switch-on-color: var(--ym-brand);
+}
+
+.gb-operations :deep(.el-dropdown) {
+  margin-left: 0;
+}
+
+.gb-more-btn {
+  color: var(--ym-muted);
+}
+
+.gb-more-icon {
+  margin-left: 2px;
+}
+
+.sk-when-cell {
   font-size: 12px;
 }
 </style>

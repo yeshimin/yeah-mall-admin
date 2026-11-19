@@ -9,6 +9,9 @@ export function addSeckillProduct(...args: unknown[]): Promise<unknown>
 export function removeSeckillProduct(...args: unknown[]): Promise<unknown>
 export function querySeckillProductList(...args: unknown[]): Promise<unknown>
 export function getSeckillMonitorData(...args: unknown[]): Promise<unknown>
+export function getSeckillMonitorEvents(...args: unknown[]): Promise<unknown>
+export function querySeckillSpuList(...args: unknown[]): Promise<unknown>
+export function getSeckillSpuDetail(...args: unknown[]): Promise<unknown>
 export function getSeckillAnalysisData(...args: unknown[]): Promise<unknown>
 export function updateSeckillActivityStatus(...args: unknown[]): Promise<unknown>
 export function updateSeckillActivityEnabled(...args: unknown[]): Promise<unknown>

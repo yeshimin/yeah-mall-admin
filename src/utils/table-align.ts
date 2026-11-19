@@ -130,6 +130,25 @@ function naturalTextWidth(cell: HTMLElement): number {
 }
 
 /**
+ * 探针挂在 body 下，拿不到 #app / 页面祖先作用域里的字体规则（如 #app b{font-weight:600}、
+ * 继承的 tabular-nums），克隆体会按错误字重/字形量宽，导致容器偏窄、最长文本被假截断。
+ * 逐元素把渲染态 computed 字体同步到克隆体，使探针字形与真实渲染完全一致，与作用域无关。
+ */
+const FONT_PROPS = ['fontSize', 'fontFamily', 'fontWeight', 'fontStyle', 'letterSpacing', 'fontVariantNumeric', 'textTransform', 'wordSpacing'] as const
+function syncFont(source: Element, clone: Element): void {
+  const cs = getComputedStyle(source)
+  const el = clone as HTMLElement
+  for (const prop of FONT_PROPS) el.style[prop] = cs[prop]
+  const srcKids = source.children
+  const cloneKids = clone.children
+  for (let i = 0; i < srcKids.length; i += 1) {
+    const src = srcKids[i]
+    const dst = cloneKids[i]
+    if (src && dst) syncFont(src, dst)
+  }
+}
+
+/**
  * 多元素列内容的自然宽度：把单元格内容克隆到离屏探针，放开块级子元素的固定宽/max-width，
  * 让 flex 复合块收缩到「内容真正需要的宽度」。渲染态的 extent 会被 max-width:100% 压到≈列内容宽，
  * 窄列里永远填满而无法居中；自然宽才能算出可居中的容器宽。
@@ -166,6 +185,7 @@ function naturalContentWidth(cell: HTMLElement): number {
       const el = clone as HTMLElement
       el.style.width = 'auto'
       el.style.maxWidth = 'none'
+      syncFont(child as Element, el)
     }
     blockProbe.appendChild(clone)
     has = true
@@ -281,6 +301,9 @@ function normalize({ scope, tbody, containerSelector }: Target): void {
     for (const cell of column.cells) {
       if (cell.style.getPropertyValue(WIDTH_VAR) !== width) cell.style.setProperty(WIDTH_VAR, width)
       if (cell.dataset.ymAlign !== 'multi') cell.dataset.ymAlign = 'multi'
+      // box=容器收缩到内容自然宽（内容可再居中）；full=自然宽>=列宽的回退满宽（内容保持左对齐截断）
+      const fit = width === 'auto' ? 'full' : 'box'
+      if (cell.dataset.ymFit !== fit) cell.dataset.ymFit = fit
       if (cell.dataset.ymTitle === '1') {
         cell.removeAttribute('title')
         delete cell.dataset.ymTitle

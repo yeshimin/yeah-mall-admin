@@ -14,6 +14,7 @@ import { installTableAlign } from '@/utils/table-align'
 import './assets/main.css'
 import './assets/yeah-mall-theme.css'
 import './views/mall/_ui/mall-ui.scss'
+import './assets/yeah-mall-groupbuy.css'
 import './assets/yeah-mall-table-align.css'
 
 const app = createApp(App)

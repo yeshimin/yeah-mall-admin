@@ -36,10 +36,19 @@ export function getGroupBuyActivityDetail(id) {
   })
 }
 
-// 查询拼团活动列表
+// 查询拼团活动列表（含报名数/商品数回填）
 export function queryGroupBuyActivityList(params) {
   return request({
-    url: '/admin/groupBuyActivity/crud/query',
+    url: '/admin/groupBuyActivity/query',
+    method: 'get',
+    params
+  })
+}
+
+// 拼团活动状态统计
+export function queryGroupBuyActivityStats(params) {
+  return request({
+    url: '/admin/groupBuyActivity/stats',
     method: 'get',
     params
   })
@@ -123,6 +132,33 @@ export function auditGroupBuyApply(data) {
     url: '/admin/groupBuy/apply/audit',
     method: 'post',
     data
+  })
+}
+
+// 拼团申请详情（含活动上下文/SKU/商品详情）
+export function getGroupBuyApplyDetail(id) {
+  return request({
+    url: '/admin/groupBuy/apply/detail',
+    method: 'get',
+    params: { id }
+  })
+}
+
+// 拼团商品详情（含 SKU）
+export function getGroupBuyProductDetail(id) {
+  return request({
+    url: '/admin/groupBuy/product/detail',
+    method: 'get',
+    params: { id }
+  })
+}
+
+// 拼团团详情（含成员名单）
+export function getGroupBuyGroupDetail(id) {
+  return request({
+    url: '/admin/groupBuy/group/detail',
+    method: 'get',
+    params: { id }
   })
 }
 
