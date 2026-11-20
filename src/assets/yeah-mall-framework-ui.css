@@ -172,3 +172,69 @@
   color: var(--mall-muted, #65726a);
   font-size: 13px;
 }
+
+/* ===== 个人中心（ProfileView，与 yeahboot 同源，哈希一致） =====
+   同样只覆盖视觉令牌：蓝渐变→商城灰底 paper、20/18px 圆角→8px、蓝阴影去除。 */
+#app .profile-view {
+  --mall-ink: #17251f;
+  --mall-ink-secondary: #30423a;
+  --mall-brand: #24634f;
+  --mall-brand-soft: #e8f2ed;
+  --mall-paper: #f4f6f3;
+  --mall-line: #dce4de;
+  --mall-line-strong: #c8d4cc;
+  --mall-muted: #65726a;
+  padding: 12px 12px 18px !important;
+  background: var(--mall-paper) !important;
+  color: var(--mall-ink);
+}
+#app .profile-view .profile-hero {
+  padding: 18px 20px !important;
+  border: 1px solid var(--mall-line) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+#app .profile-view .profile-hero__identity {
+  gap: 12px !important;
+}
+#app .profile-view .profile-hero__avatar {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+#app .profile-view .profile-hero__meta h1 {
+  margin: 0 !important;
+  color: var(--mall-ink);
+  font-size: 20px;
+}
+#app .profile-view .profile-hero__meta p {
+  color: var(--mall-muted);
+  font-size: 13px;
+}
+#app .profile-view .profile-hero__tags {
+  gap: 8px;
+  margin-top: 8px !important;
+}
+#app .profile-view .profile-hero__actions {
+  gap: 8px !important;
+}
+#app .profile-view .profile-main {
+  margin-top: 12px !important;
+}
+#app .profile-view .profile-card {
+  margin-bottom: 12px !important;
+  border: 1px solid var(--mall-line) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+#app .profile-view .profile-card__header {
+  gap: 8px !important;
+}
+#app .profile-view .profile-card__header > span {
+  color: var(--mall-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+#app .profile-view .form-actions .el-form-item__content {
+  justify-content: flex-end !important;
+}
