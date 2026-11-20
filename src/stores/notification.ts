@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { getRecentMessages, getUnreadMessageCount, markMessagesRead } from '@/api/notification'
 import type { NotifMessageVo } from '@/types/notification'
 import { apiBaseUrl } from '@/utils/api-base-url'
-import { getToken } from '@/utils/auth'
+import { getLoginSubject, getToken } from '@/utils/auth'
 
 const RECONNECT_DELAY = 5000
 const HEARTBEAT_INTERVAL = 20000
@@ -33,7 +33,9 @@ export const useNotificationStore = defineStore('notification', () => {
 
   async function refreshSummary() {
     const sequence = ++summarySequence
-    if (!getToken()) {
+    // 商家端没有 /mch/notifMessage 配套接口，且 /admin/notifMessage 不在 mch 的 api-prefix 内，
+    // 商家 token 调用会被判认证失败。商家端静默停用通知摘要，待后续做商家通知配套再放开。
+    if (!getToken() || getLoginSubject() === 'merchant') {
       unreadCount.value = 0
       recentMessages.value = []
       summaryLoading.value = false
@@ -147,7 +149,7 @@ export const useNotificationStore = defineStore('notification', () => {
   async function start() {
     stopped = false
     await refreshSummary()
-    if (stopped) {
+    if (stopped || getLoginSubject() === 'merchant') {
       return
     }
     connectWebSocket()
