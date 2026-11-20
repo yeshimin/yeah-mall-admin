@@ -24,7 +24,13 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="dialogVisible" :title="form.id ? '编辑支付通道' : '新增支付通道'" width="860px" destroy-on-close>
+    <el-dialog v-model="dialogVisible" width="860px" destroy-on-close>
+      <template #header>
+        <div class="settlement-dialog-head">
+          <span>PAYMENT CHANNEL</span>
+          <h2>{{ form.id ? '编辑支付通道' : '新增支付通道' }}</h2>
+        </div>
+      </template>
       <el-form label-position="top">
         <div class="form-grid">
           <el-form-item label="通道名称" required><el-input v-model="form.channelName" /></el-form-item>

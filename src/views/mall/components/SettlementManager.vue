@@ -81,7 +81,13 @@
       />
     </section>
 
-    <el-dialog v-model="dialog.visible" title="确认线下打款" width="560px" @closed="resetDialog">
+    <el-dialog v-model="dialog.visible" width="560px" @closed="resetDialog">
+      <template #header>
+        <div class="settlement-dialog-head">
+          <span>OFFLINE SETTLEMENT</span>
+          <h2>确认线下打款</h2>
+        </div>
+      </template>
       <el-alert
         :title="`本次结算 ${dialog.recordCount} 条记录，实际净额 ¥${amountText(dialog.totalAmount)}`"
         type="info"

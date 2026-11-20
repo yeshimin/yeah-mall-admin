@@ -9,13 +9,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import SettlementManager from '../components/SettlementManager.vue'
 import SettlementAccountForm from '../components/SettlementAccountForm.vue'
 import MerchantPaymentChannelForm from '../components/MerchantPaymentChannelForm.vue'
 
 defineOptions({ name: 'MerchantSettlementPage' })
-const activeTab = ref('ledger')
+const route = useRoute()
+function resolveTab(value: unknown) {
+  const name = Array.isArray(value) ? value[0] : value
+  return name === '收款账户' || name === 'account' ? 'account'
+    : name === '独立App支付' || name === 'channel' ? 'channel'
+      : 'ledger'
+}
+const activeTab = ref(resolveTab(route.query.tab))
+watch(() => route.query.tab, (value) => { activeTab.value = resolveTab(value) })
 </script>
 
 <style scoped>

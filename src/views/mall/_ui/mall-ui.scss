@@ -746,7 +746,11 @@
 
 /* Dialogs and drawers are teleported outside mall-page, so their finish lives here. */
 .el-overlay .el-dialog {
+  display: flex;
+  flex-direction: column;
   max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 48px);
+  margin-top: 24px !important;
   overflow: hidden;
   border: 1px solid #dce4de;
   border-radius: 10px;
@@ -754,6 +758,7 @@
 }
 
 .el-overlay .el-dialog__header {
+  flex: 0 0 auto;
   margin: 0;
   padding: 18px 22px;
   border-bottom: 1px solid #e5ebe7;
@@ -766,10 +771,35 @@
   font-weight: 700;
 }
 
+.el-overlay .el-dialog__header .settlement-dialog-head {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.el-overlay .el-dialog__header .settlement-dialog-head span {
+  color: var(--mall-brand, #24634f);
+  font-family: var(--ym-font-mono, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.el-overlay .el-dialog__header .settlement-dialog-head h2 {
+  margin: 0;
+  color: var(--mall-ink, #17251f);
+  font-size: 18px;
+  font-weight: 700;
+}
+
 .el-overlay .el-dialog__body {
-  max-height: calc(100vh - 190px);
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100vh - 180px);
   padding: 20px 22px;
   overflow: auto;
+}
+
+.el-overlay .el-dialog__footer {
+  flex: 0 0 auto;
 }
 
 .el-overlay .el-dialog__body .el-form-item__label,
@@ -825,6 +855,8 @@
 }
 
 .el-overlay .el-drawer {
+  display: flex;
+  flex-direction: column;
   max-width: calc(100vw - 28px);
   box-shadow: -18px 0 48px rgba(23, 37, 31, 0.14);
 }
@@ -836,7 +868,13 @@
 }
 
 .el-overlay .el-drawer__body {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 20px 22px;
+  overflow-y: auto;
+}
+.el-overlay .el-drawer__footer {
+  flex: 0 0 auto;
 }
 
 .el-message-box {

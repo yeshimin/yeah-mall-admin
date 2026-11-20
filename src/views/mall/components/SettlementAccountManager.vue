@@ -48,7 +48,13 @@
       <MallPagination :total="page.total" :page="page.current" :limit="page.size" @pagination="changePage" />
     </section>
 
-    <el-dialog v-model="dialog.visible" title="结算账户审核" width="560px" @closed="resetDialog">
+    <el-dialog v-model="dialog.visible" width="560px" @closed="resetDialog">
+      <template #header>
+        <div class="settlement-dialog-head">
+          <span>ACCOUNT AUDIT</span>
+          <h2>结算账户审核</h2>
+        </div>
+      </template>
       <el-descriptions :column="1" border>
         <el-descriptions-item label="店铺ID">{{ dialog.record?.shopId }}</el-descriptions-item>
         <el-descriptions-item label="账户类型">{{ dialog.record?.accountType === '1' ? '银行卡' : '支付宝' }}</el-descriptions-item>
