@@ -1,0 +1,174 @@
+/* 系统管理（YeahBoot merge）UI 统一适配。
+   仅用全局 CSS 把骨架映射到商城同款视觉，不改 template/script/功能/权限，
+   上游 merge 只碰 vue 文件，本文件零冲突。
+   命中 11 个 [class$="-manage-container"] 管理页 + RoutePlaceholderView 例外页。 */
+
+/* ===== 设计令牌 + 页面底色（压过 scoped 的白底/20px padding） ===== */
+#app [class$="-manage-container"] {
+  --mall-ink: #17251f;
+  --mall-ink-secondary: #30423a;
+  --mall-brand: #24634f;
+  --mall-brand-soft: #e8f2ed;
+  --mall-paper: #f4f6f3;
+  --mall-line: #dce4de;
+  --mall-line-strong: #c8d4cc;
+  --mall-muted: #65726a;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 12px 12px 18px !important;
+  color: var(--mall-ink);
+  background: var(--mall-paper) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== 分栏布局（User / Area / Dict）间距收紧到商城口径 ===== */
+#app [class$="-manage-container"] :is(.page-body, .area-layout, .dict-layout) {
+  gap: 12px !important;
+}
+
+/* 分栏左右面板 → 白卡 */
+#app [class$="-manage-container"] :is(
+  .org-tree-panel, .user-content-panel,
+  .area-tree-panel, .area-detail-panel,
+  .dict-tree-panel, .dict-detail-panel
+) {
+  min-width: 0;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+#app [class$="-manage-container"] :is(
+  .org-tree-panel, .area-tree-panel, .dict-tree-panel
+) {
+  padding: 12px 14px !important;
+}
+#app [class$="-manage-container"] :is(.area-detail-panel, .dict-detail-panel) {
+  padding: 14px 16px !important;
+}
+#app [class$="-manage-container"] :is(.org-tree-header h3, .tree-header h3, .detail-header h3) {
+  color: var(--mall-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ===== 筛选区 → 商城筛选卡片 ===== */
+#app [class$="-manage-container"] .search-bar {
+  margin: 0 0 8px !important;
+  padding: 8px 12px !important;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+/* 紧跟操作栏时上下拼成同一张卡（商城 filter panel 同款） */
+#app [class$="-manage-container"] .search-bar:has(+ .action-bar) {
+  margin-bottom: 0 !important;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+#app [class$="-manage-container"] .search-form {
+  flex-wrap: wrap;
+  gap: 0 12px;
+  align-items: center;
+}
+#app [class$="-manage-container"] .search-form .el-form-item {
+  margin-bottom: 0 !important;
+}
+#app [class$="-manage-container"] .search-form .el-form-item:last-child {
+  margin-left: auto !important;
+}
+#app [class$="-manage-container"] .search-form .el-form-item__label {
+  padding-right: 8px;
+  color: var(--mall-ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ===== 操作按钮区 → 同卡片下半部 / 独立卡片 ===== */
+#app [class$="-manage-container"] .action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 50px;
+  margin: 0 0 8px !important;
+  padding: 8px 12px !important;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+#app [class$="-manage-container"] .search-bar + .action-bar {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+#app [class$="-manage-container"] .action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ===== 表格容器 → 商城表格卡片 ===== */
+#app [class$="-manage-container"] .table-container {
+  margin: 8px 0 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+#app [class$="-manage-container"] .el-table {
+  --el-table-border-color: #edf1ee;
+  --el-table-header-bg-color: #f5f8f5;
+  --el-table-row-hover-bg-color: #fbfdfb;
+  color: var(--mall-ink-secondary);
+}
+#app [class$="-manage-container"] .el-table th.el-table__cell {
+  height: 42px;
+  color: var(--mall-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+#app [class$="-manage-container"] .el-table td.el-table__cell {
+  height: 54px;
+  font-size: 13px;
+}
+
+/* ===== 分页 → 表格卡片下方 ===== */
+#app [class$="-manage-container"] .pagination-container {
+  margin: 8px 0 0 !important;
+  padding: 9px 14px !important;
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* ===== 特殊页：LogManage 表格直挂根下，补卡片边界 ===== */
+#app .log-manage-container > .el-table {
+  border: 1px solid var(--mall-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ===== 特殊页：RoutePlaceholderView（根 class 非 -manage-container） ===== */
+#app .placeholder-container {
+  padding: 12px !important;
+  background: var(--mall-paper, #f4f6f3) !important;
+}
+#app .placeholder-card {
+  padding: 24px !important;
+  border: 1px solid var(--mall-line, #dce4de);
+  border-radius: 8px !important;
+  background: #fff !important;
+}
+#app .placeholder-card h2 {
+  color: var(--mall-ink, #17251f);
+  font-size: 16px;
+}
+#app .placeholder-card p {
+  color: var(--mall-muted, #65726a);
+  font-size: 13px;
+}
