@@ -473,7 +473,6 @@ html body {
 
 #app .welcome-description,
 #app .merchant-heading p,
-#app .overview-label,
 #app .card-header p {
   color: var(--ym-muted);
 }
@@ -516,29 +515,6 @@ html body {
 #app .merchant-card small {
   color: var(--ym-muted);
   opacity: 1;
-}
-
-#app .overview-grid {
-  gap: 12px;
-  margin-top: 14px;
-}
-
-#app .overview-card .el-card__body {
-  padding: 18px;
-}
-
-#app .overview-icon {
-  width: 42px;
-  height: 42px;
-  color: var(--ym-brand);
-  border-radius: 8px;
-  background: var(--ym-brand-soft);
-  font-size: 20px;
-}
-
-#app .overview-value {
-  color: var(--ym-ink);
-  font-size: 23px;
 }
 
 #app .quick-card {

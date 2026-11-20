@@ -7,10 +7,10 @@
 
     <template v-else>
       <section class="overview-metrics">
-        <article v-for="item in metrics" :key="item.label">
+        <article v-for="(item, index) in metrics" :key="item.label">
           <span>{{ item.label }}</span>
           <b>{{ item.value }}</b>
-          <small :class="{ attention: item.attention }">{{ item.hint }}</small>
+          <small :class="{ attention: index > 1 }">{{ item.hint }}</small>
         </article>
       </section>
 
@@ -21,7 +21,7 @@
               <span class="shelf-mark"></span>
               <b>待办事项</b>
             </div>
-            <el-tag size="small" type="warning" effect="light">今日</el-tag>
+            <span class="status-ticket tone-warning">今日</span>
           </div>
           <button
             v-for="task in tasks"
@@ -51,7 +51,7 @@
               <span
                 class="trend-bar-fill"
                 :style="{ height: `${bar.height}%` }"
-                :title="`${bar.date} 支付金额 ${bar.amountText}，${bar.orderCount} 笔`"
+                :title="`${bar.label} 支付金额 ${bar.amountText}，${bar.orderCount} 笔`"
               ></span>
               <i>{{ bar.label }}</i>
             </div>
@@ -108,7 +108,6 @@ interface MetricCard {
   label: string
   value: string
   hint: string
-  attention?: boolean
 }
 
 interface TaskItem {
@@ -159,7 +158,6 @@ const metrics = computed<MetricCard[]>(() => {
         label: '退款待处理',
         value: formatCount(data.refundPendingCount),
         hint: '申请中或处理中',
-        attention: Number(data.refundPendingCount || 0) > 0,
       },
     ]
   }
@@ -188,7 +186,6 @@ const metrics = computed<MetricCard[]>(() => {
       label: '退款待处理',
       value: formatCount(data.refundPendingCount),
       hint: `跨 ${formatCount(data.refundShopCount)} 家店铺`,
-      attention: Number(data.refundPendingCount || 0) > 0,
     },
   ]
 })
@@ -205,7 +202,7 @@ const tasks = computed<TaskItem[]>(() => {
         query: { status: '2' },
       },
       {
-        label: '低库存商品',
+        label: `低库存商品（≤${Number(data?.stockWarningThreshold || 10)}）`,
         count: Number(data?.stockWarningCount || 0),
         component: 'mall/sku/index',
         fallbackPath: '/mall/sku',
@@ -390,22 +387,22 @@ onMounted(() => {
 <style scoped>
 .overview-page {
   min-height: 100%;
-  padding: 18px 20px 20px;
+  padding: 12px 12px 18px;
   background: var(--ym-paper);
 }
 
 .overview-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 8px;
 }
 
 .overview-metrics article {
   display: flex;
-  min-height: 110px;
+  min-height: 102px;
   flex-direction: column;
   justify-content: center;
-  padding: 15px;
+  padding: 15px 16px;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
   background: #fff;
@@ -414,6 +411,7 @@ onMounted(() => {
 .overview-metrics span {
   color: var(--ym-muted);
   font-size: 12px;
+  line-height: normal;
 }
 
 .overview-metrics b {
@@ -422,11 +420,13 @@ onMounted(() => {
   font-family: var(--ym-font-mono);
   font-size: 25px;
   font-weight: 600;
+  line-height: normal;
 }
 
 .overview-metrics small {
   color: var(--ym-brand);
   font-size: 12px;
+  line-height: normal;
 }
 
 .overview-metrics small.attention {
@@ -436,8 +436,8 @@ onMounted(() => {
 .overview-grid {
   display: grid;
   grid-template-columns: minmax(320px, 0.85fr) minmax(420px, 1.4fr);
-  gap: 12px;
-  margin-top: 12px;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .overview-tasks,
@@ -450,22 +450,32 @@ onMounted(() => {
 
 .panel-toolbar {
   display: flex;
-  min-height: 48px;
+  height: 50px;
   align-items: center;
   justify-content: space-between;
   padding: 0 14px;
-  border-bottom: 1px solid #edf1ee;
+  border-bottom: 1px solid #edf0ee;
 }
 
 .panel-title {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 
 .panel-title b {
   color: var(--ym-ink);
-  font-size: 13px;
+  font-size: 14px;
+  line-height: normal;
+}
+
+.overview-tasks .panel-title b {
+  font-size: 12px;
+}
+
+#app .overview-page .panel-title b,
+#app .overview-page .overview-tasks b {
+  font-weight: 700;
 }
 
 .shelf-mark {
@@ -474,6 +484,10 @@ onMounted(() => {
   height: 17px;
   border-radius: 1px;
   background: var(--ym-brand);
+}
+
+.panel-toolbar .shelf-mark {
+  height: 15px;
 }
 
 .overview-tasks button {
@@ -487,7 +501,8 @@ onMounted(() => {
   border: 0;
   border-bottom: 1px solid #edf1ee;
   background: #fff;
-  color: var(--ym-ink-secondary);
+  color: var(--ym-ink);
+  font-size: 13px;
   cursor: pointer;
   text-align: left;
 }
@@ -500,6 +515,11 @@ onMounted(() => {
   background: #fafcfa;
 }
 
+.overview-tasks button:focus-visible {
+  outline: 3px solid rgba(36, 99, 79, 0.22);
+  outline-offset: 2px;
+}
+
 .overview-tasks button > span {
   display: flex;
   flex-direction: column;
@@ -507,24 +527,24 @@ onMounted(() => {
 }
 
 .overview-tasks b {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .overview-tasks small {
   color: var(--ym-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .overview-tasks strong {
   color: var(--ym-warning);
   font-family: var(--ym-font-mono);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   text-align: right;
 }
 
 .overview-tasks .el-icon {
-  color: var(--ym-muted);
+  font-size: 16px;
 }
 
 .trend-panel {
@@ -533,10 +553,9 @@ onMounted(() => {
 }
 
 .mini-legend {
-  display: flex;
-  align-items: center;
   color: var(--ym-muted);
-  font-size: 12px;
+  font-size: 13px;
+  line-height: normal;
 }
 
 .mini-legend i {
@@ -598,7 +617,12 @@ onMounted(() => {
   font-family: var(--ym-font-mono);
   font-size: 11px;
   font-style: normal;
+  line-height: normal;
   text-align: center;
+}
+
+.overview-page .status-ticket {
+  line-height: normal;
 }
 
 @media (max-width: 1050px) {
