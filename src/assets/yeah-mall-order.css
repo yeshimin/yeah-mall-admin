@@ -1,0 +1,629 @@
+/* 商家交易服务·订单管理真实页 rev order-real-v1
+   镜像原型 admin-merchant-order.css 及其依赖的全局块（description-grid / drawer-section /
+   order-money / operation-timeline / shipping-order / dialog-field / dialog-hint / dialog-actions）。
+   基础面板类（mall-page / mall-filter-panel / status-ticket / mp-row-menu）由全局样式提供。 */
+
+/* ---------- 筛选：字段区与操作区（对齐原型 FilterBar） ---------- */
+.merchant-order-page .mall-filter-panel .mall-query-form {
+  align-items: center;
+  gap: 10px;
+}
+
+.merchant-order-page .mo-filter-fields {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.merchant-order-page .mall-filter-panel .el-input,
+.merchant-order-page .mall-filter-panel .el-select {
+  width: 168px;
+}
+
+.merchant-order-page .mall-query-actions .el-button {
+  min-width: 62px;
+  padding: 0 15px;
+}
+
+.merchant-order-page .mall-query-actions .el-button + .el-button {
+  margin-left: 0;
+}
+
+.merchant-order-page .mall-business-actions {
+  padding-left: 12px;
+}
+
+.merchant-order-page .mall-business-actions .el-button {
+  min-width: 96px;
+}
+
+/* ---------- 筛选：日期区间 ---------- */
+.merchant-order-page .mo-date-range {
+  display: flex;
+  height: 36px;
+  align-items: center;
+  gap: 6px;
+}
+
+.merchant-order-page .mo-date-range .el-date-editor.el-input {
+  width: 168px;
+}
+
+.merchant-order-page .mo-date-sep {
+  color: var(--ym-muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+/* ---------- 列表单元格 ---------- */
+.merchant-order-page .mo-stack {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.merchant-order-page .mo-stack > b {
+  font-size: 13px;
+}
+
+.merchant-order-page .cell-sub {
+  display: block;
+  margin-top: 0;
+  color: var(--ym-muted);
+  font-size: 11px;
+}
+
+.merchant-order-page .amount-strong {
+  color: var(--ym-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.merchant-order-page .mo-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+/* 订单表按列居中：运行时把多元素列判为 multi 并默认容器内左对齐，这里统一改为居中。 */
+:is(#app, body) .merchant-order-page .el-table td.el-table__cell .cell[data-ym-align="multi"] {
+  text-align: center !important;
+}
+
+:is(#app, body) .merchant-order-page .el-table td.el-table__cell .cell[data-ym-align="multi"] > * {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.merchant-order-page .mo-stack {
+  align-items: center;
+}
+
+.merchant-order-page .mo-empty {
+  display: flex;
+  min-height: 230px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--ym-muted);
+}
+
+.merchant-order-page .mo-empty .el-icon {
+  font-size: 28px;
+}
+
+.merchant-order-page .mo-empty b {
+  color: var(--ym-ink);
+  font-size: 13px;
+}
+
+.merchant-order-page .mo-empty span {
+  font-size: 11px;
+}
+
+/* ---------- 详情抽屉 900px ---------- */
+.el-drawer.mo-detail-drawer {
+  max-width: calc(100vw - 40px);
+}
+
+.mo-detail-drawer .mo-detail-body {
+  position: relative;
+  min-height: 320px;
+}
+
+.mo-detail-drawer .drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--ym-line);
+}
+
+.mo-detail-drawer .drawer-head h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.mo-detail-drawer .drawer-kicker,
+.el-dialog.mo-dialog .drawer-kicker {
+  color: var(--ym-brand);
+  font-family: var(--ym-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.mo-detail-drawer .mo-close-btn,
+.el-dialog.mo-dialog .mo-close-btn {
+  display: inline-grid;
+  width: 29px;
+  height: 29px;
+  flex: 0 0 29px;
+  place-items: center;
+  color: var(--ym-muted);
+  border: 1px solid var(--ym-line);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.mo-detail-drawer .mo-close-btn:hover,
+.el-dialog.mo-dialog .mo-close-btn:hover {
+  color: var(--ym-brand);
+  border-color: var(--ym-brand);
+}
+
+.mo-detail-drawer .order-detail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 17px 0;
+}
+
+.mo-detail-drawer .order-detail-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mo-detail-drawer .order-detail-heading span {
+  color: var(--ym-muted);
+  font-size: 11px;
+}
+
+.mo-detail-drawer .order-detail-heading b {
+  font-size: 13px;
+}
+
+.mo-detail-drawer .drawer-section {
+  padding: 15px 0;
+  border-top: 1px solid var(--ym-line);
+}
+
+.mo-detail-drawer .drawer-section h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+/* ---------- 描述网格（抽屉 + 弹窗共用） ---------- */
+:is(.mo-detail-drawer, .mo-process-dialog, .mo-receive-dialog, .mo-record-detail-dialog) .description-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  margin-top: 18px;
+  border-top: 1px solid var(--ym-line);
+  border-left: 1px solid var(--ym-line);
+}
+
+:is(.mo-detail-drawer, .mo-process-dialog, .mo-receive-dialog, .mo-record-detail-dialog) .description-grid > div {
+  display: flex;
+  min-height: 58px;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-right: 1px solid var(--ym-line);
+  border-bottom: 1px solid var(--ym-line);
+}
+
+:is(.mo-detail-drawer, .mo-process-dialog, .mo-receive-dialog, .mo-record-detail-dialog) .description-grid > div.wide {
+  grid-column: 1 / -1;
+}
+
+:is(.mo-detail-drawer, .mo-process-dialog, .mo-receive-dialog, .mo-record-detail-dialog) .description-grid span {
+  color: var(--ym-muted);
+  font-size: 13px;
+}
+
+:is(.mo-detail-drawer, .mo-process-dialog, .mo-receive-dialog, .mo-record-detail-dialog) .description-grid b {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ---------- 金额信息 4 格 ---------- */
+.mo-detail-drawer .order-money {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.mo-detail-drawer .order-money span {
+  display: flex;
+  min-height: 60px;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  color: var(--ym-muted);
+  border: 1px solid var(--ym-line);
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.mo-detail-drawer .order-money b {
+  color: var(--ym-ink);
+  font-family: var(--ym-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mo-detail-drawer .order-money .total {
+  color: var(--ym-brand);
+  border-color: #bcd4c7;
+  background: var(--ym-brand-soft);
+}
+
+.mo-detail-drawer .order-money .total b {
+  color: var(--ym-brand);
+}
+
+/* ---------- 协商时间线 / 物流轨迹 ---------- */
+:is(.mo-detail-drawer) .operation-timeline {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0 4px 8px;
+}
+
+:is(.mo-detail-drawer) .operation-timeline > div {
+  position: relative;
+  display: grid;
+  min-height: 58px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+}
+
+:is(.mo-detail-drawer) .operation-timeline > div::before {
+  position: absolute;
+  top: 15px;
+  bottom: -8px;
+  left: 5px;
+  width: 1px;
+  background: var(--ym-line);
+  content: '';
+}
+
+:is(.mo-detail-drawer) .operation-timeline > div:last-child::before {
+  display: none;
+}
+
+:is(.mo-detail-drawer) .operation-timeline i {
+  position: relative;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  margin-top: 4px;
+  border: 3px solid var(--ym-brand-soft);
+  border-radius: 50%;
+  background: var(--ym-brand);
+}
+
+:is(.mo-detail-drawer) .operation-timeline span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+:is(.mo-detail-drawer) .operation-timeline b {
+  color: var(--ym-ink-secondary);
+  font-size: 12px;
+}
+
+:is(.mo-detail-drawer) .operation-timeline small {
+  color: var(--ym-muted);
+  font-size: 11px;
+}
+
+/* ---------- 售后子块 ---------- */
+.mo-detail-drawer .mo-return-block {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--ym-line);
+  border-radius: 8px;
+  background: var(--ym-paper);
+}
+
+.mo-detail-drawer .mo-return-block h4,
+.mo-detail-drawer .mo-timeline-wrap h4 {
+  margin: 0;
+  color: var(--ym-ink-secondary);
+  font-size: 12px;
+}
+
+.mo-detail-drawer .mo-return-block .description-grid {
+  margin-top: 10px;
+  background: #fff;
+}
+
+.mo-detail-drawer .mo-timeline-wrap {
+  margin-top: 14px;
+}
+
+.mo-detail-drawer .mo-timeline-wrap .operation-timeline {
+  margin-top: 8px;
+}
+
+.mo-detail-drawer .mo-muted {
+  margin: 8px 0 0;
+  color: var(--ym-muted);
+  font-size: 12px;
+}
+
+.mo-detail-drawer .mo-track {
+  margin-top: 12px;
+}
+
+.mo-detail-drawer .mo-track-query {
+  height: 30px;
+  margin-top: 10px;
+  padding: 0 12px;
+  color: var(--ym-brand);
+  border: 1px solid var(--ym-line-strong);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12px;
+}
+
+.mo-detail-drawer .mo-track-query:hover {
+  border-color: var(--ym-brand);
+  background: var(--ym-brand-soft);
+}
+
+/* ---------- 凭证与商品图 ---------- */
+.mo-detail-drawer .mo-evidence,
+.mo-process-dialog .mo-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mo-detail-drawer .mo-evidence-item,
+.mo-process-dialog .mo-evidence-item {
+  display: block;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border: 1px solid var(--ym-line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.mo-detail-drawer .mo-evidence-item .el-image,
+.mo-process-dialog .mo-evidence-item .el-image,
+.mo-detail-drawer .mo-evidence-item .storage-image-placeholder,
+.mo-process-dialog .mo-evidence-item .storage-image-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.mo-detail-drawer .mo-item-art {
+  display: block;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border: 1px solid var(--ym-line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.mo-detail-drawer .mo-item-art .el-image,
+.mo-detail-drawer .mo-item-art .storage-image-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.mo-detail-drawer .mo-items-table {
+  width: 100%;
+}
+
+/* ---------- 抽屉底部操作 ---------- */
+.mo-detail-drawer .drawer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.mo-detail-drawer .drawer-actions .el-button {
+  min-width: 88px;
+  height: 36px;
+  font-size: 12px;
+}
+
+/* ---------- 弹窗通用（mo-dialog） ---------- */
+.el-dialog.mo-dialog {
+  max-width: calc(100vw - 40px);
+  padding: 20px;
+}
+
+.el-dialog.mo-dialog .el-dialog__header {
+  margin: 0;
+  padding: 0;
+  border-bottom: 0;
+}
+
+.el-dialog.mo-dialog .el-dialog__body {
+  padding: 0;
+}
+
+.el-dialog.mo-dialog .dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--ym-line);
+}
+
+.el-dialog.mo-dialog .dialog-head h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.el-dialog.mo-dialog .shipping-order {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 10px 11px;
+  border: 1px solid var(--ym-line);
+  border-radius: 6px;
+  background: var(--ym-paper);
+  font-size: 12px;
+}
+
+.el-dialog.mo-dialog .shipping-order span {
+  color: var(--ym-muted);
+}
+
+.el-dialog.mo-dialog .shipping-order b {
+  font-size: 13px;
+}
+
+.el-dialog.mo-dialog .dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.el-dialog.mo-dialog .dialog-field > span {
+  color: var(--ym-ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.el-dialog.mo-dialog .dialog-hint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 13px;
+  color: var(--ym-muted);
+  font-size: 12px;
+}
+
+.el-dialog.mo-dialog .dialog-hint .el-icon {
+  font-size: 17px;
+}
+
+.el-dialog.mo-dialog .dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.el-dialog.mo-dialog .dialog-actions .el-button {
+  min-width: 88px;
+  height: 36px;
+  font-size: 12px;
+}
+
+.el-dialog.mo-dialog .dialog-actions .mo-danger-btn {
+  color: var(--ym-danger);
+  border-color: #e3b9b5;
+  background: var(--ym-danger-soft);
+}
+
+.el-dialog.mo-dialog .dialog-actions .mo-danger-btn:hover {
+  color: var(--ym-danger);
+  border-color: var(--ym-danger);
+  background: #f3d9d6;
+}
+
+/* ---------- 售后处理弹窗 ---------- */
+.mo-process-dialog .mo-process-context {
+  margin-top: 12px;
+}
+
+.mo-process-dialog .mo-process-form {
+  margin-top: 2px;
+}
+
+.mo-process-dialog .mo-process-form .dialog-field {
+  margin-top: 12px;
+}
+
+.mo-process-dialog .mo-radio-group {
+  display: flex;
+  height: 38px;
+  align-items: center;
+  gap: 20px;
+}
+
+.mo-process-dialog .mo-radio-group .el-radio {
+  height: auto;
+  margin-right: 0;
+  color: var(--ym-ink-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ---------- 确认收货弹窗 ---------- */
+.mo-receive-dialog .mo-process-context {
+  margin-top: 12px;
+}
+
+/* ---------- 退款记录弹窗 ---------- */
+.mo-records-dialog .mo-records-table {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.mo-records-dialog .mo-empty {
+  display: flex;
+  min-height: 200px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--ym-muted);
+}
+
+.mo-records-dialog .mo-empty .el-icon {
+  font-size: 26px;
+}
+
+.mo-records-dialog .mo-empty b {
+  color: var(--ym-ink);
+  font-size: 13px;
+}
+
+.mo-records-dialog .mo-empty span {
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .mo-detail-drawer .order-money {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

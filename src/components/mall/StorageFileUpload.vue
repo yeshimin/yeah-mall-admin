@@ -6,7 +6,7 @@
       :show-file-list="false"
       :accept="accept"
     >
-      <el-button type="primary" :loading="uploading">{{ modelValue ? '重新上传' : '选择文件' }}</el-button>
+      <el-button type="primary" icon="Picture" :loading="uploading">{{ modelValue ? filledText : emptyText }}</el-button>
     </el-upload>
     <el-link v-if="modelValue" type="primary" :href="previewUrl" target="_blank">查看文件</el-link>
   </div>
@@ -25,12 +25,16 @@ const props = withDefaults(defineProps<{
   fileType?: string[]
   isUsed?: boolean
   uploadScope?: 'platform' | 'merchant'
+  emptyText?: string
+  filledText?: string
 }>(), {
   modelValue: '',
   fileSize: 5,
   fileType: () => [],
   isUsed: true,
   uploadScope: 'platform',
+  emptyText: '选择文件',
+  filledText: '重新上传',
 })
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()

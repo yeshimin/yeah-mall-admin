@@ -16,6 +16,10 @@ export function queryMchReviews(params: Record<string, unknown>) {
   return request({ url: '/mch/review/query', method: 'get', params })
 }
 
+export function getMchReviewStats(params: Record<string, unknown>) {
+  return request({ url: '/mch/review/stats', method: 'get', params })
+}
+
 export function getMchReviewDetail(params: Record<string, unknown>) {
   return request({ url: '/mch/review/detail', method: 'get', params })
 }

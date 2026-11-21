@@ -50,15 +50,6 @@ export function queryTracking(orderId) {
   })
 }
 
-// 订单备注
-export function remarkOrder(data) {
-  return request({
-    url: `/mch/order/remark`,
-    method: 'post',
-    data
-  })
-}
-
 // 确认退款
 export function confirmRefund(data) {
   return request({
@@ -74,6 +65,24 @@ export function rejectRefund(data) {
     url: `/mch/order/rejectRefund`,
     method: 'post',
     data
+  })
+}
+
+// 退货退款确认收货
+export function confirmReturnReceive(data) {
+  return request({
+    url: `/mch/order/confirmReturnReceive`,
+    method: 'post',
+    data
+  })
+}
+
+// 查询退货物流轨迹
+export function queryReturnTracking(orderId) {
+  return request({
+    url: `/mch/order/queryReturnTracking`,
+    method: 'get',
+    params: { orderId }
   })
 }
 

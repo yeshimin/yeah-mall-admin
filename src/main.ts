@@ -17,6 +17,7 @@ import './views/mall/_ui/mall-ui.scss'
 import './assets/yeah-mall-groupbuy.css'
 import './assets/yeah-mall-table-align.css'
 import './assets/yeah-mall-framework-ui.css'
+import './assets/yeah-mall-product.css'
 
 const app = createApp(App)
 

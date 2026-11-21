@@ -4,6 +4,7 @@ import type { PageResponse } from '@/types/api'
 export interface SpecDefinition {
   id: string
   specName: string
+  optCount?: number
   createTime?: string
   updateTime?: string
 }
@@ -18,7 +19,7 @@ export interface SpecOptionDefinition {
 
 export function listSpecDef(params: Record<string, unknown>) {
   return request<PageResponse<SpecDefinition>>({
-    url: '/mch/productSpecDef/crud/query',
+    url: '/mch/productSpecDef/query',
     method: 'get',
     params,
   })

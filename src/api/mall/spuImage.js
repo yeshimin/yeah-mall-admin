@@ -1,26 +1,11 @@
 import request from '@/utils/request'
 
-// 上传主图
-export function setMainImage(data) {
+// 新增滚动图：确认保存时按临时fileKey落库并markUse
+export function createSpuImage(data) {
   return request({
     url: '/mch/productSpuImage/create',
     method: 'post',
-    data: data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
-}
-
-// 上传滚动图
-export function setCarouselImages(data) {
-  return request({
-    url: '/mch/productSpuImage/create',
-    method: 'post',
-    data: data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    data: data
   })
 }
 

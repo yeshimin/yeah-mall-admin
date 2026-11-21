@@ -1,39 +1,51 @@
 <template>
-  <div class="spec-page mall-page">
-    <div v-show="showSearch" class="search-bar">
-      <el-form class="search-form" :inline="true" :model="search" @submit.prevent="handleSearch">
+  <div class="mall-page merchant-spec-page">
+    <section class="mall-filter-panel">
+      <el-form :inline="true" :model="search" class="mall-query-form" @submit.prevent="handleSearch">
         <el-form-item label="规格名称">
-          <el-input v-model="search.specName" clearable placeholder="请输入规格名称" />
+          <el-input v-model="search.specName" clearable placeholder="请输入规格名称" @clear="handleSearch" />
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" native-type="submit" icon="Search">搜索</el-button>
+        <el-form-item class="mall-query-actions">
           <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" native-type="submit" icon="Search">查询</el-button>
         </el-form-item>
       </el-form>
-    </div>
-
-    <div class="action-bar">
-      <div class="action-buttons">
+      <div class="mall-business-actions">
         <el-button type="primary" icon="Plus" @click="openSpecForm()">新增规格</el-button>
-        <el-button type="danger" :disabled="selectedSpecs.length === 0" @click="removeSpecs()">批量删除</el-button>
+        <el-button type="danger" plain :disabled="selectedSpecs.length === 0" @click="removeSpecs()">
+          {{ batchDeleteText }}
+        </el-button>
       </div>
-      <MallListTools v-model:showSearch="showSearch" @refresh="loadSpecs" />
-    </div>
+    </section>
 
-    <div class="table-container">
+    <section class="mall-table-panel">
       <el-table data-ym-table="r56"
         ref="tableRef"
         v-loading="loading"
         :data="specs"
-        stripe
-        height="100%"
+        row-key="id"
         @selection-change="selectedSpecs = $event"
       >
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="specName" label="规格名称" min-width="180" />
-        <el-table-column prop="createTime" label="创建时间" width="170" />
-        <el-table-column prop="updateTime" label="更新时间" width="170" />
-        <el-table-column label="操作" width="220" fixed="right">
+        <el-table-column type="selection" width="48" align="center" />
+        <el-table-column label="规格名称" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <CopyableText :value="row.specName" label="规格名称" />
+          </template>
+        </el-table-column>
+        <el-table-column label="选项数" width="90" align="center">
+          <template #default="{ row }">{{ row.optCount ?? 0 }}</template>
+        </el-table-column>
+        <el-table-column label="创建时间" width="168" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="mp-time">{{ row.createTime || '—' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="更新时间" width="168" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="mp-time">{{ row.updateTime || '—' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="190" fixed="right" align="center">
           <template #default="{ row }">
             <div class="table-row-actions">
               <el-button link type="primary" @click="openOptions(row)">规格选项</el-button>
@@ -42,25 +54,39 @@
             </div>
           </template>
         </el-table-column>
+        <template #empty>
+          <div class="mp-empty">
+            <el-icon><Filter /></el-icon>
+            <b>没有匹配的规格</b>
+            <span>调整规格名称后重试</span>
+          </div>
+        </template>
       </el-table>
-    </div>
 
-    <MallPagination
-      :total="page.total"
-      :page="page.current"
-      :limit="page.size"
-      @pagination="handlePageChange"
-    />
+      <MallPagination
+        :total="page.total"
+        :page="page.current"
+        :limit="page.size"
+        @pagination="handlePageChange"
+      />
+    </section>
 
     <el-dialog
       v-model="specDialog.visible"
-      :title="specDialog.form.id ? '编辑规格' : '新增规格'"
       width="500px"
       :close-on-click-modal="!specDialog.submitting"
+      :close-on-press-escape="!specDialog.submitting"
+      :show-close="!specDialog.submitting"
       @closed="resetSpecForm"
     >
-      <el-form ref="specFormRef" :model="specDialog.form" :rules="specRules" label-width="96px">
-        <el-form-item label="规格名称" prop="specName">
+      <template #header>
+        <div class="mp-dialog-head">
+          <span class="drawer-kicker">{{ specDialog.form.id ? 'EDIT' : 'CREATE' }}</span>
+          <h2>{{ specDialog.form.id ? '编辑规格' : '新增规格' }}</h2>
+        </div>
+      </template>
+      <el-form ref="specFormRef" :model="specDialog.form" :rules="specRules" label-position="top" class="mp-form-grid">
+        <el-form-item label="规格名称" prop="specName" class="is-wide">
           <el-input v-model="specDialog.form.specName" maxlength="64" placeholder="例如颜色、尺寸" />
         </el-form-item>
       </el-form>
@@ -70,15 +96,31 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="optionsDialog.visible" :title="`${optionsDialog.spec?.specName || ''} · 规格选项`" width="720px">
-      <div class="options-action">
+    <el-dialog v-model="optionsDialog.visible" width="720px" class="mp-options-dialog" append-to-body>
+      <template #header>
+        <div class="mp-dialog-head">
+          <span class="drawer-kicker">OPTIONS</span>
+          <h2>{{ optionsDialog.spec?.specName || '' }} · 规格选项</h2>
+        </div>
+      </template>
+      <div class="mp-options-action">
         <el-button type="primary" icon="Plus" @click="openOptionForm()">新增选项</el-button>
       </div>
-      <el-table data-ym-table="r57" v-loading="optionsDialog.loading" :data="optionsDialog.options" stripe>
-        <el-table-column prop="optName" label="选项名称" min-width="180" />
-        <el-table-column prop="createTime" label="创建时间" width="170" />
-        <el-table-column prop="updateTime" label="更新时间" width="170" />
-        <el-table-column label="操作" width="140" fixed="right">
+      <el-table data-ym-table="r57" v-loading="optionsDialog.loading" :data="optionsDialog.options" row-key="id">
+        <el-table-column label="选项名称" min-width="180" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.optName }}</template>
+        </el-table-column>
+        <el-table-column label="创建时间" width="168" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="mp-time">{{ row.createTime || '—' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="更新时间" width="168" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="mp-time">{{ row.updateTime || '—' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="110" fixed="right" align="center">
           <template #default="{ row }">
             <div class="table-row-actions">
               <el-button link type="primary" @click="openOptionForm(row)">编辑</el-button>
@@ -86,19 +128,36 @@
             </div>
           </template>
         </el-table-column>
+        <template #empty>
+          <div class="mp-empty">
+            <el-icon><Filter /></el-icon>
+            <b>暂无规格选项</b>
+            <span>点击「新增选项」添加可选值</span>
+          </div>
+        </template>
       </el-table>
+      <template #footer>
+        <el-button type="primary" @click="optionsDialog.visible = false">完成</el-button>
+      </template>
     </el-dialog>
 
     <el-dialog
       v-model="optionDialog.visible"
-      :title="optionDialog.form.id ? '编辑规格选项' : '新增规格选项'"
       width="500px"
       append-to-body
       :close-on-click-modal="!optionDialog.submitting"
+      :close-on-press-escape="!optionDialog.submitting"
+      :show-close="!optionDialog.submitting"
       @closed="resetOptionForm"
     >
-      <el-form ref="optionFormRef" :model="optionDialog.form" :rules="optionRules" label-width="96px">
-        <el-form-item label="选项名称" prop="optName">
+      <template #header>
+        <div class="mp-dialog-head">
+          <span class="drawer-kicker">{{ optionDialog.form.id ? 'EDIT' : 'CREATE' }}</span>
+          <h2>{{ optionDialog.form.id ? '编辑规格选项' : '新增规格选项' }}</h2>
+        </div>
+      </template>
+      <el-form ref="optionFormRef" :model="optionDialog.form" :rules="optionRules" label-position="top" class="mp-form-grid">
+        <el-form-item label="选项名称" prop="optName" class="is-wide">
           <el-input v-model="optionDialog.form.optName" maxlength="64" placeholder="请输入选项名称" />
         </el-form-item>
       </el-form>
@@ -111,10 +170,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import type { FormInstance, FormRules, TableInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import MallListTools from '@/components/mall/MallListTools.vue'
+import { Filter } from '@element-plus/icons-vue'
+import CopyableText from '@/components/mall/CopyableText.vue'
 import MallPagination from '@/components/mall/MallPagination.vue'
 import {
   createSpecDef,
@@ -129,13 +189,11 @@ import {
   type SpecOptionDefinition,
 } from '@/api/mall/specDef'
 import { getCurrentShop } from '@/utils/shop'
-import { buildConditions } from '@/utils/query'
 import { getRequestErrorMessage, isUserCancel } from '@/utils/error'
 
 defineOptions({ name: 'ProductSpecPage' })
 
 const loading = ref(false)
-const showSearch = ref(true)
 const tableRef = ref<TableInstance>()
 const specFormRef = ref<FormInstance>()
 const optionFormRef = ref<FormInstance>()
@@ -159,6 +217,10 @@ const optionRules: FormRules = {
   optName: [{ required: true, message: '请输入选项名称', trigger: 'blur' }],
 }
 
+const batchDeleteText = computed(() =>
+  selectedSpecs.value.length ? `批量删除 (${selectedSpecs.value.length})` : '批量删除',
+)
+
 function shopId() {
   return getCurrentShop()?.id || ''
 }
@@ -176,15 +238,15 @@ async function loadSpecs() {
       shopId: currentShopId,
       current: page.current,
       size: page.size,
-      conditions_: buildConditions([
-        { field: 'specName', operator: 'like', value: search.specName },
-        { field: 'createTime', operator: 'sort', value: 'desc' },
-      ]),
+      specName: search.specName.trim(),
     })
     specs.value = response.data?.records || []
     page.total = Number(response.data?.total || 0)
     selectedSpecs.value = []
     tableRef.value?.clearSelection()
+  } catch (error) {
+    const message = getRequestErrorMessage(error)
+    if (message) ElMessage.error(message)
   } finally {
     loading.value = false
   }
@@ -229,7 +291,7 @@ async function saveSpec() {
     const specName = specDialog.form.specName.trim()
     if (specDialog.form.id) await updateSpecDef({ id: specDialog.form.id, specName })
     else await createSpecDef({ shopId: currentShopId, specName })
-    ElMessage.success('保存成功')
+    ElMessage.success(specDialog.form.id ? '规格已保存' : '规格已新增')
     specDialog.visible = false
     await loadSpecs()
   } catch (error) {
@@ -244,9 +306,13 @@ async function removeSpecs(row?: SpecDefinition) {
   const ids = row ? [row.id] : selectedSpecs.value.map((item) => item.id)
   if (!ids.length) return
   try {
-    await ElMessageBox.confirm(`确定删除选中的 ${ids.length} 个规格吗？`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm(`确定删除选中的 ${ids.length} 个规格吗？`, '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      confirmButtonClass: 'el-button--danger',
+    })
     await deleteSpecDef(ids)
-    ElMessage.success('删除成功')
+    ElMessage.success(`已删除 ${ids.length} 个规格`)
     await loadSpecs()
   } catch (error) {
     if (!isUserCancel(error)) ElMessage.error(getRequestErrorMessage(error) || '删除失败')
@@ -266,6 +332,9 @@ async function loadOptions() {
   try {
     const response = await listSpecOptDef({ shopId: currentShopId, specId: optionsDialog.spec.id })
     optionsDialog.options = response.data || []
+  } catch (error) {
+    const message = getRequestErrorMessage(error)
+    if (message) ElMessage.error(message)
   } finally {
     optionsDialog.loading = false
   }
@@ -297,9 +366,10 @@ async function saveOption() {
     } else {
       await createSpecOptDef({ shopId: currentShopId, specId: optionsDialog.spec.id, optName })
     }
-    ElMessage.success('保存成功')
+    ElMessage.success(optionDialog.form.id ? '选项已保存' : '选项已新增')
     optionDialog.visible = false
     await loadOptions()
+    await loadSpecs()
   } catch (error) {
     const message = getRequestErrorMessage(error)
     if (message) ElMessage.error(message)
@@ -310,10 +380,15 @@ async function saveOption() {
 
 async function removeOption(row: SpecOptionDefinition) {
   try {
-    await ElMessageBox.confirm(`确定删除规格选项“${row.optName}”吗？`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm(`确定删除规格选项“${row.optName}”吗？`, '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      confirmButtonClass: 'el-button--danger',
+    })
     await deleteSpecOptDef([row.id])
-    ElMessage.success('删除成功')
+    ElMessage.success('选项已删除')
     await loadOptions()
+    await loadSpecs()
   } catch (error) {
     if (!isUserCancel(error)) ElMessage.error(getRequestErrorMessage(error) || '删除失败')
   }
@@ -321,18 +396,3 @@ async function removeOption(row: SpecOptionDefinition) {
 
 onMounted(() => void loadSpecs())
 </script>
-
-<style scoped>
-.spec-page {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.action-bar { display: flex; justify-content: space-between; align-items: center; }
-.action-buttons { display: flex; gap: 12px; }
-.table-container { flex: 1; min-height: 0; }
-.options-action { display: flex; justify-content: flex-end; margin-bottom: 16px; }
-</style>

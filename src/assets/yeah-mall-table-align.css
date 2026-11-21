@@ -71,14 +71,14 @@
   text-align: left !important;
 }
 
-/* views/mall/category/index.vue #0 ← platform/categories */
+/* views/mall/category/index.vue #0 ← merchant/categories */
 [data-ym-table="r1"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
 [data-ym-table="r1"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r1"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
 [data-ym-table="r1"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
 [data-ym-table="r1"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
 [data-ym-table="r1"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
 [data-ym-table="r1"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
-[data-ym-table="r1"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
 
 /* views/mall/components/BannerManager.vue #0 ← platform/content */
 [data-ym-table="r2"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
@@ -305,12 +305,30 @@
 
 /* views/mall/order/index.vue #0 ← merchant/orders */
 [data-ym-table="r36"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
 [data-ym-table="r36"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
 [data-ym-table="r36"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
 [data-ym-table="r36"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r36"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
 [data-ym-table="r36"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
-[data-ym-table="r36"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
-[data-ym-table="r36"] .el-table__body td:nth-child(12) .cell { padding: 0 12px; }
+
+/* views/mall/order/index.vue #1 ← merchant/orders [订单详情抽屉·商品信息] */
+[data-ym-table="r37"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r37"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r37"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r37"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r37"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+
+/* views/mall/order/index.vue #2 ← merchant/orders [退款记录弹窗] */
+[data-ym-table="r38"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r38"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r38"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r38"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r38"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r38"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r38"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r38"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
 
 /* views/mall/platform-category/index.vue #0 ← platform/categories */
 [data-ym-table="r39"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
@@ -330,6 +348,16 @@
 [data-ym-table="r40"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
 [data-ym-table="r40"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
 [data-ym-table="r40"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+
+/* views/mall/mch-review/index.vue #0 ← merchant/reviews */
+[data-ym-table="r76"] .el-table__body td:nth-child(1) .cell { padding: 7px 12px; }
+[data-ym-table="r76"] .el-table__body td:nth-child(2) .cell { padding: 7px 12px; }
+[data-ym-table="r76"] .el-table__body td:nth-child(3) .cell { padding: 7px 12px; }
+[data-ym-table="r76"] .el-table__body td:nth-child(4) .cell { padding: 7px 12px; }
+[data-ym-table="r76"] .el-table__body td:nth-child(5) .cell { padding: 7px 12px; }
+[data-ym-table="r76"] .el-table__body td:nth-child(6) .cell { padding: 7px 12px; }
+[data-ym-table="r76"] .el-table__body td:nth-child(7) .cell { padding: 7px 12px; }
+[data-ym-table="r76"] .el-table__body td:nth-child(8) .cell { padding: 7px 12px; }
 
 /* views/mall/points-mall/index.vue #1 ← platform/points-mall [tab=积分商品] */
 [data-ym-table="r41"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
@@ -446,6 +474,7 @@
 /* views/mall/specDef/index.vue #0 ← merchant/specs */
 [data-ym-table="r56"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
 [data-ym-table="r56"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r56"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
 [data-ym-table="r56"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
 
 /* views/mall/specDef/index.vue #1 ← merchant/specs [tab=规格选项] */

@@ -199,7 +199,7 @@ const asyncRoutes = [
         component: MchGroupBuyOrder,
         meta: { title: '拼团订单', ignoreAccessControl: true },
       },
-      // 商品 SKU 管理由商品 SPU 页面进入，不作为独立菜单展示。
+      // 商品 SKU 管理：商城管理›商品管理分组内菜单（mch_res，见 sql/14），也可由商品 SPU 页行内「SKU 管理」按 spuId 深链进入；静态路由保证深链首屏可达。
       {
         path: '/mall/sku',
         name: 'mch-sku',

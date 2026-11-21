@@ -66,12 +66,3 @@ export function setMainImage(data) {
     data
   })
 }
-
-// 设置滚动图
-export function setCarouselImages(data) {
-  return request({
-    url: '/mch/productSpu/setCarouselImages',
-    method: 'post',
-    data
-  })
-}

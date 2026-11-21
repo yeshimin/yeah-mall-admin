@@ -1,1062 +1,721 @@
 <template>
-  <div class="chat-manage mall-page">
-    <el-card class="search-card mall-filter-card" shadow="never">
-      <el-form ref="searchFormRef" :model="searchForm" label-position="left" label-width="80px" inline>
-        <el-form-item label="关键词">
-          <el-input
-            v-model="searchForm.keyword"
-            placeholder="请输入用户昵称或消息内容"
-            clearable
-            style="width: 300px;"
-            @keyup.enter="handleSearch"
-          ></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button @click="resetForm">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+  <div class="mall-page merchant-service-page">
+    <section class="merchant-service-console">
+      <aside>
+        <label class="cs-search">
+          <el-icon><Search /></el-icon>
+          <input
+            v-model="keyword"
+            type="text"
+            placeholder="搜索用户昵称或消息内容"
+            @input="handleKeywordInput"
+          />
+          <button v-if="keyword" class="cs-search-clear" type="button" aria-label="清空搜索" @click="clearKeyword">×</button>
+        </label>
 
-    <el-card class="list-card mall-table-card" shadow="never">
-      <el-table data-ym-table="r6" v-loading="loading" :data="conversationList" style="width: 100%">
-        <el-table-column prop="id" label="会话ID" min-width="180"></el-table-column>
-        <el-table-column prop="memberId" label="用户ID" min-width="120"></el-table-column>
-        <el-table-column label="用户信息" min-width="200">
-          <template #default="scope">
-            <div class="user-info">
-              <div class="user-avatar">
-                <el-image
-                  :src="getFullImageUrl(scope.row.memberAvatar)"
-                  fit="cover"
-                  style="width: 40px; height: 40px; border-radius: 50%;"
-                >
-                  <template #error>
-                    <div class="image-slot">
-                      <el-icon><user /></el-icon>
-                    </div>
+        <div
+          ref="conversationListRef"
+          v-loading="listLoading"
+          class="cs-conversation-list"
+          @scroll="handleConversationScroll"
+        >
+          <button
+            v-for="item in conversationList"
+            :key="item.id"
+            type="button"
+            :class="['cs-conversation-item', { active: isActive(item) }]"
+            @click="selectConversation(item)"
+          >
+            <span class="cs-avatar">{{ initialOf(item.memberNickname, item.memberId) }}</span>
+            <span class="cs-conversation-main">
+              <b>{{ item.memberNickname || `用户 ${item.memberId}` }}</b>
+              <small>{{ item.lastMessage || '暂无消息' }}</small>
+            </span>
+            <time>{{ formatListTime(item.lastMessageTime) }}</time>
+          </button>
+          <div v-if="!listLoading && !conversationList.length" class="cs-conversation-empty">
+            <b>{{ keyword ? '没有匹配的会话' : '暂无客服会话' }}</b>
+            <span>{{ keyword ? '换个昵称或消息关键词试试' : '买家发起咨询后会出现在这里' }}</span>
+          </div>
+        </div>
+
+        <div class="cs-conversation-footer">
+          <span>共 {{ conversationTotal }} 个会话</span>
+          <b>{{ listLoading || listLoadingMore ? '加载中…' : conversationHasMore ? '滚动加载更多' : '已全部加载' }}</b>
+        </div>
+      </aside>
+
+      <main>
+        <header>
+          <template v-if="activeConversation">
+            <span class="cs-avatar">{{ initialOf(activeMemberName, activeConversation.memberId) }}</span>
+            <div>
+              <b>{{ activeMemberName }}</b>
+              <span>会员 ID {{ activeConversation.memberId }} · {{ activeShopName }}</span>
+            </div>
+            <span class="cs-conversation-ref">
+              会话 ID <CopyableText :value="activeConversation.id" label="会话ID" />
+            </span>
+          </template>
+          <template v-else>
+            <span class="cs-avatar is-muted">客</span>
+            <div>
+              <b>客服消息</b>
+              <span>选择左侧会话开始回复</span>
+            </div>
+          </template>
+        </header>
+
+        <div ref="chatRef" class="cs-chat" @scroll="handleMessageScroll">
+          <template v-if="activeConversation">
+            <div v-if="historyLoading" class="cs-chat-hint is-loading">加载更早消息…</div>
+            <div v-else-if="messagePagination.hasMore && chatMessages.length" class="cs-chat-hint">向上滚动加载更早消息</div>
+            <div v-else-if="chatMessages.length" class="cs-chat-hint is-boundary">没有更早消息</div>
+
+            <article
+              v-for="message in chatMessages"
+              :key="message.id"
+              :class="['cs-message', message.type]"
+            >
+              <span class="cs-avatar is-small">{{ message.type === 'send' ? shopInitial : memberInitial }}</span>
+              <div class="cs-message-body">
+                <small>
+                  {{ message.type === 'send' ? activeShopName : activeMemberName }} · {{ formatMessageTime(message.createTime) }}
+                </small>
+                <div :class="['cs-bubble', `type-${message.type === 'send' ? 'me' : 'them'}`, `kind-${message.msgType}`]">
+                  <template v-if="message.msgType === 2">
+                    <el-image
+                      v-if="message.attachment?.url"
+                      :src="message.attachment.url"
+                      fit="cover"
+                      :preview-src-list="[message.attachment.url]"
+                      preview-teleported
+                      class="cs-message-image"
+                    >
+                      <template #error>
+                        <span class="cs-media-placeholder"><el-icon><PictureFilled /></el-icon></span>
+                      </template>
+                    </el-image>
+                    <span v-else class="cs-media-placeholder"><el-icon><PictureFilled /></el-icon></span>
                   </template>
-                </el-image>
-              </div>
-              <div class="user-name">{{ scope.row.memberNickname || `用户 ${scope.row.memberId}` }}</div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="会话信息" min-width="300">
-          <template #default="scope">
-            <div class="last-message">
-              <div class="message-content">{{ scope.row.lastMessage || '暂无消息' }}</div>
-              <div class="message-time">
-                最后消息时间：{{ scope.row.lastMessageTime ? formatTime(scope.row.lastMessageTime) : '无' }}
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="180"></el-table-column>
-        <el-table-column label="操作" min-width="120" fixed="right">
-          <template #default="scope">
-            <el-button size="small" type="primary" @click="handleViewConversation(scope.row)">查看聊天</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-container" style="margin-top: 20px; text-align: right;">
-        <el-pagination
-          v-model:current-page="pagination.current"
-          v-model:page-size="pagination.pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="Number(pagination.total)"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
-
-    <!-- 聊天对话框 -->
-    <el-dialog v-model="chatDialogVisible" :title="chatTitle" width="800px" class="cs-chat-dialog" :close-on-press-escape="false" @keydown.esc="handleDialogKeydown" @closed="handleDialogClosed">
-      <div class="chat-dialog">
-        <!-- 聊天记录 -->
-        <div class="chat-messages" ref="chatMessagesRef" v-loading="messagesLoading">
-          <div v-for="(message, index) in chatMessages" :key="index" :class="['message-item', message.type === 'send' ? 'send' : 'receive']">
-            <!-- 头像 -->
-            <div class="message-avatar">
-              <el-image
-                :src="message.type === 'send' ? getFullImageUrl(conversationDetail.mchAvatar) : getFullImageUrl(conversationDetail.memberAvatar)"
-                fit="cover"
-                style="width: 36px; height: 36px; border-radius: 50%;"
-              >
-                <template #error>
-                  <div class="image-slot">
-                    <el-icon><user /></el-icon>
-                  </div>
-                </template>
-              </el-image>
-            </div>
-
-            <div class="message-content">
-              <!-- 昵称 -->
-              <div class="message-nickname" :class="message.type === 'send' ? 'send' : 'receive'">
-                {{ message.type === 'send' ? conversationDetail.mchNickname : conversationDetail.memberNickname }}
-              </div>
-
-              <div class="message-bubble" :class="message.type === 'send' ? 'send' : 'receive'">
-                <template v-if="message.msgType === 2">
-                  <el-image
-                    :src="message.attachment.url"
-                    fit="cover"
-                    :style="{ width: '80px', height: '80px' }"
-                    :preview-src-list="[message.attachment.url]"
-                    preview-teleported
+                  <a
+                    v-else-if="message.msgType === 3 || message.msgType === 4"
+                    class="cs-message-file"
+                    :href="message.attachment?.url || 'javascript:void(0)'"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <template #error>
-                      <div class="image-slot">
-                        <el-icon><picture-filled /></el-icon>
-                      </div>
-                    </template>
-                  </el-image>
-                </template>
-                <template v-else-if="message.msgType === 3">
-                  <video class="message-video" :src="message.attachment.url" controls></video>
-                </template>
-                <template v-else-if="message.msgType === 4">
-                  <a class="message-file" :href="message.attachment.url" target="_blank" rel="noopener noreferrer">
-                    <el-icon><Document /></el-icon>
+                    <span class="cs-file-icon">
+                      <el-icon><VideoPlay v-if="message.msgType === 3" /><Document v-else /></el-icon>
+                    </span>
                     <span>
-                      <strong>{{ message.attachment.fileName || '附件文件' }}</strong>
-                      <small>{{ formatFileSize(message.attachment.fileSize) }}</small>
+                      <b>{{ message.attachment?.fileName || (message.msgType === 3 ? '视频文件' : '附件文件') }}</b>
+                      <small>{{ message.attachment?.fileSize ? formatFileSize(message.attachment.fileSize) : (message.msgType === 3 ? '视频' : '附件文件') }}</small>
                     </span>
                   </a>
-                </template>
-                <template v-else>
-                  {{ message.content }}
-                </template>
+                  <template v-else>{{ message.content }}</template>
+                </div>
               </div>
-              <div class="message-time">{{ formatTime(message.createTime) }}</div>
+            </article>
+
+            <div v-if="!chatMessages.length && !messagesLoading" class="cs-chat-empty">
+              <b>还没有消息</b>
+              <span>在下方输入内容，向买家发送第一条回复</span>
             </div>
-          </div>
-          <div v-if="chatMessages.length === 0" class="no-messages">
-            <span>暂无消息</span>
+            <div v-if="messagesLoading" class="cs-chat-loading">加载消息…</div>
+          </template>
+          <div v-else class="cs-chat-empty">
+            <b>选择会话</b>
+            <span>从左侧选择一条会话查看聊天记录</span>
           </div>
         </div>
 
-        <!-- 消息输入 -->
-        <div class="chat-input">
-          <el-dropdown trigger="click" @command="chooseAttachment">
-            <el-button class="attachment-button" aria-label="选择附件"><el-icon><Plus /></el-icon></el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="image"><el-icon><PictureFilled /></el-icon>图片</el-dropdown-item>
-                <el-dropdown-item command="video"><el-icon><VideoPlay /></el-icon>视频</el-dropdown-item>
-                <el-dropdown-item command="file"><el-icon><Document /></el-icon>文件</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <input ref="attachmentInputRef" class="attachment-input" type="file" :accept="attachmentAccept" @change="handleAttachmentChange" />
-
-          <div class="input-container">
-            <div v-if="selectedAttachment?.file" class="attachment-preview-in-input">
-              <el-image
-                v-if="selectedAttachment.kind === 'image'"
-                :src="attachmentPreviewUrl"
-                fit="cover"
-                :style="{ width: '80px', height: '80px' }"
-              >
-                <template #error>
-                  <div class="image-slot">
-                    <el-icon><picture-filled /></el-icon>
-                  </div>
-                </template>
-              </el-image>
-              <video v-else-if="selectedAttachment.kind === 'video'" :src="attachmentPreviewUrl" controls></video>
-              <div v-else class="selected-file"><el-icon><Document /></el-icon><span>{{ selectedAttachment.file.name }}</span></div>
-              <el-button class="attachment-clear" size="small" type="danger" @click="clearAttachment"><el-icon><Close /></el-icon></el-button>
+        <footer class="cs-input-bar">
+          <div class="cs-attachment-wrap">
+            <button
+              type="button"
+              class="cs-attachment-button"
+              aria-label="选择附件"
+              :disabled="!!pendingAttachment?.file || sending"
+              @click="attachmentOpen = !attachmentOpen"
+            >
+              <el-icon><Plus /></el-icon>
+            </button>
+            <div v-if="attachmentOpen" class="cs-attachment-menu">
+              <button type="button" @click="chooseAttachment('image')"><el-icon><PictureFilled /></el-icon>图片</button>
+              <button type="button" @click="chooseAttachment('video')"><el-icon><VideoPlay /></el-icon>视频</button>
+              <button type="button" @click="chooseAttachment('file')"><el-icon><Document /></el-icon>文件</button>
             </div>
+          </div>
+          <input
+            ref="attachmentInputRef"
+            class="cs-file-input"
+            type="file"
+            :accept="attachmentAccept"
+            @change="handleAttachmentChange"
+            @cancel="handleAttachmentCancel"
+          />
 
-            <!-- 文本输入框 -->
-            <el-input
-              v-model="messageInput"
-              type="textarea"
-              placeholder="请输入消息内容"
-              :rows="3"
-              maxlength="255"
-              show-word-limit
-              :disabled="inputDisabled"
-              @input="handleTextInput"
-              @keyup.enter.exact="handleSendMessage"
-            ></el-input>
+          <div class="cs-input-stack">
+            <div v-if="pendingAttachment?.file" class="cs-attachment-preview">
+              <span :class="['cs-attachment-art', { 'is-image': pendingAttachment.kind === 'image' }]">
+                <img v-if="pendingAttachment.kind === 'image' && attachmentPreviewUrl" :src="attachmentPreviewUrl" alt="" />
+                <el-icon v-else-if="pendingAttachment.kind === 'video'"><VideoPlay /></el-icon>
+                <el-icon v-else><Document /></el-icon>
+              </span>
+              <span>
+                <b>{{ pendingAttachment.file?.name }}</b>
+                <small>{{ formatFileSize(pendingAttachment.file?.size) }}</small>
+              </span>
+              <button type="button" aria-label="移除附件" @click="clearAttachment">×</button>
+            </div>
+            <div class="cs-input-line">
+              <input
+                v-model="messageInput"
+                :disabled="!!pendingAttachment?.file"
+                maxlength="255"
+                :placeholder="pendingAttachment?.file ? '附件待发送' : '输入回复内容'"
+                @keydown.enter.prevent="handleSendMessage"
+              />
+              <small>{{ messageInput.length }}/255</small>
+            </div>
           </div>
 
-          <el-button type="primary" @click="handleSendMessage" :loading="sending">发送</el-button>
-        </div>
-      </div>
-    </el-dialog>
+          <button type="button" class="cs-send-button" :disabled="sending" @click="handleSendMessage">发送</button>
+        </footer>
+      </main>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onBeforeUnmount, onMounted, nextTick } from 'vue';
-import { ElMessage, ElIcon } from 'element-plus';
-import { Close, Document, PictureFilled, Plus, User, VideoPlay } from '@element-plus/icons-vue';
-import wsService from '@/utils/websocket';
-import { initConversation, queryConversationList, queryConversationMessages, sendMessage, uploadCsMessageFile } from '@/api/mall/cschat';
-import { resolveApiUrl } from '@/utils/download';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { ElIcon, ElMessage } from 'element-plus'
+import { Document, PictureFilled, Plus, Search, VideoPlay } from '@element-plus/icons-vue'
+import CopyableText from '@/components/mall/CopyableText.vue'
+import wsService from '@/utils/websocket'
+import { getCurrentShop } from '@/utils/shop'
+import { initConversation, queryConversationList, queryConversationMessages, sendMessage, uploadCsMessageFile } from '@/api/mall/cschat'
+import { resolveApiUrl } from '@/utils/download'
+import '@/assets/yeah-mall-service.css'
 
-const loading = ref(false);
-const messagesLoading = ref(false);
-const sending = ref(false);
-const chatMessagesRef = ref(null);
-const attachmentInputRef = ref(null);
-const selectedAttachment = ref(null);
-const attachmentPreviewUrl = ref('');
-const attachmentAccept = ref('image/*');
-const inputDisabled = ref(false);
+const CONVERSATION_PAGE_SIZE = 10
+const MESSAGE_PAGE_SIZE = 6
+
+const keyword = ref('')
+const conversationList = ref([])
+const conversationTotal = ref(0)
+const conversationPage = ref(1)
+const conversationHasMore = ref(false)
+const listLoading = ref(false)
+const listLoadingMore = ref(false)
+const conversationListRef = ref(null)
+const activeConversation = ref(null)
+const conversationDetail = ref({})
+const chatMessages = ref([])
+const messagesLoading = ref(false)
+const historyLoading = ref(false)
 const messagePagination = reactive({
   current: 1,
-  pageSize: 50,
+  pageSize: MESSAGE_PAGE_SIZE,
   total: 0,
-  hasMore: true
-});
-const conversationDetail = ref({
-  memberId: '',
-  memberNickname: '',
-  memberAvatar: '',
-  mchId: '',
-  mchNickname: '',
-  mchAvatar: '',
-  shopId: '',
-  shopName: '',
-  shopLogo: ''
-});
+  hasMore: false,
+})
+const messageInput = ref('')
+const sending = ref(false)
+const chatRef = ref(null)
+const attachmentInputRef = ref(null)
+const attachmentOpen = ref(false)
+const attachmentAccept = ref('image/*')
+const attachmentKind = ref('image')
+const pendingAttachment = ref(null)
+const attachmentPreviewUrl = ref('')
+const currentShopName = ref(getCurrentShop()?.name || '')
 
-const searchForm = reactive({
-  keyword: ''
-});
+const activeMemberName = computed(() => {
+  const row = activeConversation.value
+  return conversationDetail.value.memberNickname || row?.memberNickname || (row ? `用户 ${row.memberId}` : '')
+})
+const activeShopName = computed(() => conversationDetail.value.shopName || currentShopName.value || '当前店铺')
+const memberInitial = computed(() => initialOf(activeMemberName.value, '买'))
+const shopInitial = computed(() => initialOf(activeShopName.value, '店'))
 
-const pagination = reactive({
-  current: 1,
-  pageSize: 10,
-  total: 0
-});
+let keywordTimer = null
+let messageRequestToken = 0
+let listRequestToken = 0
 
-const conversationList = ref([]);
-const chatDialogVisible = ref(false);
-const chatTitle = ref('');
-const currentConversation = ref(null);
-const chatMessages = ref([]);
-const messageInput = ref('');
+const initialOf = (name, fallback) => {
+  const value = String(name || fallback || '').trim()
+  return value ? Array.from(value)[0] : '客'
+}
 
-// 格式化时间
-const formatTime = (time) => {
-  if (!time) return '';
-  const date = new Date(time);
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-};
+const pad = (value) => String(value).padStart(2, '0')
 
-// 获取完整图片URL
+const parseTime = (value) => {
+  if (!value) return null
+  if (value instanceof Date) return value
+  const raw = String(value)
+  const date = new Date(/^\d{4}-\d{2}-\d{2} \d/.test(raw) ? raw.replace(/-/g, '/') : raw)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+const formatListTime = (value) => {
+  const date = parseTime(value)
+  if (!date) return ''
+  const now = new Date()
+  if (now.getTime() - date.getTime() >= 0 && now.getTime() - date.getTime() < 60000) return '刚刚'
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const dayDiff = Math.round((today.getTime() - target.getTime()) / 86400000)
+  if (dayDiff === 0) return `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  if (dayDiff === 1) return '昨天'
+  return `${pad(date.getMonth() + 1)}/${pad(date.getDate())}`
+}
+
+const formatMessageTime = (value) => {
+  const date = parseTime(value)
+  if (!date) return ''
+  const now = new Date()
+  if (now.getTime() - date.getTime() >= 0 && now.getTime() - date.getTime() < 60000) return '刚刚'
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const dayDiff = Math.round((today.getTime() - target.getTime()) / 86400000)
+  const clock = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  if (dayDiff === 0) return clock
+  if (dayDiff === 1) return `昨天 ${clock}`
+  return `${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${clock}`
+}
+
+const nowStamp = () => {
+  const date = new Date()
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
 const getFullImageUrl = (fileKey) => {
-  if (!fileKey) return '';
-  if (/^https?:\/\//.test(fileKey)) return fileKey;
-  return resolveApiUrl(`/public/storage/preview?fileKey=${encodeURIComponent(fileKey)}`);
-};
+  if (!fileKey) return ''
+  if (/^https?:\/\//.test(fileKey)) return fileKey
+  return resolveApiUrl(`/public/storage/preview?fileKey=${encodeURIComponent(fileKey)}`)
+}
 
 const formatFileSize = (size) => {
-  const bytes = Number(size || 0);
-  if (!bytes) return '附件文件';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-};
+  const bytes = Number(size || 0)
+  if (!bytes) return '附件文件'
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
 
 const parseAttachment = (content, msgType) => {
   if (Number(msgType) === 2) {
-    return { fileKey: content, url: getFullImageUrl(content) };
+    return { fileKey: content, url: getFullImageUrl(content) }
   }
-  if (![3, 4].includes(Number(msgType))) return null;
+  if (![3, 4].includes(Number(msgType))) return null
   try {
-    const metadata = JSON.parse(content || '{}');
-    return { ...metadata, url: getFullImageUrl(metadata.fileKey) };
-  } catch (error) {
-    return { fileKey: content, url: getFullImageUrl(content) };
+    const metadata = JSON.parse(content || '{}')
+    return { ...metadata, url: getFullImageUrl(metadata.fileKey) }
+  } catch {
+    return { fileKey: content, url: getFullImageUrl(content) }
   }
-};
+}
 
-// 滚动到底部
+const isActive = (row) => !!activeConversation.value && String(activeConversation.value.id) === String(row.id)
+
 const scrollToBottom = () => {
   nextTick(() => {
-    if (chatMessagesRef.value) {
-      chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
-    }
-  });
-};
+    if (chatRef.value) chatRef.value.scrollTop = chatRef.value.scrollHeight
+  })
+}
 
-const updateConversationSummary = (conversationId, content, msgType, messageTime) => {
-  if (searchForm.keyword.trim()) {
-    // 搜索结果是否仍匹配取决于最新消息内容，交给后端重新筛选。
-    getConversationList();
-    return;
+const maybeLoadMoreConversations = () => {
+  if (!conversationHasMore.value || listLoading.value || listLoadingMore.value) return
+  const el = conversationListRef.value
+  if (!el || el.scrollHeight > el.clientHeight + 1) return
+  loadConversations({ append: true })
+}
+
+const loadConversations = async ({ append = false } = {}) => {
+  const token = ++listRequestToken
+  const targetPage = append ? conversationPage.value + 1 : 1
+  if (append) {
+    listLoadingMore.value = true
+  } else {
+    listLoading.value = true
+    listLoadingMore.value = false
   }
-
-  const conversationIndex = conversationList.value.findIndex(
-    item => String(item.id) === String(conversationId)
-  );
-  if (conversationIndex < 0) {
-    getConversationList();
-    return;
-  }
-
-  // 更新会话摘要，并将最近有消息的会话移动到列表顶部。
-  const conversation = {
-    ...conversationList.value[conversationIndex],
-    lastMessage: Number(msgType) === 2 ? '[图片]' : Number(msgType) === 3 ? '[视频]' : Number(msgType) === 4 ? '[文件]' : content,
-    lastMessageTime: messageTime
-  };
-  conversationList.value.splice(conversationIndex, 1);
-  conversationList.value.unshift(conversation);
-};
-
-// 获取会话列表
-const getConversationList = async () => {
   try {
-    loading.value = true;
-
-    const params = {
-      current: pagination.current,
-      size: pagination.pageSize,
-      keyword: searchForm.keyword.trim()
-    };
-
-    const response = await queryConversationList(params);
+    const response = await queryConversationList({
+      current: targetPage,
+      size: CONVERSATION_PAGE_SIZE,
+      keyword: keyword.value.trim(),
+    })
+    if (token !== listRequestToken) return
     if (response.code === 0 && response.data) {
-      conversationList.value = response.data.records || [];
-      pagination.total = parseInt(response.data.total) || 0;
-    } else {
-      conversationList.value = [];
-      pagination.total = 0;
+      const records = response.data.records || []
+      if (append) {
+        const seen = new Set(conversationList.value.map((item) => String(item.id)))
+        conversationList.value = [
+          ...conversationList.value,
+          ...records.filter((item) => !seen.has(String(item.id))),
+        ]
+      } else {
+        conversationList.value = records
+        if (conversationListRef.value) conversationListRef.value.scrollTop = 0
+      }
+      conversationPage.value = targetPage
+      conversationTotal.value = Number(response.data.total) || 0
+      conversationHasMore.value = !!records.length && conversationList.value.length < conversationTotal.value
+    } else if (!append) {
+      conversationList.value = []
+      conversationTotal.value = 0
+      conversationHasMore.value = false
+    }
+
+    if (activeConversation.value) {
+      const latest = conversationList.value.find((item) => String(item.id) === String(activeConversation.value.id))
+      if (latest) activeConversation.value = latest
+    } else if (conversationList.value.length) {
+      selectConversation(conversationList.value[0])
+    }
+
+    nextTick(maybeLoadMoreConversations)
+  } catch (error) {
+    if (token !== listRequestToken) return
+    console.error('获取客服会话失败:', error)
+    ElMessage.error(append ? '加载更多会话失败' : '获取客服会话失败')
+    if (!append) {
+      conversationList.value = []
+      conversationTotal.value = 0
+      conversationHasMore.value = false
+    }
+  } finally {
+    if (token === listRequestToken) {
+      if (append) listLoadingMore.value = false
+      else listLoading.value = false
+    }
+  }
+}
+
+const loadConversationDetail = async (conversationId) => {
+  try {
+    const response = await initConversation({ id: conversationId })
+    if (response.code === 0 && response.data) {
+      conversationDetail.value = response.data
+      if (response.data.shopName) currentShopName.value = response.data.shopName
     }
   } catch (error) {
-    console.error('获取会话列表失败:', error);
-    ElMessage.error('获取会话列表失败');
-    conversationList.value = [];
-    pagination.total = 0;
-  } finally {
-    loading.value = false;
+    console.error('获取客服会话详情失败:', error)
   }
-};
+}
 
-// 获取聊天消息
-const getChatMessages = async (conversationId, isLoadMore = false) => {
+const loadMessages = async (conversationId, loadOlder = false) => {
+  const token = ++messageRequestToken
+  if (loadOlder) historyLoading.value = true
+  else messagesLoading.value = true
+  const previousHeight = loadOlder && chatRef.value ? chatRef.value.scrollHeight : 0
+
   try {
-    if (!isLoadMore) {
-      messagesLoading.value = true;
-    }
-
-    const params = {
+    const response = await queryConversationMessages({
       conversationId,
-      current: isLoadMore ? messagePagination.current + 1 : 1,
-      size: messagePagination.pageSize
-    };
+      current: loadOlder ? messagePagination.current + 1 : 1,
+      size: MESSAGE_PAGE_SIZE,
+    })
+    if (token !== messageRequestToken) return
 
-    const response = await queryConversationMessages(params);
     if (response.code === 0 && response.data) {
-      const newMessages = (response.data.records || []).map(msg => ({
+      const pageRecords = (response.data.records || []).map((msg) => ({
         id: msg.id,
         conversationId: msg.conversationId,
         content: msg.msgContent,
-        type: msg.msgDirection === 1 ? 'receive' : 'send', // 1-买家到商家（接收），2-商家到买家（发送）
-        msgType: msg.msgType,
+        type: Number(msg.msgDirection) === 1 ? 'receive' : 'send',
+        msgType: Number(msg.msgType) || 1,
         attachment: parseAttachment(msg.msgContent, msg.msgType),
-        createTime: msg.createTime
-      }));
+        createTime: msg.createTime,
+      }))
+      const ascending = pageRecords.reverse()
 
-      if (isLoadMore) {
-        // 加载更多消息，添加到数组前面
-        chatMessages.value = [...newMessages, ...chatMessages.value];
-        messagePagination.current++;
+      if (loadOlder) {
+        chatMessages.value = [...ascending, ...chatMessages.value]
+        messagePagination.current += 1
       } else {
-        // 首次加载消息，替换数组并倒序
-        chatMessages.value = newMessages.reverse();
-        messagePagination.current = 1;
+        chatMessages.value = ascending
+        messagePagination.current = 1
       }
 
-      messagePagination.total = parseInt(response.data.total) || 0;
-      messagePagination.hasMore = chatMessages.value.length < messagePagination.total;
-    } else {
-      if (!isLoadMore) {
-        chatMessages.value = [];
+      messagePagination.total = Number(response.data.total) || 0
+      messagePagination.hasMore = chatMessages.value.length < messagePagination.total
+
+      if (loadOlder) {
+        await nextTick()
+        if (chatRef.value) chatRef.value.scrollTop = chatRef.value.scrollHeight - previousHeight
+      } else {
+        scrollToBottom()
       }
-      messagePagination.hasMore = false;
+    } else if (!loadOlder) {
+      chatMessages.value = []
+      messagePagination.total = 0
+      messagePagination.hasMore = false
     }
   } catch (error) {
-    console.error('获取聊天消息失败:', error);
-    if (!isLoadMore) {
-      ElMessage.error('获取聊天消息失败');
-      chatMessages.value = [];
+    if (token !== messageRequestToken) return
+    console.error('获取客服消息失败:', error)
+    if (!loadOlder) {
+      ElMessage.error('获取客服消息失败')
+      chatMessages.value = []
     }
-    messagePagination.hasMore = false;
   } finally {
-    messagesLoading.value = false;
-    if (!isLoadMore) {
-      scrollToBottom();
+    if (token === messageRequestToken) {
+      historyLoading.value = false
+      messagesLoading.value = false
     }
   }
-};
+}
 
-// 获取会话详细信息
-const getConversationDetail = async (conversationId) => {
-  try {
-    const response = await initConversation({ id: conversationId });
+const selectConversation = (row) => {
+  if (isActive(row)) return
+  activeConversation.value = row
+  conversationDetail.value = {}
+  chatMessages.value = []
+  messagePagination.current = 1
+  messagePagination.total = 0
+  messagePagination.hasMore = false
+  messageInput.value = ''
+  attachmentOpen.value = false
+  clearAttachment()
+  nextTick(scrollToBottom)
+  loadConversationDetail(row.id)
+  loadMessages(row.id, false)
+}
 
-    if (response.code === 0 && response.data) {
-      conversationDetail.value = response.data;
-      return response.data;
-    } else {
-      console.error('获取会话详细信息失败:', response.message);
-      return null;
-    }
-  } catch (error) {
-    console.error('获取会话详细信息失败:', error);
-    return null;
+const handleConversationScroll = () => {
+  if (!conversationHasMore.value || listLoading.value || listLoadingMore.value) return
+  const el = conversationListRef.value
+  if (!el) return
+  if (el.scrollHeight - el.scrollTop - el.clientHeight > 48) return
+  loadConversations({ append: true })
+}
+
+const handleKeywordInput = () => {
+  if (keywordTimer) window.clearTimeout(keywordTimer)
+  keywordTimer = window.setTimeout(() => {
+    conversationPage.value = 1
+    loadConversations()
+  }, 300)
+}
+
+const clearKeyword = () => {
+  if (keywordTimer) window.clearTimeout(keywordTimer)
+  keyword.value = ''
+  conversationPage.value = 1
+  loadConversations()
+}
+
+const handleMessageScroll = (event) => {
+  if (!activeConversation.value || messagePagination.hasMore === false) return
+  if (messagesLoading.value || historyLoading.value) return
+  if (event.target.scrollTop > 4) return
+  loadMessages(activeConversation.value.id, true)
+}
+
+const summaryText = (content, msgType) => {
+  if (msgType === 2) return '[图片]'
+  if (msgType === 3) return '[视频]'
+  if (msgType === 4) return '[文件]'
+  return content
+}
+
+const updateConversationSummary = (conversationId, content, msgType, messageTime) => {
+  if (keyword.value.trim()) {
+    loadConversations()
+    return
   }
-};
 
-// 查看聊天
-const handleViewConversation = async (row) => {
-  currentConversation.value = row;
-  chatMessages.value = [];
-  messagePagination.current = 1;
-  messagePagination.hasMore = true;
-
-  // 获取会话详细信息
-  const detail = await getConversationDetail(row.id);
-  if (detail) {
-    chatTitle.value = `与用户 ${detail.memberNickname || row.memberId} 的聊天`;
-  } else {
-    chatTitle.value = `与用户 ${row.memberId} 的聊天`;
+  const index = conversationList.value.findIndex((item) => String(item.id) === String(conversationId))
+  if (index < 0) {
+    loadConversations()
+    return
   }
 
-  chatDialogVisible.value = true;
+  const updated = {
+    ...conversationList.value[index],
+    lastMessage: summaryText(content, msgType),
+    lastMessageTime: messageTime,
+  }
+  conversationList.value.splice(index, 1)
+  conversationList.value.unshift(updated)
+  if (isActive(updated)) activeConversation.value = updated
+}
 
-  // 对话框显示后再获取消息，确保滚动操作能生效
-  nextTick(() => {
-    getChatMessages(row.id);
-    // 添加滚动事件监听
-    if (chatMessagesRef.value) {
-      chatMessagesRef.value.addEventListener('scroll', handleMessageScroll);
-    }
-  });
-};
-
-// 发送消息
 const handleSendMessage = async () => {
-  if (!messageInput.value.trim() && !selectedAttachment.value?.file) {
-    return;
-  }
+  if (sending.value || !activeConversation.value) return
+  if (!messageInput.value.trim() && !pendingAttachment.value?.file) return
 
-  sending.value = true;
-
+  sending.value = true
   try {
-    if (selectedAttachment.value?.file) {
-      await sendAttachmentMessage();
-    }
-    // 否则，发送文本消息
-    else if (messageInput.value.trim()) {
-      await sendTextMessage();
+    if (pendingAttachment.value?.file) {
+      await sendAttachmentMessage()
+    } else {
+      await sendTextMessage()
     }
   } catch (error) {
-    console.error('发送消息失败:', error);
-    ElMessage.error(error instanceof Error ? error.message : '发送消息失败');
+    console.error('发送客服消息失败:', error)
+    ElMessage.error(error instanceof Error ? error.message : '发送消息失败')
   } finally {
-    sending.value = false;
+    sending.value = false
   }
-};
+}
 
-// 发送文本消息
 const sendTextMessage = async () => {
-  const conversationId = currentConversation.value.id;
-  const content = messageInput.value.trim();
-  // HTTP 与 WebSocket 使用同一命令格式，由服务端统一鉴权、落库并推送给买家。
-  const message = {
+  const conversationId = activeConversation.value.id
+  const content = messageInput.value.trim()
+  await sendMessage({
     category: 'biz-handle',
     command: 'cs-chat.mch',
     subCmd: 'msg.mch2mem',
     payload: {
       conversationId,
       content,
-      type: 1 // 1表示文本消息
-    }
-  };
+      type: 1,
+    },
+  })
 
-  await sendMessage(message);
-
-  // 服务端确认成功后再显示消息，发送失败时输入内容保持不变。
-  const createTime = new Date().toISOString();
+  const createTime = nowStamp()
   chatMessages.value.push({
-    id: Date.now().toString(),
+    id: `local-${Date.now()}`,
     conversationId,
     content,
     type: 'send',
     msgType: 1,
-    createTime
-  });
-  updateConversationSummary(conversationId, content, 1, createTime);
-  if (messageInput.value.trim() === content) {
-    messageInput.value = '';
-  }
-  scrollToBottom();
-};
+    attachment: null,
+    createTime,
+  })
+  updateConversationSummary(conversationId, content, 1, createTime)
+  messagePagination.total += 1
+  messagePagination.hasMore = chatMessages.value.length < messagePagination.total
+  if (messageInput.value.trim() === content) messageInput.value = ''
+  scrollToBottom()
+  ElMessage.success('消息已发送')
+}
 
-// 发送附件消息
 const sendAttachmentMessage = async () => {
-  const conversationId = currentConversation.value.id;
-  const attachment = selectedAttachment.value;
-  const result = await uploadCsMessageFile(attachment.file);
+  const conversationId = activeConversation.value.id
+  const attachment = pendingAttachment.value
+  const result = await uploadCsMessageFile(attachment.file)
 
-  if (result.code === 0 && result.data && result.data.fileKey) {
-    const fileKey = result.data.fileKey;
-    const msgType = attachment.kind === 'image' ? 2 : attachment.kind === 'video' ? 3 : 4;
-    const content = msgType === 2 ? fileKey : JSON.stringify({
-      fileKey,
-      fileName: attachment.file.name.slice(0, 72),
-      fileSize: attachment.file.size || 0
-    });
-    const message = {
-      category: 'biz-handle',
-      command: 'cs-chat.mch',
-      subCmd: 'msg.mch2mem',
-      payload: {
-        conversationId,
-        content,
-        type: msgType
-      }
-    };
-    await sendMessage(message);
+  if (result.code !== 0 || !result.data?.fileKey) {
+    throw new Error('附件上传失败')
+  }
 
-    const createTime = new Date().toISOString();
-    const newMessage = {
-      id: Date.now().toString(),
+  const fileKey = result.data.fileKey
+  const msgType = attachment.kind === 'image' ? 2 : attachment.kind === 'video' ? 3 : 4
+  const content = msgType === 2
+    ? fileKey
+    : JSON.stringify({
+        fileKey,
+        fileName: attachment.file.name.slice(0, 72),
+        fileSize: attachment.file.size || 0,
+      })
+
+  await sendMessage({
+    category: 'biz-handle',
+    command: 'cs-chat.mch',
+    subCmd: 'msg.mch2mem',
+    payload: {
       conversationId,
       content,
-      type: 'send',
-      msgType,
-      attachment: parseAttachment(content, msgType),
-      createTime
-    };
+      type: msgType,
+    },
+  })
 
-    chatMessages.value.push(newMessage);
-    updateConversationSummary(conversationId, content, msgType, createTime);
-    clearAttachment();
-    scrollToBottom();
-  } else {
-    ElMessage.error('附件上传失败');
-  }
-};
+  const createTime = nowStamp()
+  chatMessages.value.push({
+    id: `local-${Date.now()}`,
+    conversationId,
+    content,
+    type: 'send',
+    msgType,
+    attachment: parseAttachment(content, msgType),
+    createTime,
+  })
+  updateConversationSummary(conversationId, content, msgType, createTime)
+  messagePagination.total += 1
+  messagePagination.hasMore = chatMessages.value.length < messagePagination.total
+  const label = attachment.kind === 'image' ? '图片' : attachment.kind === 'video' ? '视频' : '文件'
+  clearAttachment()
+  scrollToBottom()
+  ElMessage.success(`${label}已发送`)
+}
 
 const chooseAttachment = (kind) => {
-  attachmentAccept.value = kind === 'image' ? 'image/*' : kind === 'video' ? 'video/*' : '*/*';
-  selectedAttachment.value = { kind, file: null };
-  nextTick(() => attachmentInputRef.value?.click());
-};
+  attachmentKind.value = kind
+  attachmentAccept.value = kind === 'image' ? 'image/*' : kind === 'video' ? 'video/*' : '*/*'
+  attachmentOpen.value = false
+  if (attachmentInputRef.value) attachmentInputRef.value.value = ''
+  nextTick(() => attachmentInputRef.value?.click())
+}
 
 const handleAttachmentChange = (event) => {
-  const file = event.target.files?.[0];
-  if (!file || !selectedAttachment.value) {
-    selectedAttachment.value = null;
-    return;
-  }
-  selectedAttachment.value = { ...selectedAttachment.value, file };
-  attachmentPreviewUrl.value = selectedAttachment.value.kind === 'file' ? '' : URL.createObjectURL(file);
-  messageInput.value = '';
-  inputDisabled.value = true;
-  event.target.value = '';
-};
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  // 只有真正选中文件才创建待发送附件；取消选择时保持无占位。
+  if (!file) return
+  if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value)
+  pendingAttachment.value = { kind: attachmentKind.value, file }
+  attachmentPreviewUrl.value = attachmentKind.value === 'image' ? URL.createObjectURL(file) : ''
+  messageInput.value = ''
+}
+
+const handleAttachmentCancel = () => {
+  if (attachmentInputRef.value) attachmentInputRef.value.value = ''
+}
 
 const clearAttachment = () => {
-  if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value);
-  selectedAttachment.value = null;
-  attachmentPreviewUrl.value = '';
-  inputDisabled.value = false;
-};
+  if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value)
+  attachmentPreviewUrl.value = ''
+  pendingAttachment.value = null
+}
 
-// 处理文本输入
-const handleTextInput = () => {
-  if (messageInput.value.trim() && selectedAttachment.value) {
-    clearAttachment();
-  }
-};
-
-// 处理消息区域滚动事件
-const handleMessageScroll = (event) => {
-  const { scrollTop } = event.target;
-  // 当滚动到顶部且还有更多消息时，加载下一页
-  if (scrollTop === 0 && messagePagination.hasMore && !messagesLoading.value) {
-    if (currentConversation.value) {
-      getChatMessages(currentConversation.value.id, true);
-    }
-  }
-};
-
-// 处理对话框键盘事件
-const handleDialogKeydown = (event) => {
-  // 检查是否存在图片预览遮罩层
-  const imagePreviewMask = document.querySelector('.el-image-viewer__mask');
-  if (!imagePreviewMask) {
-    // 如果没有图片预览，关闭对话框
-    chatDialogVisible.value = false;
-  }
-};
-
-const handleDialogClosed = () => {
-  chatMessagesRef.value?.removeEventListener('scroll', handleMessageScroll);
-  currentConversation.value = null;
-  chatMessages.value = [];
-  messageInput.value = '';
-  clearAttachment();
-};
-
-// 搜索
-const handleSearch = () => {
-  pagination.current = 1;
-  getConversationList();
-};
-
-// 重置
-const resetForm = () => {
-  searchForm.keyword = '';
-  pagination.current = 1;
-  getConversationList();
-};
-
-// 分页
-const handleSizeChange = (size) => {
-  pagination.pageSize = size;
-  getConversationList();
-};
-
-const handleCurrentChange = (current) => {
-  pagination.current = current;
-  getConversationList();
-};
-
-// 注册WebSocket消息处理器
 const handleWebSocketMessage = (message) => {
-  // 处理买家发送给商家的消息
-  if (message.category === 'biz-handle' && message.command === 'cs-chat.mem' && message.subCmd === 'msg.mem2mch') {
-    const payload = message.payload;
-    if (!payload) return;
+  if (message.category !== 'biz-handle' || message.command !== 'cs-chat.mem' || message.subCmd !== 'msg.mem2mch') return
+  const payload = message.payload
+  if (!payload) return
 
-    const receiveTime = payload.createTime || new Date().toISOString();
-    updateConversationSummary(payload.conversationId, payload.content, payload.type, receiveTime);
+  const receiveTime = payload.createTime || nowStamp()
+  updateConversationSummary(payload.conversationId, payload.content, Number(payload.type) || 1, receiveTime)
 
-    if (currentConversation.value && String(payload.conversationId) === String(currentConversation.value.id)) {
-      if (payload.messageId && chatMessages.value.some(item => String(item.id) === String(payload.messageId))) {
-        return;
-      }
-      chatMessages.value.push({
-        id: payload.messageId || Date.now().toString(),
-        conversationId: payload.conversationId,
-        content: payload.content,
-        type: 'receive',
-        msgType: payload.type,
-        attachment: parseAttachment(payload.content, payload.type),
-        createTime: receiveTime
-      });
-      scrollToBottom();
-    }
+  if (activeConversation.value && String(payload.conversationId) === String(activeConversation.value.id)) {
+    if (payload.messageId && chatMessages.value.some((item) => String(item.id) === String(payload.messageId))) return
+    chatMessages.value.push({
+      id: payload.messageId || `ws-${Date.now()}`,
+      conversationId: payload.conversationId,
+      content: payload.content,
+      type: 'receive',
+      msgType: Number(payload.type) || 1,
+      attachment: parseAttachment(payload.content, payload.type),
+      createTime: receiveTime,
+    })
+    messagePagination.total += 1
+    scrollToBottom()
   }
-};
+  ElMessage.info('收到买家新消息')
+}
 
 const handleWebSocketReconnect = () => {
-  // 重连后补拉断线期间的消息，并同步最新会话摘要。
-  getConversationList();
-  if (currentConversation.value) {
-    getChatMessages(currentConversation.value.id);
-  }
-};
+  loadConversations()
+  if (activeConversation.value) loadMessages(activeConversation.value.id, false)
+}
 
 onMounted(() => {
-  getConversationList();
-  // 注册WebSocket消息处理器
-  wsService.onMessage(handleWebSocketMessage);
-  wsService.onReconnect(handleWebSocketReconnect);
-});
+  loadConversations()
+  wsService.onMessage(handleWebSocketMessage)
+  wsService.onReconnect(handleWebSocketReconnect)
+})
 
 onBeforeUnmount(() => {
-  wsService.offMessage(handleWebSocketMessage);
-  wsService.offReconnect(handleWebSocketReconnect);
-});
+  if (keywordTimer) window.clearTimeout(keywordTimer)
+  messageRequestToken += 1
+  listRequestToken += 1
+  if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value)
+  wsService.offMessage(handleWebSocketMessage)
+  wsService.offReconnect(handleWebSocketReconnect)
+})
 </script>
-
-<style lang="scss" scoped>
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.user-name {
-  font-weight: bold;
-}
-
-.last-message {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.message-content {
-  color: var(--mall-ink-secondary, #30423a);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.message-time {
-  font-size: 12px;
-  color: var(--mall-muted, #65726a);
-}
-
-/* 聊天对话框样式 */
-.chat-dialog {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  background-color: #f5f7fa;
-  max-height: calc(70vh - 160px); /* 确保有足够的高度用于滚动 */
-
-  /* 自定义滚动条样式 */
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-  }
-}
-
-.message-item {
-  display: flex;
-  margin-bottom: 20px;
-  gap: 10px;
-  align-items: flex-start;
-
-  &.send {
-    flex-direction: row-reverse;
-  }
-}
-
-.message-avatar {
-  flex-shrink: 0;
-}
-
-.message-content {
-  max-width: 70%;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  &.send {
-    align-items: flex-end;
-  }
-
-  &.receive {
-    align-items: flex-start;
-  }
-}
-
-.message-nickname {
-  font-size: 12px;
-  color: var(--mall-muted, #65726a);
-  margin-bottom: 4px;
-
-  &.send {
-    text-align: right;
-  }
-
-  &.receive {
-    text-align: left;
-  }
-}
-
-.message-bubble {
-  padding: 10px 14px;
-  border-radius: 18px;
-  word-break: break-word;
-
-  &.send {
-    background-color: var(--mall-brand, #24634f);
-    color: white;
-    border-bottom-right-radius: 4px;
-  }
-
-  &.receive {
-    background-color: white;
-    color: var(--mall-ink-secondary, #30423a);
-    border-bottom-left-radius: 4px;
-  }
-
-  /* 确保图片在聊天框中保持较小尺寸，禁用悬停放大效果 */
-  :deep(.el-image) {
-    border-radius: 4px !important;
-    box-shadow: none !important;
-    width: 80px !important;
-    height: 80px !important;
-
-    .el-image__inner {
-      transition: none !important;
-      transform: none !important;
-      cursor: pointer !important;
-      width: 100% !important;
-      height: 100% !important;
-    }
-  }
-}
-
-.message-video {
-  display: block;
-  width: 280px;
-  max-width: 100%;
-  max-height: 220px;
-  border-radius: 6px;
-  background: #111;
-}
-
-.message-file {
-  display: flex;
-  width: 260px;
-  max-width: 100%;
-  align-items: center;
-  gap: 12px;
-  color: inherit;
-  text-decoration: none;
-
-  > .el-icon {
-    flex: 0 0 auto;
-    font-size: 34px;
-  }
-
-  > span {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  strong {
-    overflow: hidden;
-    font-size: 14px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  small {
-    opacity: .68;
-  }
-}
-
-.no-messages {
-  text-align: center;
-  padding: 40px 0;
-  color: var(--mall-muted, #65726a);
-}
-
-.chat-input {
-  padding: 20px;
-  border-top: 1px solid #ebeef5;
-  background-color: white;
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
-
-.attachment-input { display: none; }
-
-.input-container {
-  flex: 1;
-  position: relative;
-  min-height: 80px;
-}
-
-.attachment-preview-in-input {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 10;
-  display: inline-block;
-  position: relative;
-  margin-right: 10px;
-  margin-bottom: 10px;
-}
-
-.attachment-preview-in-input > video {
-  width: 160px;
-  height: 90px;
-  border-radius: 6px;
-  background: #111;
-}
-
-.selected-file {
-  display: flex;
-  max-width: 320px;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--mall-line);
-  border-radius: 8px;
-  background: var(--mall-paper);
-}
-
-.selected-file span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.attachment-clear {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border-radius: 50%;
-}
-
-.el-input {
-  flex: 1;
-  min-height: 80px;
-}
-
-.el-textarea__inner {
-  resize: none;
-  min-height: 80px;
-}
-
-/* 确保文本输入时图片被清除 */
-textarea:focus {
-  outline: none;
-}
-
-.no-messages {
-  text-align: center;
-  padding: 40px 0;
-  color: var(--mall-muted, #65726a);
-}
-
-.chat-manage {
-  min-height: 100%;
-}
-
-.message-content {
-  color: var(--mall-ink-secondary);
-}
-
-.message-time,
-.message-nickname,
-.no-messages {
-  color: var(--mall-muted);
-}
-
-.chat-dialog {
-  min-height: 520px;
-  max-height: calc(100vh - 190px);
-}
-
-.chat-messages {
-  min-height: 330px;
-  max-height: calc(100vh - 350px);
-  padding: 20px 22px;
-  background: #eef2ef;
-}
-
-.message-bubble {
-  border: 1px solid var(--mall-line);
-  border-radius: 10px;
-  line-height: 1.55;
-}
-
-.message-bubble.send {
-  color: #fff;
-  border-color: var(--mall-brand);
-  border-bottom-right-radius: 3px;
-  background: var(--mall-brand);
-}
-
-.message-bubble.receive {
-  color: var(--mall-ink-secondary);
-  border-bottom-left-radius: 3px;
-  background: #fff;
-}
-
-.chat-input {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 88px;
-  align-items: end;
-  gap: 10px;
-  padding: 14px 18px 18px;
-  border-top-color: var(--mall-line);
-}
-
-.attachment-button {
-  width: 40px;
-  height: 40px;
-}
-
-.attachment-button {
-  padding: 0;
-  color: var(--mall-brand);
-  border-color: var(--mall-line-strong);
-  background: var(--mall-brand-soft);
-}
-
-.input-container {
-  display: flex;
-  min-width: 0;
-  min-height: 80px;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.attachment-preview-in-input {
-  position: relative;
-  top: auto;
-  left: auto;
-  align-self: flex-start;
-  margin: 0;
-}
-
-.chat-input > .el-button:last-child {
-  width: 88px;
-  height: 40px;
-  margin: 0;
-}
-</style>
