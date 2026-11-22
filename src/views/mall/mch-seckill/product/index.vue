@@ -1,497 +1,544 @@
 <template>
-  <div class="mall-page">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
-      <el-form-item label="活动名称" prop="activityId">
-        <el-select
-          v-model="queryParams.activityId"
-          placeholder="请选择活动"
-          clearable
-          style="width: 180px"
-          @change="handleActivityChange"
-        >
-          <el-option v-for="activity in activityList" :key="activity.id" :label="activity.name" :value="activity.id" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="场次名称" prop="sessionId">
-        <el-select
-          v-model="queryParams.sessionId"
-          placeholder="请选择场次"
-          clearable
-          style="width: 180px"
-        >
-          <el-option v-for="session in sessionList" :key="session.id" :label="session.name" :value="session.id" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="审核状态" prop="auditStatus">
-        <el-select
-          v-model="queryParams.auditStatus"
-          placeholder="请选择审核状态"
-          clearable
-          style="width: 120px"
-        >
-          <el-option label="待审核" value="1" />
-          <el-option label="审核通过" value="2" />
-          <el-option label="审核驳回" value="3" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="商家名称" prop="mchName">
-        <el-input
-          v-model="queryParams.mchName"
-          placeholder="请输入商家名称"
-          clearable
-          style="width: 150px"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="店铺名称" prop="shopName">
-        <el-input
-          v-model="queryParams.shopName"
-          placeholder="请输入店铺名称"
-          clearable
-          style="width: 150px"
-        />
-      </el-form-item>
-      <el-form-item label="商品名称" prop="spuName">
-        <el-input
-          v-model="queryParams.spuName"
-          placeholder="请输入商品名称"
-          clearable
-          style="width: 180px"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
-
-    <el-row :gutter="10" class="mall-action-row">
-      <MallListTools v-model:showSearch="showSearch" @refresh="getProductList" />
-    </el-row>
-
-    <!-- 商品列表 -->
-    <el-table data-ym-table="r29"
-      v-loading="loading"
-      :data="productList"
-      style="width: 100%"
-    >
-      <el-table-column type="index" label="序号" width="80" />
-      <el-table-column label="商品图片" min-width="100">
-        <template #default="scope">
-          <el-image
-            v-if="scope.row.mainImage"
-            :src="getImagePreviewUrl(scope.row.mainImage)"
-            fit="cover"
-            style="width: 80px; height: 80px"
-            lazy
-          />
-          <el-empty v-else description="无图片" style="width: 80px; height: 80px" />
-        </template>
-      </el-table-column>
-      <el-table-column prop="name" label="商品名称" min-width="200" />
-      <el-table-column prop="activityName" label="活动名称" min-width="150" />
-      <el-table-column prop="sessionName" label="场次名称" min-width="150" />
-      <el-table-column prop="mchName" label="商家名称" min-width="120" />
-      <el-table-column prop="shopName" label="店铺名称" min-width="120" />
-      <el-table-column prop="sales" label="销量" width="100" />
-      <el-table-column prop="auditStatus" label="审核状态" width="100">
-        <template #default="scope">
-          <el-tag :type="getStatusTagType(scope.row.auditStatus)">
-            {{ getStatusText(scope.row.auditStatus) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="150" fixed="right">
-        <template #default="scope">
-          <el-button
-            size="small"
-            type="primary"
-            icon="View"
-            @click="handleView(scope.row)"
-          >
-            查看
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="queryParams.current"
-        v-model:page-size="queryParams.size"
-        :page-sizes="[10, 20, 30, 50]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="Number(total)"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
-
-    <!-- 查看详情对话框 -->
-    <el-dialog title="商品详情" v-model="viewDialogVisible" width="800px">
-      <!-- 商品基本信息 -->
-      <div class="mb-4">
-        <h4>基本信息</h4>
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="商品名称">{{ viewForm.name }}</el-descriptions-item>
-          <el-descriptions-item label="活动名称">{{ viewForm.activityName }}</el-descriptions-item>
-          <el-descriptions-item label="场次名称">{{ viewForm.sessionName }}</el-descriptions-item>
-          <el-descriptions-item label="销量">{{ viewForm.sales }}</el-descriptions-item>
-          <el-descriptions-item label="审核状态">{{ getStatusText(viewForm.auditStatus) }}</el-descriptions-item>
-          <el-descriptions-item label="商家名称">{{ viewForm.mchName }}</el-descriptions-item>
-          <el-descriptions-item label="店铺名称">{{ viewForm.shopName }}</el-descriptions-item>
-          <el-descriptions-item label="主图">
-            <el-image
-              v-if="viewForm.mainImage"
-              :src="getImagePreviewUrl(viewForm.mainImage)"
-              fit="cover"
-              style="width: 100px; height: 100px"
-              lazy
+  <div class="mall-page merchant-seckill-page ms-products-page">
+    <section class="mall-filter-panel">
+      <el-form :inline="true" class="mall-query-form" @submit.prevent="handleSearch">
+        <div class="ms-filter-fields ms-products-page-filters">
+          <el-form-item label="商品名称" class="ms-filter-field ms-filter-keyword">
+            <el-input
+              v-model="draft.keyword"
+              clearable
+              placeholder="搜索报名商品名称"
+              @keyup.enter="handleSearch"
             />
-            <span v-else>无图片</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="商品描述" :span="2">{{ viewForm.detailDesc }}</el-descriptions-item>
-        </el-descriptions>
-      </div>
+          </el-form-item>
+          <el-form-item label="所属活动" class="ms-filter-field ms-filter-activity">
+            <el-select
+              v-model="draft.activityId"
+              placeholder="全部活动"
+              @change="handleActivityChange"
+            >
+              <el-option label="全部活动" value="" />
+              <el-option
+                v-for="item in activityOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="String(item.id)"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="活动场次" class="ms-filter-field ms-filter-session">
+            <el-select
+              v-model="draft.sessionId"
+              :disabled="!draft.activityId"
+              placeholder="全部场次"
+            >
+              <el-option label="全部场次" value="" />
+              <el-option
+                v-for="session in sessionOptions"
+                :key="session.id"
+                :label="session.name"
+                :value="String(session.id)"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="审核状态" class="ms-filter-field ms-filter-audit">
+            <el-select v-model="draft.auditStatus" placeholder="全部状态">
+              <el-option label="全部状态" value="" />
+              <el-option v-for="item in AUDIT_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+        </div>
+        <el-form-item class="mall-query-actions">
+          <el-button @click="resetQuery">重置</el-button>
+          <el-button type="primary" native-type="submit">
+            <el-icon><Search /></el-icon>查询
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </section>
 
-      <!-- 轮播图 -->
-      <div class="mb-4" v-if="viewForm.images && viewForm.images.length > 0">
-        <h4>轮播图</h4>
-        <div class="carousel-images">
-          <el-image
-            v-for="(image, index) in viewForm.images"
-            :key="index"
-            :src="getImagePreviewUrl(image)"
-            fit="cover"
-            style="width: 100px; height: 100px; margin-right: 10px"
-            lazy
-          />
+    <section class="mall-table-panel">
+      <div class="ms-table-intro">
+        <span>
+          <el-icon :size="15"><Goods /></el-icon>
+          审核通过的商品才会在活动场次中售卖；待审核与驳回商品仅商家可见。
+        </span>
+        <div class="ms-intro-right">
+          <b>共 {{ pagination.total }} 个秒杀商品</b>
         </div>
       </div>
 
-      <!-- SKU信息 -->
-      <div class="mb-4" v-if="viewForm.skuList && viewForm.skuList.length > 0">
-        <h4>SKU信息</h4>
-        <el-table data-ym-table="r30" :data="viewForm.skuList" style="width: 100%">
-          <el-table-column prop="name" label="SKU名称" min-width="200" />
-          <el-table-column prop="specCode" label="规格编码" width="150" />
-          <el-table-column prop="originPrice" label="原价" width="100">
-            <template #default="scope">
-              ¥{{ scope.row.originPrice }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="seckillPrice" label="秒杀价格" width="100">
-            <template #default="scope">
-              ¥{{ scope.row.seckillPrice }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="stock" label="库存" width="80" />
-          <el-table-column label="SKU图片" width="120">
-            <template #default="scope">
-              <el-image
-                v-if="scope.row.mainImage"
-                :src="getImagePreviewUrl(scope.row.mainImage)"
-                fit="cover"
-                style="width: 80px; height: 80px"
-                lazy
-              />
-              <span v-else>无图片</span>
-            </template>
-          </el-table-column>
-        </el-table>
+      <el-table data-ym-table="r82" v-loading="loading" :data="products" row-key="id" style="width: 100%">
+        <el-table-column label="秒杀商品" min-width="240" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="ms-product-cell">
+              <SeckillThumb :src="row.mainImage" :alt="row.name" />
+              <span class="ms-product-copy">
+                <b :title="row.name">{{ row.name }}</b>
+                <small>{{ row.sessionName }} · {{ row.skuCount || 0 }} 个 SKU</small>
+              </span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="活动 / 场次" min-width="190" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="ms-event-cell">
+              <b :title="row.activityName">{{ row.activityName }}</b>
+              <small>{{ shortTime(row.sessionBeginTime) }} – {{ clockTime(row.sessionEndTime) }}</small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="秒杀价" min-width="150" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="ms-price-cell">
+              <b>{{ priceRange(row.minSeckillPrice, row.maxSeckillPrice) }}</b>
+              <small>较原价低 {{ money(asNumber(row.minOriginPrice) - asNumber(row.minSeckillPrice)) }} 起</small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="原价" min-width="130" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="ms-price-cell is-muted">
+              <b>{{ priceRange(row.minOriginPrice, row.maxOriginPrice) }}</b>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="库存 / 已售" min-width="173" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="ms-stock-cell">
+              <div class="ms-stock-line">
+                <b>已售 {{ row.sales || 0 }}</b>
+                <span>/ {{ row.stock || 0 }} 件</span>
+                <em>{{ stockPercent(row) }}%</em>
+              </div>
+              <span class="ms-progress"><i :style="{ width: `${stockPercent(row)}%` }"></i></span>
+              <small>剩余 {{ remaining(row) }} 件</small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="成交额" min-width="115" align="center" header-align="center">
+          <template #default="{ row }">
+            <b v-if="row.salesAmount && Number(row.salesAmount) > 0" class="ms-amount">
+              {{ money(row.salesAmount) }}
+            </b>
+            <span v-else class="ms-muted">—</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="审核状态" min-width="105" align="center" header-align="center">
+          <template #default="{ row }">
+            <span class="status-ticket" :class="`tone-${auditMeta(row.auditStatus).tone}`">
+              {{ auditMeta(row.auditStatus).label }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="95" fixed="right" align="center" header-align="center">
+          <template #default="{ row }">
+            <button type="button" class="ms-link" @click="openDetail(row)">详情</button>
+          </template>
+        </el-table-column>
+
+        <template #empty>
+          <div class="ms-empty">
+            <el-icon><Goods /></el-icon>
+            <b>没有匹配的秒杀商品</b>
+            <span>调整活动、场次或审核状态后重新查询</span>
+          </div>
+        </template>
+      </el-table>
+
+      <MallPagination
+        variant="admin"
+        :total="pagination.total"
+        :page="pagination.current"
+        :limit="pagination.pageSize"
+        @pagination="changePage"
+      />
+    </section>
+
+    <el-drawer
+      v-model="detailVisible"
+      :with-header="false"
+      size="720px"
+      class="ms-drawer-scope ms-product-drawer"
+    >
+      <div v-if="detailView" v-loading="detailLoading" class="ms-drawer-content">
+        <div class="ms-drawer-head">
+          <div>
+            <span class="ms-drawer-kicker">SECKILL PRODUCT</span>
+            <h2>秒杀商品详情</h2>
+          </div>
+          <button type="button" class="ms-drawer-close" title="关闭" @click="detailVisible = false">
+            <el-icon><Close /></el-icon>
+          </button>
+        </div>
+
+        <div class="ms-drawer-hero">
+          <SeckillThumb :src="detailView.mainImage" :alt="detailView.name" class="ms-drawer-cover" />
+          <div class="ms-drawer-hero-copy">
+            <div class="ms-drawer-title">
+              <h3>{{ detailView.name }}</h3>
+              <span class="status-ticket" :class="`tone-${detailAudit.tone}`">{{ detailAudit.label }}</span>
+            </div>
+            <p class="ms-hero-sub">{{ detailView.activityName }} · {{ detailView.sessionName }}</p>
+            <span class="ms-drawer-meta">
+              <el-icon><Clock /></el-icon>
+              {{ shortTime(detailView.sessionBeginTime) }} – {{ clockTime(detailView.sessionEndTime) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="ms-stat-grid">
+          <div class="ms-stat">
+            <span>秒杀价</span>
+            <b>{{ priceRange(detailView.minSeckillPrice, detailView.maxSeckillPrice) }}</b>
+            <small>共 {{ detailView.skuCount || 0 }} 个 SKU</small>
+          </div>
+          <div class="ms-stat">
+            <span>投放库存</span>
+            <b>{{ detailView.stock || 0 }}</b>
+            <small>剩余 {{ remaining(detailView) }} 件</small>
+          </div>
+          <div class="ms-stat">
+            <span>累计销量</span>
+            <b>{{ detailView.sales || 0 }}</b>
+            <small>售罄进度 {{ stockPercent(detailView) }}%</small>
+          </div>
+          <div class="ms-stat">
+            <span>成交金额</span>
+            <b>{{ money(detailView.salesAmount) }}</b>
+            <small>已支付有效订单</small>
+          </div>
+        </div>
+
+        <div class="ms-description-grid">
+          <div><span>所属活动</span><b>{{ detailView.activityName }}</b></div>
+          <div><span>活动场次</span><b>{{ detailView.sessionName }}</b></div>
+          <div><span>报名时间</span><b>{{ dateTime(detailView.applyTime) }}</b></div>
+          <div><span>审核时间</span><b>{{ detailView.auditTime ? dateTime(detailView.auditTime) : '—' }}</b></div>
+          <div><span>原价区间</span><b>{{ priceRange(detailView.minOriginPrice, detailView.maxOriginPrice) }}</b></div>
+          <div>
+            <span>审核状态</span>
+            <b>
+              <span class="status-ticket is-small" :class="`tone-${detailAudit.tone}`">{{ detailAudit.label }}</span>
+            </b>
+          </div>
+        </div>
+
+        <div class="ms-drawer-section">
+          <h3>商品图片</h3>
+          <div class="ms-detail-gallery">
+            <SeckillThumb
+              v-for="(image, index) in detailGallery"
+              :key="`${image || 'empty'}-${index}`"
+              :src="image"
+              :alt="detailView.name"
+              class="ms-detail-shot"
+            />
+          </div>
+          <div class="ms-detail-desc">
+            <b>商品描述</b>
+            <p>{{ detailDescText }}</p>
+          </div>
+        </div>
+
+        <div class="ms-drawer-section">
+          <h3>SKU 明细</h3>
+          <div v-if="detailView.skuList.length" class="ms-sku-wrap">
+            <table class="ms-sku-table">
+              <thead>
+                <tr>
+                  <th>SKU 名称</th>
+                  <th>规格编码</th>
+                  <th>原价</th>
+                  <th>秒杀价</th>
+                  <th>活动库存</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="sku in detailView.skuList" :key="sku.id">
+                  <td>{{ sku.name }}</td>
+                  <td><span class="mono">{{ sku.specCode }}</span></td>
+                  <td>{{ money(sku.originPrice) }}</td>
+                  <td class="ms-price-text">{{ money(sku.seckillPrice) }}</td>
+                  <td>{{ sku.stock ?? 0 }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="ms-empty is-compact">
+            <el-icon><Goods /></el-icon>
+            <b>暂无 SKU 明细</b>
+            <span>秒杀商品的规格信息尚未生成</span>
+          </div>
+        </div>
+
+        <div class="ms-drawer-section">
+          <h3>备注信息</h3>
+          <div class="ms-description-grid">
+            <div class="wide"><span>申请备注</span><b>{{ detailView.applyRemark || '未填写' }}</b></div>
+            <div class="wide"><span>审核备注</span><b>{{ detailView.auditRemark || '未填写' }}</b></div>
+          </div>
+        </div>
+
+        <div class="ms-drawer-actions">
+          <button type="button" class="ms-btn" @click="detailVisible = false">关闭</button>
+          <button type="button" class="ms-btn primary" @click="goRecords(detailView.activityId)">查看报名记录</button>
+        </div>
       </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="viewDialogVisible = false">关闭</el-button>
-        </span>
-      </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { getStoragePreviewUrl } from '@/utils/storage'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search, Refresh, View } from '@element-plus/icons-vue'
-import { useRoute } from 'vue-router'
-import request from '@/utils/request'
-import MallListTools from '@/components/mall/MallListTools.vue'
+import { Clock, Close, Goods, Search } from '@element-plus/icons-vue'
+import {
+  getMchSeckillSpuDetail,
+  queryMchSeckillApplyActivities,
+  queryMchSeckillSessionList,
+  queryMchSeckillSpuList,
+} from '@/api/mall/seckill'
+import MallPagination from '@/components/mall/MallPagination.vue'
+import SeckillThumb from '../components/SeckillThumb.vue'
+import {
+  asNumber,
+  auditMeta,
+  clockTime,
+  dateTime,
+  money,
+  percent,
+  priceRange,
+  shortTime,
+  stripHtml,
+} from '../shared'
+import '@/assets/yeah-mall-seckill.css'
 
-// 路由
+defineOptions({ name: 'MchSeckillProduct' })
+
+const AUDIT_OPTIONS = [
+  { value: '1', label: '待审核' },
+  { value: '2', label: '审核通过' },
+  { value: '3', label: '审核驳回' },
+]
+
 const route = useRoute()
+const router = useRouter()
 
-// 表格数据
-const loading = ref(false)
-const productList = ref([])
-const total = ref(0)
-const showSearch = ref(true)
-
-// 查询参数
-const queryParams = reactive({
-  current: 1,
-  size: 10,
-  activityId: '',
+const initialQuery = () => ({
+  keyword: '',
+  activityId: route.query.activityId ? String(route.query.activityId) : '',
   sessionId: '',
   auditStatus: '',
-  mchName: '',
-  shopName: '',
-  spuName: ''
 })
 
-// 查看对话框
-const viewDialogVisible = ref(false)
+const loading = ref(false)
+const products = ref([])
+const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
+const draft = reactive(initialQuery())
+const query = reactive(initialQuery())
 
-// 查看表单数据
-const viewForm = reactive({})
+const activityOptions = ref([])
+const sessionOptions = ref([])
+const sessionCache = new Map()
 
-// 活动列表
-const activityList = ref([])
+const detailVisible = ref(false)
+const detailLoading = ref(false)
+const detailRow = ref(null)
+const detailPayload = ref(null)
+let detailToken = 0
 
-// 场次列表
-const sessionList = ref([])
-
-// 初始化
-onMounted(() => {
-  loadActivityList().then(() => {
-    // 检查URL中是否有活动ID参数
-    const activityId = route.query.activityId
-    if (activityId) {
-      // 设置活动ID到查询参数
-      queryParams.activityId = activityId
-      // 加载对应的场次列表
-      loadSessionList(activityId)
-    }
-    // 页面加载时自动获取一次商品列表
-    getProductList()
-  })
+const detailView = computed(() => {
+  if (!detailRow.value) return null
+  const base = detailRow.value
+  const payload = detailPayload.value || {}
+  const spu = payload.spu || {}
+  const images = Array.isArray(payload.images) ? payload.images.filter(Boolean) : []
+  const fallbackImages = images.length ? images : (base.mainImage ? [base.mainImage] : [])
+  return {
+    ...base,
+    ...spu,
+    activityName: base.activityName,
+    sessionName: base.sessionName,
+    sessionBeginTime: base.sessionBeginTime,
+    sessionEndTime: base.sessionEndTime,
+    skuCount: base.skuCount,
+    stock: base.stock,
+    sales: base.sales,
+    salesAmount: base.salesAmount,
+    minOriginPrice: base.minOriginPrice,
+    maxOriginPrice: base.maxOriginPrice,
+    minSeckillPrice: base.minSeckillPrice,
+    maxSeckillPrice: base.maxSeckillPrice,
+    applyTime: base.applyTime,
+    auditTime: base.auditTime,
+    applyRemark: base.applyRemark,
+    auditRemark: base.auditRemark,
+    auditStatus: spu.auditStatus ?? base.auditStatus,
+    name: spu.name || base.name,
+    mainImage: spu.mainImage || base.mainImage,
+    detailDesc: spu.detailDesc ?? base.detailDesc,
+    images: fallbackImages,
+    skuList: Array.isArray(payload.skuList) ? payload.skuList : [],
+  }
 })
 
-// 加载活动列表
-function loadActivityList() {
-  return new Promise((resolve, reject) => {
-    request({
-      url: '/mch/seckillActivity/queryApplyActivity',
-      method: 'get'
-    })
-      .then(response => {
-        const data = response.data
-        if (data) {
-          activityList.value = data
-        }
-        resolve()
+const detailAudit = computed(() => auditMeta(detailView.value?.auditStatus))
+const detailGallery = computed(() => {
+  if (!detailView.value) return []
+  return detailView.value.images.length ? detailView.value.images : [detailView.value.mainImage || '']
+})
+const detailDescText = computed(() => stripHtml(detailView.value?.detailDesc) || '暂无商品描述')
+
+function stockPercent(row) {
+  return percent(row?.sales, row?.stock)
+}
+
+function remaining(row) {
+  return Math.max(0, asNumber(row?.stock) - asNumber(row?.sales))
+}
+
+async function ensureSessions(activityId) {
+  const key = String(activityId)
+  if (!sessionCache.has(key)) {
+    const promise = queryMchSeckillSessionList({ activityId })
+      .then((response) => response?.data || [])
+      .catch(() => {
+        sessionCache.delete(key)
+        return []
       })
-      .catch(error => {
-        ElMessage.error('获取活动列表失败: ' + (error.message || '未知错误'))
-        activityList.value = []
-        resolve() // 即使失败也 resolve，确保初始化流程继续
-      })
-  })
-}
-
-// 加载场次列表
-function loadSessionList(activityId) {
-  if (!activityId) {
-    sessionList.value = []
-    return
+    sessionCache.set(key, promise)
   }
+  return sessionCache.get(key)
+}
 
-  const params = {
-    conditions_: 'sort:sort:asc',
-    activityId: activityId,
-    size: 100,
-    current: 1
+async function handleActivityChange() {
+  draft.sessionId = ''
+  sessionOptions.value = []
+  if (!draft.activityId) return
+  sessionOptions.value = await ensureSessions(draft.activityId)
+}
+
+async function getActivityOptions() {
+  try {
+    const response = await queryMchSeckillApplyActivities()
+    activityOptions.value = response?.data || []
+  } catch {
+    activityOptions.value = []
   }
-
-  request({
-    url: '/mch/seckillActivity/querySession',
-    method: 'get',
-    params
-  })
-    .then(response => {
-      const data = response.data
-      if (data) {
-        sessionList.value = data
-      }
-    })
-    .catch(error => {
-      ElMessage.error('获取场次列表失败: ' + (error.message || '未知错误'))
-      sessionList.value = []
-    })
 }
 
-// 处理活动选择变化
-function handleActivityChange(activityId) {
-  // 清空场次选择
-  queryParams.sessionId = ''
-  // 加载对应的场次列表
-  loadSessionList(activityId)
-}
-
-// 加载商品列表
-const getProductList = () => {
+async function getProducts() {
   loading.value = true
-  const params = {
-    conditions_: 'sort:createTime:desc',
-    size: queryParams.size,
-    current: queryParams.current
-  }
-
-  // 添加查询参数
-  if (queryParams.activityId) {
-    params.activityId = queryParams.activityId
-  }
-  if (queryParams.sessionId) {
-    params.sessionId = queryParams.sessionId
-  }
-  if (queryParams.auditStatus) {
-    params.auditStatus = queryParams.auditStatus
-  }
-  if (queryParams.mchName) {
-    params.mchName = queryParams.mchName
-  }
-  if (queryParams.shopName) {
-    params.shopName = queryParams.shopName
-  }
-  if (queryParams.spuName) {
-    params.spuName = queryParams.spuName
-  }
-
-  request({
-    url: '/mch/seckillSpu/query',
-    method: 'get',
-    params
-  })
-    .then(response => {
-      const data = response.data
-      if (data.records) {
-        productList.value = data.records
-        total.value = Number(data.total) || 0
-      }
-    })
-    .catch(error => {
-      ElMessage.error('获取商品列表失败: ' + (error.message || '未知错误'))
-      productList.value = []
-      total.value = 0
-    })
-    .finally(() => {
-      loading.value = false
-    })
-}
-
-// 搜索
-const handleQuery = () => {
-  queryParams.current = 1
-  getProductList()
-}
-
-// 重置
-const resetQuery = () => {
-  Object.assign(queryParams, {
-    activityId: '',
-    sessionId: '',
-    auditStatus: '',
-    mchName: '',
-    shopName: '',
-    spuName: ''
-  })
-  // 清空场次列表
-  sessionList.value = []
-  handleQuery()
-}
-
-// 分页
-const handleSizeChange = (size) => {
-  queryParams.size = size
-  getProductList()
-}
-
-const handleCurrentChange = (current) => {
-  queryParams.current = current
-  getProductList()
-}
-
-// 查看详情
-const handleView = (row) => {
-  // 保存从列表中获取的字段（详情接口可能不返回这些字段）
-  const listFields = {
-    activityName: row.activityName, // 活动名称
-    sessionName: row.sessionName, // 场次名称
-    mchName: row.mchName, // 商家名称
-    shopName: row.shopName // 店铺名称
-  }
-
-  loading.value = true
-  request({
-    url: '/mch/seckillSpu/detail',
-    method: 'get',
-    params: {
-      id: row.id
+  try {
+    const params = {
+      current: pagination.current,
+      size: pagination.pageSize,
     }
-  })
-  .then(response => {
-    const data = response.data
-    if (data) {
-      // 填充查看表单数据，优先使用列表中的字段
-      Object.assign(viewForm, {
-        ...data.spu,
-        ...listFields, // 从列表中获取的字段
-        images: data.images || [],
-        skuList: data.skuList || []
-      })
-      viewDialogVisible.value = true
-    }
-  })
-  .catch(error => {
-    ElMessage.error('获取商品详情失败: ' + (error.message || '未知错误'))
-  })
-  .finally(() => {
+    if (query.keyword) params.spuName = query.keyword
+    if (query.activityId) params.activityId = query.activityId
+    if (query.sessionId) params.sessionId = query.sessionId
+    if (query.auditStatus) params.auditStatus = query.auditStatus
+    const response = await queryMchSeckillSpuList(params)
+    const data = response?.data || {}
+    products.value = data.records || []
+    pagination.total = Number(data.total || 0)
+    ensureRouteActivityOption()
+  } catch {
+    products.value = []
+    pagination.total = 0
+  } finally {
     loading.value = false
+  }
+}
+
+function ensureRouteActivityOption() {
+  if (!query.activityId) return
+  if (activityOptions.value.some((item) => String(item.id) === query.activityId)) return
+  const matched = products.value.find((row) => String(row.activityId) === query.activityId)
+  if (matched?.activityName) {
+    activityOptions.value = [{ id: query.activityId, name: matched.activityName }, ...activityOptions.value]
+  }
+}
+
+function applyDraft() {
+  query.keyword = draft.keyword.trim()
+  query.activityId = draft.activityId
+  query.sessionId = draft.sessionId
+  query.auditStatus = draft.auditStatus
+}
+
+function handleSearch() {
+  applyDraft()
+  pagination.current = 1
+  getProducts()
+}
+
+function resetQuery() {
+  Object.assign(draft, { keyword: '', activityId: '', sessionId: '', auditStatus: '' })
+  Object.assign(query, { keyword: '', activityId: '', sessionId: '', auditStatus: '' })
+  sessionOptions.value = []
+  pagination.current = 1
+  getProducts()
+}
+
+function changePage(payload) {
+  pagination.current = payload.page
+  pagination.pageSize = payload.limit
+  getProducts()
+}
+
+async function openDetail(row) {
+  detailRow.value = row
+  detailPayload.value = null
+  detailVisible.value = true
+  const token = ++detailToken
+  detailLoading.value = true
+  try {
+    const response = await getMchSeckillSpuDetail(row.id)
+    if (token !== detailToken) return
+    detailPayload.value = response?.data || {}
+  } catch {
+    if (token === detailToken) ElMessage.error('秒杀商品详情加载失败，请稍后重试')
+  } finally {
+    if (token === detailToken) detailLoading.value = false
+  }
+}
+
+function goRecords(activityId) {
+  detailVisible.value = false
+  if (!activityId) return
+  router.push({
+    path: '/mall/mch-seckill/apply',
+    query: { activityId: String(activityId) },
   })
 }
 
-// 获取图片预览URL
-function getImagePreviewUrl(fileKey) {
-  return getStoragePreviewUrl(fileKey)
-}
+watch(
+  () => route.query.activityId,
+  (value) => {
+    const nextId = value ? String(value) : ''
+    if (nextId === query.activityId && nextId === draft.activityId) return
+    Object.assign(draft, { keyword: '', activityId: nextId, sessionId: '', auditStatus: '' })
+    Object.assign(query, { keyword: '', activityId: nextId, sessionId: '', auditStatus: '' })
+    sessionOptions.value = []
+    pagination.current = 1
+    detailVisible.value = false
+    if (nextId) {
+      ensureSessions(nextId).then((sessions) => {
+        if (draft.activityId === nextId) sessionOptions.value = sessions
+      })
+    }
+    getProducts()
+  },
+)
 
-// 获取状态文本
-function getStatusText(status) {
-  const statusMap = {
-    1: '待审核',
-    2: '审核通过',
-    3: '审核驳回'
+onMounted(async () => {
+  getProducts()
+  getActivityOptions()
+  if (draft.activityId) {
+    sessionOptions.value = await ensureSessions(draft.activityId)
   }
-  return statusMap[status] || ''
-}
-
-// 获取状态标签类型
-function getStatusTagType(status) {
-  const typeMap = {
-    1: 'warning',
-    2: 'success',
-    3: 'danger'
-  }
-  return typeMap[status] || ''
-}
+})
 </script>
-
-<style scoped>
-.dialog-footer {
-  text-align: right;
-}
-
-.carousel-images {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-</style>

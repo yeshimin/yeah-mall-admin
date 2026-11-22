@@ -278,3 +278,47 @@ export function auditSeckillApply(data) {
     data
   })
 }
+
+// 商家端查询报名记录
+export function queryMchSeckillApplyList(params) {
+  return request({
+    url: '/mch/seckillActivityApply/query',
+    method: 'get',
+    params
+  })
+}
+
+// 商家端获取报名详情
+export function getMchSeckillApplyDetail(id) {
+  return request({
+    url: '/mch/seckillActivityApply/detail',
+    method: 'get',
+    params: { id }
+  })
+}
+
+// 商家端查询已报名的活动选项
+export function queryMchSeckillApplyActivities() {
+  return request({
+    url: '/mch/seckillActivity/queryApplyActivity',
+    method: 'get'
+  })
+}
+
+// 商家端查询秒杀商品列表
+export function queryMchSeckillSpuList(params) {
+  return request({
+    url: '/mch/seckillSpu/query',
+    method: 'get',
+    params
+  })
+}
+
+// 商家端获取秒杀商品详情
+export function getMchSeckillSpuDetail(id) {
+  return request({
+    url: '/mch/seckillSpu/detail',
+    method: 'get',
+    params: { id }
+  })
+}
