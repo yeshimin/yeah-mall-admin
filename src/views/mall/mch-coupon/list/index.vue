@@ -1,7 +1,5 @@
 <template>
   <div class="mall-page merchant-coupon-page">
-    <CouponPageTabs active="coupon" />
-
     <section class="mall-filter-panel">
       <el-form :inline="true" class="mall-query-form" @submit.prevent="handleSearch">
         <div class="mc-filter-fields">
@@ -390,7 +388,6 @@ import {
 import { queryMchSpuList } from '@/api/mall/seckill'
 import { getCurrentShop } from '@/utils/shop'
 import MallPagination from '@/components/mall/MallPagination.vue'
-import CouponPageTabs from '../components/CouponPageTabs.vue'
 import '@/assets/yeah-mall-coupon.css'
 
 defineOptions({ name: 'MchCouponList' })

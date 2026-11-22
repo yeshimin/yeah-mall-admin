@@ -1,34 +1,6 @@
 /* 商家交易服务·优惠券管理真实页 rev coupon-real-v1
    镜像原型 admin-merchant-coupon.css：券列表 8 列 + 券表单/实时预览 + 领取/使用记录 + 详情抽屉。 */
 
-/* ---------- 模块 Tab ---------- */
-.merchant-coupon-page .mc-tabs {
-  display: flex;
-  gap: 22px;
-  height: 40px;
-  margin: 0 0 14px;
-  border-bottom: 1px solid var(--ym-line);
-}
-
-.merchant-coupon-page .mc-tabs button {
-  display: inline-flex;
-  align-items: center;
-  height: 40px;
-  padding: 0 2px;
-  color: var(--ym-muted);
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.merchant-coupon-page .mc-tabs button.active {
-  color: var(--ym-brand);
-  border-bottom-color: var(--ym-brand);
-  font-weight: 700;
-}
-
 /* ---------- 筛选 ---------- */
 .merchant-coupon-page .mall-filter-panel .mall-query-form {
   align-items: center;

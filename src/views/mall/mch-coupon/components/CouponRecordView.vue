@@ -1,7 +1,5 @@
 <template>
   <div class="mall-page merchant-coupon-page">
-    <CouponPageTabs :active="mode" />
-
     <section class="mall-filter-panel">
       <el-form :inline="true" class="mall-query-form" @submit.prevent="handleSearch">
         <div class="mc-filter-fields">
@@ -253,7 +251,6 @@ import { getCurrentShop } from '@/utils/shop'
 import { getMchCouponDetail, getMchCouponList, queryMchCouponRecord } from '@/api/mall/mchCoupon'
 import CopyableText from '@/components/mall/CopyableText.vue'
 import MallPagination from '@/components/mall/MallPagination.vue'
-import CouponPageTabs from './CouponPageTabs.vue'
 import '@/assets/yeah-mall-coupon.css'
 
 const props = defineProps({
