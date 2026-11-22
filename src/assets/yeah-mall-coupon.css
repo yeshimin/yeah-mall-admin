@@ -1,0 +1,987 @@
+/* 商家交易服务·优惠券管理真实页 rev coupon-real-v1
+   镜像原型 admin-merchant-coupon.css：券列表 8 列 + 券表单/实时预览 + 领取/使用记录 + 详情抽屉。 */
+
+/* ---------- 模块 Tab ---------- */
+.merchant-coupon-page .mc-tabs {
+  display: flex;
+  gap: 22px;
+  height: 40px;
+  margin: 0 0 14px;
+  border-bottom: 1px solid var(--ym-line);
+}
+
+.merchant-coupon-page .mc-tabs button {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 2px;
+  color: var(--ym-muted);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.merchant-coupon-page .mc-tabs button.active {
+  color: var(--ym-brand);
+  border-bottom-color: var(--ym-brand);
+  font-weight: 700;
+}
+
+/* ---------- 筛选 ---------- */
+.merchant-coupon-page .mall-filter-panel .mall-query-form {
+  align-items: center;
+  gap: 10px;
+}
+
+.merchant-coupon-page .mc-filter-fields {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.merchant-coupon-page .mc-keyword {
+  width: 168px;
+}
+
+.merchant-coupon-page .mc-type-select,
+.merchant-coupon-page .mc-range-select {
+  width: 140px;
+}
+
+.merchant-coupon-page .mc-status-select {
+  width: 110px;
+}
+
+.merchant-coupon-page .mc-coupon-select {
+  width: 220px;
+}
+
+.merchant-coupon-page .mc-member-input {
+  width: 220px;
+}
+
+.merchant-coupon-page .mall-query-actions .el-button {
+  min-width: 62px;
+  padding: 0 15px;
+}
+
+.merchant-coupon-page .mall-query-actions .el-button + .el-button {
+  margin-left: 0;
+}
+
+.merchant-coupon-page .mall-business-actions {
+  padding-left: 12px;
+}
+
+.merchant-coupon-page .mall-business-actions .el-button {
+  min-width: 104px;
+}
+
+/* ---------- 列表：优惠券 ---------- */
+/* 单元格结构选择器一律不挂页面作用域：对齐运行时把内容克隆到 body 下的探针里量自然宽，
+   `.merchant-coupon-page` 前缀在探针里不匹配，flex/尺寸丢失会让自然宽虚高，多元素列被误判满宽、
+   容器无法居中。类名仅本模块使用，去作用域不影响其它页面。 */
+.mc-coupon-cell {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.mc-type-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  color: var(--ym-brand);
+  border-radius: 8px;
+  background: var(--ym-brand-soft);
+}
+
+.mc-type-icon.t2 {
+  color: var(--ym-warning);
+  background: var(--ym-warning-soft);
+}
+
+.mc-type-icon.t3 {
+  color: var(--ym-info);
+  background: var(--ym-info-soft);
+}
+
+.mc-coupon-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mc-coupon-info b {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ym-ink);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-coupon-info small {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ym-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-value-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mc-value {
+  color: var(--ym-price);
+  font-family: var(--ym-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.mc-value.small {
+  font-size: 14px;
+}
+
+.mc-value-cell small {
+  color: var(--ym-muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.mc-scope {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mc-scope b {
+  color: var(--ym-ink-secondary);
+  font-size: 12px;
+}
+
+.mc-scope small {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ym-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-validity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mc-validity b {
+  color: var(--ym-ink-secondary);
+  font-family: var(--ym-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.mc-validity small {
+  color: var(--ym-muted);
+  font-family: var(--ym-font-mono);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.mc-stock {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: stretch;
+}
+
+.mc-stock-line {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.mc-stock-line b {
+  color: var(--ym-ink);
+  font-family: var(--ym-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mc-stock-line span {
+  color: var(--ym-muted);
+  font-size: 10px;
+}
+
+.mc-stock-line em {
+  margin-left: auto;
+  color: var(--ym-brand);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.mc-progress {
+  display: block;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--ym-paper);
+}
+
+.mc-progress i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ym-brand);
+}
+
+.mc-stock > small {
+  color: var(--ym-muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.mc-rules {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.mc-rules > b {
+  color: var(--ym-ink-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.mc-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mc-badge {
+  display: inline-flex;
+  height: 18px;
+  align-items: center;
+  padding: 0 6px;
+  color: var(--ym-brand);
+  border-radius: 4px;
+  background: var(--ym-brand-soft);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.mc-badge.group {
+  color: var(--ym-info);
+  background: var(--ym-info-soft);
+}
+
+.mc-badge.points {
+  color: var(--ym-warning);
+  background: var(--ym-warning-soft);
+}
+
+.mc-badge.muted {
+  color: var(--ym-muted);
+  background: var(--ym-paper);
+}
+
+.mc-status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.merchant-coupon-page .cell-sub {
+  display: block;
+  color: var(--ym-muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.mc-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.mc-row-actions .el-button {
+  height: 24px;
+  padding: 0 3px;
+  font-size: 12px;
+}
+
+.mc-row-actions .el-icon {
+  margin-left: 2px;
+}
+
+/* 时间列是单行文本，字体加载时序会让运行时按偏宽测量判成 trunc 并左对齐；
+   固定列宽下时间串始终放得下，这里直接回正，保证与其它单元素列一致居中。 */
+
+.merchant-coupon-page .mc-empty {
+  display: flex;
+  min-height: 230px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  padding: 30px 0;
+  color: var(--ym-muted);
+}
+
+.merchant-coupon-page .mc-empty b {
+  color: var(--ym-ink-secondary);
+  font-size: 13px;
+}
+
+.merchant-coupon-page .mc-empty span {
+  font-size: 12px;
+}
+
+/* ---------- 券表单 + 领券预览 ---------- */
+.el-dialog.mc-dialog {
+  max-width: calc(100vw - 40px);
+  padding: 20px;
+}
+
+.el-dialog.mc-dialog .el-dialog__header {
+  margin: 0;
+  padding: 0;
+}
+
+.el-dialog.mc-dialog .el-dialog__body {
+  max-height: calc(100vh - 180px);
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+}
+
+.mc-dialog-head span,
+.mc-confirm-dialog .mc-dialog-head span {
+  display: block;
+  color: var(--ym-muted);
+  font-family: var(--ym-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.mc-dialog-head h2,
+.mc-confirm-dialog .mc-dialog-head h2 {
+  margin: 4px 0 0;
+  color: var(--ym-ink);
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.mc-form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 22px;
+  margin-top: 16px;
+}
+
+.mc-form-main {
+  min-width: 0;
+}
+
+.mc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mc-form-grid .wide {
+  grid-column: 1 / -1;
+}
+
+.mc-form-grid .dialog-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mc-form-grid .dialog-field > span {
+  color: var(--ym-ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mc-form-grid .dialog-field > .el-input,
+.mc-form-grid .dialog-field > .el-select,
+.mc-form-grid .dialog-field > .el-date-editor {
+  width: 100%;
+}
+
+.mc-required {
+  color: var(--ym-danger);
+  font-style: normal;
+}
+
+.mc-dialog .el-input__wrapper,
+.mc-dialog .el-select__wrapper {
+  min-height: 36px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--ym-line-strong) inset;
+}
+
+.mc-dialog .el-input__inner,
+.mc-dialog .el-select__selected-item {
+  font-size: 12px;
+}
+
+.mc-dialog .el-textarea__inner {
+  padding: 8px 11px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--ym-line-strong) inset;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.mc-dialog .el-date-editor.el-input {
+  width: 100%;
+}
+
+.mc-dialog .el-input-group__prefix,
+.mc-dialog .el-input__prefix,
+.mc-dialog .el-input__suffix {
+  color: var(--ym-muted);
+  font-size: 11px;
+}
+
+.mc-type-seg {
+  display: flex;
+  gap: 8px;
+}
+
+.mc-type-seg button {
+  height: 36px;
+  flex: 1;
+  color: var(--ym-muted);
+  border: 1px solid var(--ym-line-strong);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.mc-type-seg button:hover {
+  color: var(--ym-brand);
+  border-color: var(--ym-brand);
+}
+
+.mc-type-seg button.active {
+  color: var(--ym-brand);
+  border-color: var(--ym-brand);
+  background: var(--ym-brand-soft);
+  font-weight: 700;
+}
+
+.mc-switch-lines {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 12px;
+  border: 1px solid var(--ym-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mc-switch-line {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid var(--ym-line);
+  cursor: pointer;
+}
+
+.mc-switch-line:last-child {
+  border-bottom: 0;
+}
+
+.mc-switch-line > span:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mc-switch-line b {
+  color: var(--ym-ink-secondary);
+  font-size: 11px;
+}
+
+.mc-switch-line small {
+  color: var(--ym-muted);
+  font-size: 10px;
+}
+
+.mc-switch {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  flex: 0 0 38px;
+  border-radius: 11px;
+  background: #d5ded8;
+  transition: background 0.16s ease;
+}
+
+.mc-switch input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.mc-switch i {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(19, 38, 28, 0.22);
+  transition: left 0.16s ease;
+  pointer-events: none;
+}
+
+.mc-switch.is-on {
+  background: var(--ym-brand);
+}
+
+.mc-switch.is-on i {
+  left: 19px;
+}
+
+.mc-form-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 10px;
+  color: var(--ym-danger);
+  border-radius: 6px;
+  background: var(--ym-danger-soft);
+  font-size: 11px;
+}
+
+.mc-form-aside {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.mc-preview-label {
+  margin-bottom: 8px;
+  color: var(--ym-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.mc-preview-ticket {
+  overflow: hidden;
+  padding: 17px 18px 18px;
+  color: #fff;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #1f5b47, #347e65);
+  box-shadow: 0 14px 30px rgba(18, 54, 40, 0.16);
+}
+
+.mc-preview-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  opacity: 0.86;
+}
+
+.mc-preview-brand em {
+  margin-left: auto;
+  padding: 2px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  font-size: 9px;
+  font-style: normal;
+}
+
+.mc-preview-value {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.mc-preview-value b {
+  font-family: var(--ym-font-display);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.mc-preview-value span {
+  padding-bottom: 3px;
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.mc-preview-dash {
+  margin: 16px 0 13px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.36);
+}
+
+.mc-preview-name {
+  display: block;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-preview-desc {
+  display: block;
+  margin-top: 6px;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.55;
+  opacity: 0.74;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-preview-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  font-size: 9px;
+  line-height: 1.5;
+  opacity: 0.76;
+}
+
+.mc-preview-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 13px;
+}
+
+.mc-preview-badges span {
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 9px;
+}
+
+.mc-preview-note {
+  margin: 12px 0 0;
+  color: var(--ym-muted);
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.mc-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ym-line);
+}
+
+.mc-dialog-actions .el-button {
+  min-width: 88px;
+  height: 36px;
+  font-size: 12px;
+}
+
+/* ---------- 删除确认 ---------- */
+.el-dialog.mc-confirm-dialog {
+  max-width: calc(100vw - 40px);
+  padding: 20px;
+}
+
+.el-dialog.mc-confirm-dialog .el-dialog__header {
+  margin: 0;
+  padding: 0;
+}
+
+.el-dialog.mc-confirm-dialog .el-dialog__body {
+  padding: 0;
+}
+
+.mc-confirm-text {
+  margin: 16px 0 0;
+  color: var(--ym-ink-secondary);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.mc-confirm-text b {
+  color: var(--ym-ink);
+}
+
+.mc-confirm-warning {
+  margin-top: 12px;
+  padding: 10px 12px;
+  color: var(--ym-warning);
+  border-radius: 6px;
+  background: var(--ym-warning-soft);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+/* ---------- 领取 / 使用记录 ---------- */
+.mc-member-cell {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+}
+
+.mc-avatar {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  color: var(--ym-brand);
+  border-radius: 50%;
+  background: var(--ym-brand-soft);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mc-member-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.mc-member-info b {
+  color: var(--ym-ink);
+  font-size: 12px;
+}
+
+.mc-member-info small {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ym-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-record-coupon-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.mc-record-coupon {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ym-ink-secondary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-order-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mc-order-no {
+  color: var(--ym-ink-secondary);
+  font-family: var(--ym-font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.mc-channel-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  font-size: 12px;
+}
+
+.mc-channel-cell small {
+  font-family: var(--ym-font-mono);
+  font-size: 9px;
+}
+
+.merchant-coupon-page .mc-muted {
+  color: var(--ym-muted);
+  font-size: 11px;
+}
+
+/* ---------- 记录详情抽屉 ---------- */
+.el-drawer.mc-record-drawer .el-drawer__header {
+  margin: 0;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--ym-line);
+}
+
+.el-drawer.mc-record-drawer .el-drawer__body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.mc-drawer-head span {
+  display: block;
+  color: var(--ym-muted);
+  font-family: var(--ym-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.mc-drawer-head h2 {
+  margin: 4px 0 0;
+  color: var(--ym-ink);
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.mc-detail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0 16px;
+}
+
+.mc-detail-heading > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mc-detail-heading span {
+  color: var(--ym-muted);
+  font-size: 11px;
+}
+
+.mc-detail-heading b {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-record-drawer .drawer-section {
+  padding: 15px 0;
+  border-top: 1px solid var(--ym-line);
+}
+
+.mc-record-drawer .drawer-section h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.mc-record-drawer .description-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  margin-top: 0;
+  border-top: 1px solid var(--ym-line);
+  border-left: 1px solid var(--ym-line);
+}
+
+.mc-record-drawer .description-grid > div {
+  display: flex;
+  min-height: 58px;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-right: 1px solid var(--ym-line);
+  border-bottom: 1px solid var(--ym-line);
+}
+
+.mc-record-drawer .description-grid > div.wide {
+  grid-column: 1 / -1;
+}
+
+.mc-record-drawer .description-grid span {
+  color: var(--ym-muted);
+  font-size: 11px;
+}
+
+.mc-record-drawer .description-grid b {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.mc-record-drawer .description-grid > div.mc-detail-status {
+  align-items: flex-start;
+}
+
+.mc-record-drawer .description-grid .mc-detail-status .status-ticket {
+  align-self: flex-start;
+  padding: 3px 9px;
+  font-size: 11px;
+}
+
+.mc-record-drawer .drawer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ym-line);
+}
+
+.mc-record-drawer .drawer-actions .el-button {
+  min-width: 88px;
+  height: 36px;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .mc-form-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mc-form-aside {
+    display: none;
+  }
+}

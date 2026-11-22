@@ -1,813 +1,947 @@
 <template>
-  <div class="mall-page">
-    <el-form :model="queryParams" ref="searchFormRef" :inline="true" v-show="showSearch">
-      <el-form-item label="优惠券名称">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入优惠券名称"
-          clearable
-          style="width: 200px"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="优惠券类型">
-        <el-select
-          v-model="queryParams.type"
-          placeholder="请选择优惠券类型"
-          clearable
-          style="width: 120px"
-        >
-          <el-option label="满减券" value="1" />
-          <el-option label="折扣券" value="2" />
-          <el-option label="无门槛券" value="3" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="状态">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择状态"
-          clearable
-          style="width: 120px"
-        >
-          <el-option label="启用" value="1" />
-          <el-option label="禁用" value="0" />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <el-icon><Search /></el-icon>
-          查询
-        </el-button>
-        <el-button @click="resetQuery">
-          <el-icon><Refresh /></el-icon>
-          重置
-        </el-button>
-      </el-form-item>
-    </el-form>
+  <div class="mall-page merchant-coupon-page">
+    <CouponPageTabs active="coupon" />
 
-    <el-row :gutter="10" class="mall-action-row">
-      <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增优惠券</el-button>
-      </el-col>
-      <MallListTools v-model:showSearch="showSearch" @refresh="getList" />
-    </el-row>
-
-    <el-table data-ym-table="r13" v-loading="loading" :data="couponList" style="width: 100%">
-      <el-table-column label="序号" type="index" width="80" />
-      <el-table-column prop="name" label="优惠券名称" min-width="150" />
-      <el-table-column label="支持拼团" width="100">
-        <template #default="scope">{{ scope.row.isSupportGroupBuy ? '支持' : '不支持' }}</template>
-      </el-table-column>
-      <el-table-column label="积分兑换" width="100">
-        <template #default="scope">{{ scope.row.isPointsExchangeEnabled ? '开放' : '不开放' }}</template>
-      </el-table-column>
-      <el-table-column prop="type" label="优惠券类型" width="100">
-        <template #default="scope">
-          {{ getTypeText(scope.row.type) }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="value" label="优惠金额/折扣" width="120">
-        <template #default="scope">
-          {{ scope.row.type === '2' ? scope.row.value + '%' : '¥' + scope.row.value }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="minAmount" label="使用条件" width="120">
-        <template #default="scope">
-          {{ scope.row.minAmount > 0 ? '满¥' + scope.row.minAmount : '无门槛' }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="startTime" label="开始时间" width="180" />
-      <el-table-column prop="endTime" label="结束时间" width="180" />
-      <el-table-column prop="totalCount" label="总数量" width="100" />
-      <el-table-column prop="receivedCount" label="已领取" width="100" />
-      <el-table-column prop="usedCount" label="已占用/使用" width="120" />
-      <el-table-column prop="status" label="状态" width="100">
-        <template #default="scope">
-          <el-tag :type="scope.row.status === '1' ? 'success' : 'danger'">
-            {{ scope.row.status === '1' ? '启用' : '禁用' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="150" fixed="right">
-        <template #default="scope">
-          <el-button link type="primary" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-dropdown @command="handleCouponAction($event, scope.row)">
-            <el-button link type="primary">更多</el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="status">{{ scope.row.status === '1' ? '禁用' : '启用' }}</el-dropdown-item>
-                <el-dropdown-item command="receive">领取记录</el-dropdown-item>
-                <el-dropdown-item command="record">使用记录</el-dropdown-item>
-                <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <div class="pagination-container" style="margin-top: 20px; text-align: right;">
-      <el-pagination
-        v-model:current-page="pagination.current"
-        v-model:page-size="pagination.size"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="Number(pagination.total)"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
-
-    <!-- 新增/编辑对话框 -->
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="800px">
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
-        <el-form-item label="优惠券名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入优惠券名称" />
-        </el-form-item>
-        <el-form-item label="优惠券类型" prop="type">
-          <el-radio-group v-model="form.type" @change="handleTypeChange">
-            <el-radio label="1">满减券</el-radio>
-            <el-radio label="2">折扣券</el-radio>
-            <el-radio label="3">无门槛券</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="优惠金额" prop="value" v-if="form.type === '1' || form.type === '3'">
-          <el-input-number v-model="form.value" :min="0.01" :step="0.01" style="width: 100%" placeholder="请输入优惠金额" />
-        </el-form-item>
-        <el-form-item label="折扣比例" prop="value" v-if="form.type === '2'">
-          <div style="display: flex; align-items: center; width: 100%">
-            <el-input-number v-model="form.value" :min="0.1" :max="0.99" :step="0.01" style="flex: 1" placeholder="请输入折扣比例" />
-            <span style="margin-left: 24px; font-size: 12px; color: var(--mall-muted, #65726a);">例如：0.85 表示 85 折</span>
-          </div>
-        </el-form-item>
-        <el-form-item label="使用门槛金额" prop="minAmount">
-          <el-input-number v-model="form.minAmount" :min="0" style="width: 100%" placeholder="请输入最低消费金额，0表示无门槛" :disabled="form.type === '3'" />
-        </el-form-item>
-        <el-form-item label="总数量" prop="totalCount">
-          <el-input-number v-model="form.totalCount" :min="1" style="width: 100%" placeholder="请输入优惠券总数量" />
-        </el-form-item>
-        <el-form-item label="每人限领" prop="perLimit">
-          <el-input-number v-model="form.perLimit" :min="1" style="width: 100%" placeholder="请输入每人限领数量" />
-        </el-form-item>
-        <el-form-item label="支持拼团">
-          <el-switch v-model="form.isSupportGroupBuy" active-text="支持" inactive-text="不支持" />
-        </el-form-item>
-        <el-form-item label="积分兑换">
-          <el-switch v-model="form.isPointsExchangeEnabled" active-text="开放" inactive-text="不开放" />
-          <span style="margin-left: 16px; color: var(--mall-muted, #65726a); font-size: 12px">开放后平台可将该券配置为积分商品</span>
-        </el-form-item>
-        <el-form-item label="开始时间" prop="startTime">
-          <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" />
-        </el-form-item>
-        <el-form-item label="结束时间" prop="endTime">
-          <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" />
-        </el-form-item>
-        <el-form-item label="使用范围" prop="useScope">
-          <el-radio-group v-model="form.useScope" @change="handleUseScopeChange">
-            <el-radio label="1">店铺通用</el-radio>
-            <el-radio label="2">指定商品</el-radio>
-            <el-radio label="3">指定分类</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="指定商品" prop="targetId" v-if="form.useScope === '2'">
-          <div style="display: flex; flex-direction: column; gap: 10px; width: 100%">
-            <div style="display: flex; align-items: center; gap: 10px">
-              <el-input v-model="form.targetId" placeholder="请选择商品" disabled style="flex: 1" />
-              <el-button type="primary" size="small" @click="openSpuSelectDialog">
-                选择商品
-              </el-button>
-            </div>
-            <div v-if="form.targetId" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e4e7ed; border-radius: 4px">
-              <el-image
-                v-if="form.targetImage"
-                :src="getImagePreviewUrl(form.targetImage)"
-                fit="cover"
-                style="width: 60px; height: 60px"
-                lazy
-              />
-              <div v-else style="width: 60px; height: 60px; border: 1px solid #e4e7ed; display: flex; align-items: center; justify-content: center; color: var(--mall-muted, #65726a)">
-                无图片
-              </div>
-              <div style="flex: 1">
-                <div style="font-weight: 500; margin-bottom: 4px">{{ form.targetName }}</div>
-                <div style="font-size: 12px; color: var(--mall-muted, #65726a)">商品 ID：{{ form.targetId }}</div>
-              </div>
-            </div>
-          </div>
-        </el-form-item>
-        <el-form-item label="指定分类" prop="targetId" v-if="form.useScope === '3'">
-          <el-tree-select
-            v-model="form.targetId"
-            :data="categoryTree"
-            :props="{ label: 'name', value: 'id', children: 'children' }"
-            placeholder="请选择商品分类"
-            check-strictly
-            :render-after-expand="false"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="form.status">
-            <el-radio label="1">启用</el-radio>
-            <el-radio label="0">禁用</el-radio>
-          </el-radio-group>
+    <section class="mall-filter-panel">
+      <el-form :inline="true" class="mall-query-form" @submit.prevent="handleSearch">
+        <div class="mc-filter-fields">
+          <el-form-item label="优惠券名称">
+            <el-input
+              v-model="draft.keyword"
+              class="mc-keyword"
+              clearable
+              placeholder="请输入优惠券名称"
+              @keyup.enter="handleSearch"
+            />
+          </el-form-item>
+          <el-form-item label="优惠券类型">
+            <el-select v-model="draft.type" class="mc-type-select" placeholder="全部类型">
+              <el-option label="全部类型" value="" />
+              <el-option label="满减券" value="1" />
+              <el-option label="折扣券" value="2" />
+              <el-option label="无门槛券" value="3" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="使用范围">
+            <el-select v-model="draft.useRange" class="mc-range-select" placeholder="全部范围">
+              <el-option label="全部范围" value="" />
+              <el-option label="店铺通用" value="1" />
+              <el-option label="指定商品" value="2" />
+              <el-option label="指定分类" value="3" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-select v-model="draft.status" class="mc-status-select" placeholder="全部状态">
+              <el-option label="全部状态" value="" />
+              <el-option label="启用" value="1" />
+              <el-option label="停用" value="0" />
+            </el-select>
+          </el-form-item>
+        </div>
+        <el-form-item class="mall-query-actions">
+          <el-button @click="resetQuery">重置</el-button>
+          <el-button type="primary" native-type="submit">
+            <el-icon><Search /></el-icon>查询
+          </el-button>
         </el-form-item>
       </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSubmit">确定</el-button>
-        </span>
+      <div class="mall-business-actions">
+        <el-button type="primary" @click="openCreate">
+          <el-icon><Plus /></el-icon>新增优惠券
+        </el-button>
+      </div>
+    </section>
+
+    <section class="mall-table-panel">
+      <el-table data-ym-table="r77" v-loading="loading" :data="coupons" row-key="id" style="width: 100%">
+        <el-table-column label="优惠券" min-width="248" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="mc-coupon-cell">
+              <span class="mc-type-icon" :class="`t${row.type}`">
+                <el-icon :size="18"><Ticket /></el-icon>
+              </span>
+              <span class="mc-coupon-info">
+                <b :title="row.name">{{ row.name }}</b>
+                <small :title="row.description || typeText(row.type)">{{ row.description || typeText(row.type) }}</small>
+              </span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="优惠内容" min-width="125" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="mc-value-cell">
+              <b class="mc-value">{{ valueText(row) }}</b>
+              <small>{{ conditionText(row) }}</small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="使用范围" min-width="155" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="mc-scope">
+              <b>{{ rangeText(row.useRange) }}</b>
+              <small :title="scopeDetail(row)">{{ scopeDetail(row) }}</small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="有效期" min-width="145" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="mc-validity">
+              <b>{{ shortDate(row.beginTime) }}</b>
+              <small>至 {{ shortDate(row.endTime) }}</small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="发行 / 领取 / 核销" min-width="165" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="mc-stock">
+              <div class="mc-stock-line">
+                <b>{{ row.received || 0 }}</b>
+                <span>/ {{ row.quantity || 0 }} 张</span>
+                <em>{{ receivePct(row) }}%</em>
+              </div>
+              <span class="mc-progress"><i :style="{ width: `${receivePct(row)}%` }"></i></span>
+              <small>已核销 {{ row.used || 0 }} 张 · 剩余 {{ remaining(row) }} 张</small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="领取规则" min-width="140" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="mc-rules">
+              <b>每人限领 {{ row.perLimit }} 张</b>
+              <small class="mc-badges">
+                <span v-if="row.isSupportGroupBuy" class="mc-badge group">支持拼团</span>
+                <span v-if="row.isPointsExchangeEnabled" class="mc-badge points">积分兑换</span>
+                <span v-if="!row.isSupportGroupBuy && !row.isPointsExchangeEnabled" class="mc-badge muted">普通领取</span>
+              </small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" min-width="80" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="mc-status-cell">
+              <span class="status-ticket" :class="`tone-${couponState(row).tone}`">{{ couponState(row).label }}</span>
+              <small v-if="row.isEnabled && couponState(row).label !== '已停用'" class="cell-sub">
+                {{ couponState(row).label === '进行中' ? '启用中' : '已启用' }}
+              </small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="130" fixed="right" align="center" header-align="center">
+          <template #default="{ row }">
+            <div class="mc-row-actions">
+              <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
+              <el-dropdown trigger="click" popper-class="mp-row-menu" @command="(command) => handleCommand(command, row)">
+                <el-button link type="primary">
+                  更多<el-icon><ArrowDown /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="toggle-status">{{ row.isEnabled ? '停用优惠券' : '启用优惠券' }}</el-dropdown-item>
+                    <el-dropdown-item command="receive">查看领取记录</el-dropdown-item>
+                    <el-dropdown-item command="usage">查看使用记录</el-dropdown-item>
+                    <el-dropdown-item command="delete" divided class="mp-danger-action">删除优惠券</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+          </template>
+        </el-table-column>
+
+        <template #empty>
+          <div class="mc-empty">
+            <el-icon :size="28"><Ticket /></el-icon>
+            <b>没有匹配的优惠券</b>
+            <span>调整筛选条件后重新查询</span>
+          </div>
+        </template>
+      </el-table>
+
+      <MallPagination
+        :total="pagination.total"
+        :page="pagination.current"
+        :limit="pagination.pageSize"
+        @pagination="changePage"
+      />
+    </section>
+
+    <el-dialog v-model="editor.visible" width="940px" class="mc-dialog" align-center>
+      <template #header>
+        <div class="mc-dialog-head">
+          <span>{{ editor.mode === 'edit' ? 'EDIT COUPON' : 'CREATE COUPON' }}</span>
+          <h2>{{ editor.mode === 'edit' ? '编辑优惠券' : '新增优惠券' }}</h2>
+        </div>
       </template>
+
+      <div class="mc-form-layout">
+        <div class="mc-form-main">
+          <div class="mc-form-grid">
+            <label class="dialog-field wide">
+              <span>优惠券名称 <em class="mc-required">*</em></span>
+              <el-input v-model="form.name" maxlength="40" placeholder="例如：全店满 199 减 20" />
+            </label>
+
+            <div class="dialog-field wide">
+              <span>优惠券类型</span>
+              <div class="mc-type-seg">
+                <button
+                  v-for="item in TYPE_OPTIONS"
+                  :key="item.value"
+                  type="button"
+                  :class="form.type === item.value ? 'active' : ''"
+                  @click="switchType(item.value)"
+                >
+                  {{ item.label }}
+                </button>
+              </div>
+            </div>
+
+            <label class="dialog-field">
+              <span>{{ form.type === '2' ? '折扣力度' : '优惠金额' }} <em class="mc-required">*</em></span>
+              <el-input v-if="form.type === '2'" v-model="form.discount" type="number" min="0.1" max="9.9" step="0.1" placeholder="请输入折扣">
+                <template #suffix>折</template>
+              </el-input>
+              <el-input v-else v-model="form.amount" type="number" min="0.01" step="0.01" placeholder="请输入优惠金额">
+                <template #prefix>¥</template>
+              </el-input>
+            </label>
+
+            <label class="dialog-field">
+              <span>使用门槛 {{ form.type === '3' ? '（无门槛）' : '' }} <em v-if="form.type !== '3'" class="mc-required">*</em></span>
+              <el-input v-model="form.minAmount" type="number" min="0" step="0.01" :disabled="form.type === '3'" placeholder="请输入使用门槛">
+                <template #prefix>¥</template>
+              </el-input>
+            </label>
+
+            <label class="dialog-field">
+              <span>发行总量 <em class="mc-required">*</em></span>
+              <el-input v-model="form.quantity" type="number" min="1" step="1" placeholder="请输入发行总量" />
+            </label>
+
+            <label class="dialog-field">
+              <span>每人限领 <em class="mc-required">*</em></span>
+              <el-input v-model="form.perLimit" type="number" min="1" step="1" placeholder="请输入每人限领数量" />
+            </label>
+
+            <label class="dialog-field" :class="{ wide: form.useRange === '1' }">
+              <span>使用范围</span>
+              <el-select v-model="form.useRange" @change="handleRangeChange">
+                <el-option label="店铺通用" value="1" />
+                <el-option label="指定商品" value="2" />
+                <el-option label="指定分类" value="3" />
+              </el-select>
+            </label>
+
+            <label v-if="form.useRange === '2'" class="dialog-field">
+              <span>适用商品 <em class="mc-required">*</em></span>
+              <el-select
+                v-model="form.targetId"
+                filterable
+                remote
+                :remote-method="searchProductOptions"
+                :loading="productLoading"
+                placeholder="请选择商品"
+              >
+                <el-option v-for="item in productOptions" :key="item.id" :label="item.name" :value="item.id" />
+              </el-select>
+            </label>
+
+            <label v-if="form.useRange === '3'" class="dialog-field">
+              <span>适用分类 <em class="mc-required">*</em></span>
+              <el-select v-model="form.targetId" filterable placeholder="请选择分类">
+                <el-option v-for="item in categoryOptions" :key="item.id" :label="item.name" :value="item.id" />
+              </el-select>
+            </label>
+
+            <label class="dialog-field">
+              <span>开始时间 <em class="mc-required">*</em></span>
+              <el-date-picker
+                v-model="form.beginTime"
+                type="datetime"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                format="YYYY-MM-DD HH:mm"
+                placeholder="选择开始时间"
+              />
+            </label>
+
+            <label class="dialog-field">
+              <span>结束时间 <em class="mc-required">*</em></span>
+              <el-date-picker
+                v-model="form.endTime"
+                type="datetime"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                format="YYYY-MM-DD HH:mm"
+                placeholder="选择结束时间"
+              />
+            </label>
+
+            <label class="dialog-field wide">
+              <span>使用说明</span>
+              <el-input
+                v-model="form.description"
+                type="textarea"
+                :rows="3"
+                maxlength="200"
+                placeholder="选填，买家在领券中心和优惠券详情中可见"
+              />
+            </label>
+
+            <div class="mc-switch-lines wide">
+              <label class="mc-switch-line">
+                <span><b>支持拼团</b><small>允许在拼团订单中使用本券</small></span>
+                <span class="mc-switch" :class="{ 'is-on': form.isSupportGroupBuy }">
+                  <input v-model="form.isSupportGroupBuy" type="checkbox" />
+                  <i></i>
+                </span>
+              </label>
+              <label class="mc-switch-line">
+                <span><b>积分兑换</b><small>允许在积分商城使用积分兑换本券</small></span>
+                <span class="mc-switch" :class="{ 'is-on': form.isPointsExchangeEnabled }">
+                  <input v-model="form.isPointsExchangeEnabled" type="checkbox" />
+                  <i></i>
+                </span>
+              </label>
+              <label class="mc-switch-line">
+                <span><b>立即启用</b><small>启用后买家可在领券中心看到并领取</small></span>
+                <span class="mc-switch" :class="{ 'is-on': form.isEnabled }">
+                  <input v-model="form.isEnabled" type="checkbox" />
+                  <i></i>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div v-if="editor.error" class="mc-form-error">
+            <el-icon :size="15"><Warning /></el-icon>
+            <span>{{ editor.error }}</span>
+          </div>
+        </div>
+
+        <aside class="mc-form-aside">
+          <span class="mc-preview-label">领券中心展示预览</span>
+          <div class="mc-preview-ticket">
+            <div class="mc-preview-brand">
+              <el-icon :size="14"><Shop /></el-icon>
+              <span>{{ shopName }}</span>
+              <em>{{ typeText(form.type) }}</em>
+            </div>
+            <div class="mc-preview-value">
+              <b>{{ previewValue }}</b>
+              <span>{{ previewCondition }}</span>
+            </div>
+            <div class="mc-preview-dash"></div>
+            <b class="mc-preview-name">{{ form.name.trim() || '优惠券名称' }}</b>
+            <span class="mc-preview-desc">{{ form.description.trim() || '使用说明将展示在这里' }}</span>
+            <div class="mc-preview-meta">
+              <span>{{ previewScope }}</span>
+              <span>{{ shortDate(form.beginTime) || '开始日期' }} 至 {{ shortDate(form.endTime) || '结束日期' }}</span>
+              <span>发行 {{ Number(form.quantity || 0) || '—' }} 张 · 每人限领 {{ Number(form.perLimit || 0) || '—' }} 张</span>
+            </div>
+            <div class="mc-preview-badges">
+              <span v-if="form.isSupportGroupBuy">支持拼团</span>
+              <span v-if="form.isPointsExchangeEnabled">积分兑换</span>
+              <span>{{ form.isEnabled ? '启用中' : '停用' }}</span>
+            </div>
+          </div>
+          <p class="mc-preview-note">会员领取后会生成优惠券快照，后续修改或删除本券不会影响已领取的券。</p>
+        </aside>
+      </div>
+
+      <div class="mc-dialog-actions">
+        <el-button @click="editor.visible = false">取消</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ editor.mode === 'edit' ? '保存修改' : '确认创建' }}</el-button>
+      </div>
     </el-dialog>
 
-    <!-- SPU选择对话框 -->
-    <el-dialog
-      title="选择商品"
-      v-model="spuSelectDialogVisible"
-      width="800px"
-    >
-      <!-- SPU搜索 -->
-      <div class="mb-4">
-        <el-input
-          v-model="spuSearchKeyword"
-          placeholder="请输入商品名称搜索"
-          clearable
-          style="width: 100%"
-          @keyup.enter="loadSpuList"
-        >
-          <template #append>
-            <el-button @click="loadSpuList"><el-icon><Search /></el-icon></el-button>
-          </template>
-        </el-input>
-      </div>
-
-      <!-- SPU列表 -->
-      <div v-if="spuList.length > 0" class="mb-4">
-        <el-table data-ym-table="r14" :data="spuList" style="width: 100%" @row-click="handleSpuRowClick">
-          <el-table-column type="index" label="序号" width="80" />
-          <el-table-column prop="name" label="商品名称" min-width="300" />
-          <el-table-column label="商品图片" width="120">
-            <template #default="scope">
-              <el-image
-                v-if="scope.row.mainImage"
-                :src="getImagePreviewUrl(scope.row.mainImage)"
-                fit="cover"
-                style="width: 80px; height: 80px"
-                lazy
-              />
-              <el-empty v-else description="无图片" style="width: 80px; height: 80px" />
-            </template>
-          </el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="180" />
-          <el-table-column label="操作" width="120" fixed="right">
-            <template #default="scope">
-              <el-button
-                size="small"
-                type="primary"
-                @click="selectSpu(scope.row)"
-              >
-                选择
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-      <el-empty v-else description="暂无商品数据" class="mb-4" />
-
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="spuSelectDialogVisible = false">取消</el-button>
-        </span>
+    <el-dialog v-model="deleteState.visible" width="460px" class="mc-confirm-dialog" align-center>
+      <template #header>
+        <div class="mc-dialog-head">
+          <span>DELETE COUPON</span>
+          <h2>删除优惠券</h2>
+        </div>
       </template>
+      <p v-if="deleteState.row" class="mc-confirm-text">
+        确定删除「<b>{{ deleteState.row.name }}</b>」吗？删除后买家将无法继续领取。
+      </p>
+      <div v-if="deleteState.row && deleteState.row.received > 0" class="mc-confirm-warning">
+        该券已被领取 {{ deleteState.row.received }} 张，其中已核销 {{ deleteState.row.used }} 张。会员已领取的券不会被收回，仍可在有效期内使用。
+      </div>
+      <div class="mc-dialog-actions">
+        <el-button @click="deleteState.visible = false">取消</el-button>
+        <el-button type="danger" :loading="deleteState.loading" @click="confirmDelete">确认删除</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { getStoragePreviewUrl } from '@/utils/storage'
-import { getCurrentShop } from '@/utils/shop'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox, ElIcon } from 'element-plus'
-import { Plus, Search, Refresh, Edit, Delete, Check, View } from '@element-plus/icons-vue'
-import { getMchCouponList, createMchCoupon, updateMchCoupon, deleteMchCoupon, updateMchCouponStatus, getSpuDetail } from '@/api/mall/mchCoupon'
-import { queryMchSpuList } from '@/api/mall/seckill'
+import { ElMessage } from 'element-plus'
+import { ArrowDown, Plus, Search, Shop, Ticket, Warning } from '@element-plus/icons-vue'
 import { getCategoryTree } from '@/api/mall/category'
-import MallListTools from '@/components/mall/MallListTools.vue'
+import {
+  createMchCoupon,
+  deleteMchCoupon,
+  getMchCouponList,
+  getSpuDetail,
+  updateMchCoupon,
+  updateMchCouponStatus,
+} from '@/api/mall/mchCoupon'
+import { queryMchSpuList } from '@/api/mall/seckill'
+import { getCurrentShop } from '@/utils/shop'
+import MallPagination from '@/components/mall/MallPagination.vue'
+import CouponPageTabs from '../components/CouponPageTabs.vue'
+import '@/assets/yeah-mall-coupon.css'
 
-// 路由
+defineOptions({ name: 'MchCouponList' })
+
+const TYPE_OPTIONS = [
+  { value: '1', label: '满减券' },
+  { value: '2', label: '折扣券' },
+  { value: '3', label: '无门槛券' },
+]
+const TYPE_TEXT = { 1: '满减券', 2: '折扣券', 3: '无门槛券' }
+const RANGE_TEXT = { 1: '店铺通用', 2: '指定商品', 3: '指定分类' }
+
 const router = useRouter()
+const shopName = getCurrentShop()?.name || '当前店铺'
 
-// 响应式数据
 const loading = ref(false)
-const dialogVisible = ref(false)
-const dialogTitle = ref('新增优惠券')
-const formRef = ref(null)
-const showSearch = ref(true)
+const saving = ref(false)
+const coupons = ref([])
+const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
 
-// SPU选择对话框相关
-const spuSelectDialogVisible = ref(false)
-const spuSearchKeyword = ref('')
-const spuList = ref([])
-const loadingSpu = ref(false)
+const emptyQuery = () => ({ keyword: '', type: '', useRange: '', status: '' })
+const draft = reactive(emptyQuery())
+const query = reactive(emptyQuery())
 
-// 分类选择相关
-const categoryTree = ref([])
+const editor = reactive({ visible: false, mode: 'create', origin: null, error: '' })
+const form = reactive({})
+const deleteState = reactive({ visible: false, row: null, loading: false })
 
-// 查询参数
-const queryParams = reactive({
-  name: '',
-  type: '',
-  status: ''
+const productOptions = ref([])
+const baseProductOptions = ref([])
+const productLoading = ref(false)
+const productNames = reactive(new Map())
+const categoryOptions = ref([])
+const categoryNames = reactive(new Map())
+const pendingSpuIds = new Set()
+let productLoadPromise = null
+let categoryLoadPromise = null
+let productSearchSeq = 0
+
+const shopId = () => getCurrentShop()?.id || ''
+
+function pad(value) {
+  return String(value).padStart(2, '0')
+}
+
+function dateText(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+function defaultForm() {
+  const today = new Date()
+  const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 40)
+  return {
+    id: '',
+    name: '',
+    description: '',
+    type: '1',
+    amount: '20',
+    discount: '9',
+    minAmount: '199',
+    quantity: '100',
+    perLimit: '1',
+    useRange: '1',
+    targetId: '',
+    beginTime: `${dateText(today)} 00:00:00`,
+    endTime: `${dateText(end)} 23:59:59`,
+    isEnabled: true,
+    isSupportGroupBuy: false,
+    isPointsExchangeEnabled: false,
+  }
+}
+
+Object.assign(form, defaultForm())
+
+watch(
+  form,
+  () => {
+    if (editor.error) editor.error = ''
+  },
+  { deep: true },
+)
+
+function toTime(value) {
+  if (!value) return 0
+  const parsed = new Date(String(value).replace(' ', 'T')).getTime()
+  return Number.isNaN(parsed) ? 0 : parsed
+}
+
+function toDbTime(value) {
+  if (!value) return ''
+  const text = String(value).replace('T', ' ').slice(0, 19)
+  return text.length === 16 ? `${text}:00` : text
+}
+
+function shortDate(value) {
+  return String(value || '').replace('T', ' ').slice(0, 10)
+}
+
+function typeText(type) {
+  return TYPE_TEXT[Number(type)] || '—'
+}
+
+function rangeText(range) {
+  return RANGE_TEXT[Number(range)] || '—'
+}
+
+function valueText(row) {
+  if (Number(row.type) === 2) {
+    return `${Number((Number(row.discount || 0) * 10).toFixed(2))} 折`
+  }
+  return `¥${Number(row.amount || 0)}`
+}
+
+function conditionText(row) {
+  if (Number(row.type) === 3) return '无门槛'
+  return Number(row.minAmount || 0) > 0 ? `满 ¥${Number(row.minAmount)} 可用` : '无门槛'
+}
+
+function scopeDetail(row) {
+  const range = Number(row.useRange)
+  if (range === 1) return '全部商品可用'
+  const id = String(row.targetId || '')
+  const name = (range === 2 ? productNames.get(id) : categoryNames.get(id)) || ''
+  return name || '—'
+}
+
+function receivePct(row) {
+  return Math.min(100, Math.round((Number(row.received || 0) * 100) / Math.max(1, Number(row.quantity || 0))))
+}
+
+function remaining(row) {
+  return Math.max(0, Number(row.quantity || 0) - Number(row.received || 0))
+}
+
+function couponState(row) {
+  if (!row.isEnabled) return { label: '已停用', tone: 'neutral' }
+  const now = Date.now()
+  const begin = toTime(row.beginTime)
+  const end = toTime(row.endTime)
+  if (begin && now < begin) return { label: '未开始', tone: 'info' }
+  if (end && now > end) return { label: '已结束', tone: 'neutral' }
+  if (Number(row.received || 0) >= Number(row.quantity || 0)) return { label: '已领完', tone: 'warning' }
+  return { label: '进行中', tone: 'success' }
+}
+
+const previewValue = computed(() => {
+  if (form.type === '2') return `${Number(form.discount || 0) || '—'} 折`
+  return `¥${Number(form.amount || 0) || '—'}`
 })
 
-// 分页参数
-const pagination = reactive({
-  current: 1,
-  size: 10,
-  total: 0
+const previewCondition = computed(() => {
+  if (form.type === '3') return '无门槛'
+  return `满 ¥${Number(form.minAmount || 0) || '—'} 可用`
 })
 
-// 表单数据
-const form = reactive({
-  id: '',
-  name: '',
-  type: '1',
-  value: 0,
-  minAmount: 0,
-  totalCount: 100,
-  perLimit: 1,
-  isSupportGroupBuy: false,
-  isPointsExchangeEnabled: false,
-  startTime: '',
-  endTime: '',
-  useScope: '1',
-  targetId: '',
-  targetName: '',
-  targetImage: '',
-  status: '1'
+const previewScope = computed(() => {
+  const range = rangeText(form.useRange)
+  if (form.useRange === '1') return range
+  const id = String(form.targetId || '')
+  const name =
+    (form.useRange === '2' ? productNames.get(id) : categoryNames.get(id)) ||
+    [...productOptions.value, ...categoryOptions.value].find((item) => item.id === id)?.name ||
+    ''
+  return name ? `${range} · ${name}` : range
 })
 
-// 表单规则
-const rules = reactive({
-  name: [{ required: true, message: '请输入优惠券名称', trigger: 'blur' }],
-  type: [{ required: true, message: '请选择优惠券类型', trigger: 'change' }],
-  value: [{ required: true, message: '请输入优惠金额/折扣', trigger: 'blur' }],
-  minAmount: [{ required: true, message: '请输入使用金额门槛', trigger: 'blur' }],
-  totalCount: [{ required: true, message: '请输入总数量', trigger: 'blur' }],
-  perLimit: [{ required: true, message: '请输入每人限领数量', trigger: 'blur' }],
-  startTime: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
-  endTime: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
-  useScope: [{ required: true, message: '请选择使用范围', trigger: 'change' }],
-  targetId: [{
-    required: true,
-    message: '请选择指定商品',
-    trigger: 'blur',
-    validator: (rule, value, callback) => {
-      if (form.useScope === '2' && !value) {
-        callback(new Error('请选择指定商品'))
-      } else {
-        callback()
-      }
-    }
-  }],
-  status: [{ required: true, message: '请选择状态', trigger: 'change' }]
-})
-
-// 优惠券列表
-const couponList = ref([])
-
-// 初始化
-onMounted(() => {
-  getList()
-})
-
-// 获取优惠券列表
-function getList() {
+async function getList() {
+  const currentShopId = shopId()
+  if (!currentShopId) {
+    ElMessage.warning('请先选择店铺')
+    return
+  }
   loading.value = true
-  const params = {
-    conditions_: `createTime:sort:desc`,
-    size: pagination.size,
-    current: pagination.current,
-    shopId: getShopId()
-  }
+  try {
+    let conditions = 'createTime:sort:desc'
+    const keyword = query.keyword.trim().replace(/;/g, '')
+    if (keyword) conditions += `;name:like:${keyword}`
+    if (query.type) conditions += `;type:eq:${query.type}`
+    if (query.useRange) conditions += `;useRange:eq:${query.useRange}`
+    if (query.status) conditions += `;isEnabled:eq:${query.status}`
 
-  // 合并查询参数
-  if (queryParams.name) {
-    params.conditions_ += `;name:like:${queryParams.name}`
-  }
-  if (queryParams.type) {
-    params.conditions_ += `;type:eq:${queryParams.type}`
-  }
-  if (queryParams.status) {
-    params.conditions_ += `;isEnabled:eq:${queryParams.status === '1' ? 1 : 0}`
-  }
-
-  // 调用真实API
-  getMchCouponList(params).then(res => {
-    if (res.code === 0) {
-      // 转换数据格式以匹配前端期望
-      couponList.value = res.data.records.map(item => ({
-        id: item.id,
-        name: item.name,
-        type: item.type.toString(),
-        value: item.type === 2 ? item.discount * 100 : item.amount,
-        minAmount: item.minAmount,
-        startTime: item.beginTime,
-        endTime: item.endTime,
-        totalCount: item.quantity,
-        perLimit: item.perLimit,
-        isSupportGroupBuy: Boolean(item.isSupportGroupBuy),
-        isPointsExchangeEnabled: Boolean(item.isPointsExchangeEnabled),
-        receivedCount: item.received,
-        usedCount: item.used,
-        status: item.isEnabled ? '1' : '0',
-        useScope: item.useRange ? item.useRange.toString() : '1',
-        targetId: item.targetId || ''
-      }))
-      pagination.total = res.data.total
-    } else {
-      ElMessage.error(res.message || '获取优惠券列表失败')
-    }
+    const result = await getMchCouponList({
+      shopId: currentShopId,
+      conditions_: conditions,
+      current: pagination.current,
+      size: pagination.pageSize,
+    })
+    coupons.value = result.data?.records || []
+    pagination.total = Number(result.data?.total || 0)
+    resolveRowTargets(coupons.value)
+  } catch {
+    // 接口层已统一提示错误。
+  } finally {
     loading.value = false
-  }).catch(() => {
-    ElMessage.error('获取优惠券列表失败')
-    loading.value = false
+  }
+}
+
+function applyDraft() {
+  Object.assign(query, {
+    keyword: draft.keyword.trim(),
+    type: draft.type,
+    useRange: draft.useRange,
+    status: draft.status,
   })
 }
 
-// 获取店铺ID
-function getShopId() {
-  return getCurrentShop()?.id || ''
-}
-
-// 获取分类树
-async function fetchCategoryTree() {
-  const res = await getCategoryTree({ shopId: getShopId() })
-  categoryTree.value = res.data || []
-}
-
-// 新增优惠券
-function handleAdd() {
-  dialogTitle.value = '新增优惠券'
-  form.id = ''
-  form.name = ''
-  form.type = '1'
-  form.value = 0
-  form.minAmount = 0
-  form.totalCount = 100
-  form.perLimit = 1
-  form.isSupportGroupBuy = false
-  form.isPointsExchangeEnabled = false
-  form.startTime = ''
-  form.endTime = ''
-  form.useScope = '1'
-  form.targetId = ''
-  form.targetName = ''
-  form.targetImage = ''
-  form.status = '0' // 默认禁用状态
-  dialogVisible.value = true
-}
-
-// 编辑优惠券
-function handleEdit(row) {
-  dialogTitle.value = '编辑优惠券'
-  // 复制所有字段
-  form.id = row.id
-  form.name = row.name
-  form.type = row.type
-  form.value = row.value
-  form.minAmount = row.minAmount
-  form.totalCount = row.totalCount
-  form.perLimit = row.perLimit
-  form.isSupportGroupBuy = Boolean(row.isSupportGroupBuy)
-  form.isPointsExchangeEnabled = Boolean(row.isPointsExchangeEnabled)
-  form.startTime = row.startTime
-  form.endTime = row.endTime
-  form.useScope = row.useScope || '1'
-  form.targetId = row.targetId || ''
-  form.targetName = row.targetName || ''
-  form.targetImage = row.targetImage || ''
-  form.status = row.status
-
-  // 如果使用范围是商品且有targetId，调用SPU详情接口获取商品信息
-  if (form.useScope === '2' && form.targetId) {
-    loading.value = true
-    getSpuDetail(form.targetId).then(res => {
-      if (res.code === 0) {
-        const spu = res.data
-        form.targetName = spu.name
-        form.targetImage = spu.mainImage
-      } else {
-        ElMessage.error('获取商品信息失败')
-      }
-      loading.value = false
-      dialogVisible.value = true
-    }).catch(() => {
-      ElMessage.error('获取商品信息失败')
-      loading.value = false
-      dialogVisible.value = true
-    })
-  } else if (form.useScope === '3' && form.targetId) {
-    // 如果使用范围是分类且有targetId，先加载分类树数据
-    loading.value = true
-    fetchCategoryTree().then(() => {
-      loading.value = false
-      dialogVisible.value = true
-    }).catch(() => {
-      ElMessage.error('获取分类树失败')
-      loading.value = false
-      dialogVisible.value = true
-    })
-  } else {
-    dialogVisible.value = true
-  }
-}
-
-// 处理优惠券类型变更
-function handleTypeChange() {
-  if (form.type === '3') {
-    form.minAmount = 0
-  }
-}
-
-// 处理使用范围变更
-function handleUseScopeChange() {
-  if (form.useScope === '3') {
-    fetchCategoryTree()
-  }
-  if (form.useScope !== '2' && form.useScope !== '3') {
-    form.targetId = '0'
-    form.targetName = ''
-    form.targetImage = ''
-  }
-}
-
-// 打开SPU选择对话框
-function openSpuSelectDialog() {
-  // 打开对话框前加载SPU列表
-  loadSpuList()
-  spuSelectDialogVisible.value = true
-}
-
-// 加载SPU列表
-function loadSpuList() {
-  loadingSpu.value = true
-  const params = {
-    shopId: getShopId(),
-    size: 100,
-    current: 1
-  }
-
-  // 添加搜索关键词
-  if (spuSearchKeyword.value) {
-    params.name = spuSearchKeyword.value
-  }
-
-  queryMchSpuList(params)
-    .then(response => {
-      const data = response.data
-      spuList.value = data.records || []
-    })
-    .catch(error => {
-      ElMessage.error('获取商品列表失败: ' + (error.message || '未知错误'))
-      spuList.value = []
-    })
-    .finally(() => {
-      loadingSpu.value = false
-    })
-}
-
-// 选择SPU
-function selectSpu(spu) {
-  if (spu) {
-    form.targetId = spu.id
-    form.targetName = spu.name
-    form.targetImage = spu.mainImage
-    spuSelectDialogVisible.value = false
-  }
-}
-
-// 处理表格行点击
-function handleSpuRowClick(row) {
-  selectSpu(row)
-}
-
-// 获取图片预览URL
-function getImagePreviewUrl(fileKey) {
-  return getStoragePreviewUrl(fileKey)
-}
-
-// 提交表单
-function handleSubmit() {
-  formRef.value.validate((valid) => {
-    if (valid) {
-      loading.value = true
-      // 根据使用范围设置targetId
-      let targetIdValue = '0';
-      if (form.useScope === '1') {
-        // 店铺通用，传'0'
-        targetIdValue = '0';
-      } else if (form.useScope === '2') {
-        // 指定商品，使用spu的id
-        targetIdValue = form.targetId || '0';
-      } else if (form.useScope === '3') {
-        // 指定分类，使用分类ID
-        targetIdValue = form.targetId || '0';
-      }
-
-      const submitData = {
-        shopId: getShopId(),
-        name: form.name,
-        description: form.name,
-        type: parseInt(form.type),
-        amount: form.type === '2' ? '0' : form.value.toString(),
-        discount: form.type === '2' ? form.value.toString() : '1',
-        minAmount: form.minAmount.toString(),
-        quantity: form.totalCount,
-        received: 0,
-        used: 0,
-        perLimit: form.perLimit,
-        isSupportGroupBuy: form.isSupportGroupBuy,
-        isPointsExchangeEnabled: form.isPointsExchangeEnabled,
-        useRange: parseInt(form.useScope),
-        targetId: targetIdValue,
-        beginTime: form.startTime,
-        endTime: form.endTime,
-        sort: 3,
-        isEnabled: form.status === '1' ? 1 : 0,
-        remark: ''
-      }
-
-      if (form.id) {
-        // 编辑
-        submitData.id = form.id
-        updateMchCoupon(submitData).then(res => {
-          if (res.code === 0) {
-            ElMessage.success('编辑成功')
-            dialogVisible.value = false
-            getList()
-          } else {
-            ElMessage.error(res.message || '编辑失败')
-          }
-          loading.value = false
-        }).catch(() => {
-          ElMessage.error('编辑失败')
-          loading.value = false
-        })
-      } else {
-        // 新增
-        createMchCoupon(submitData).then(res => {
-          if (res.code === 0) {
-            ElMessage.success('新增成功')
-            dialogVisible.value = false
-            getList()
-          } else {
-            ElMessage.error(res.message || '新增失败')
-          }
-          loading.value = false
-        }).catch(() => {
-          ElMessage.error('新增失败')
-          loading.value = false
-        })
-      }
-    }
-  })
-}
-
-// 删除优惠券
-function handleDelete(id) {
-  ElMessageBox.confirm('确定要删除该优惠券吗？', '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    loading.value = true
-    deleteMchCoupon([id]).then(res => {
-      if (res.code === 0) {
-        ElMessage.success('删除成功')
-        getList()
-      } else {
-        ElMessage.error(res.message || '删除失败')
-      }
-      loading.value = false
-    }).catch(() => {
-      ElMessage.error('删除失败')
-      loading.value = false
-    })
-  })
-}
-
-// 状态变更
-function handleStatusChange(row) {
-  const newStatus = row.status === '1' ? '0' : '1'
-  ElMessageBox.confirm(`确定要${newStatus === '1' ? '启用' : '禁用'}该优惠券吗？`, '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    loading.value = true
-    updateMchCouponStatus({
-      id: row.id,
-      isEnabled: newStatus === '1' ? true : false
-    }).then(res => {
-      if (res.code === 0) {
-        ElMessage.success('状态更新成功')
-        getList()
-      } else {
-        ElMessage.error(res.message || '状态更新失败')
-      }
-      loading.value = false
-    }).catch(() => {
-      ElMessage.error('状态更新失败')
-      loading.value = false
-    })
-  })
-}
-
-// 跳转到领取记录
-function navigateToReceive(couponId) {
-  router.push({
-    path: '/mall/mch-coupon/receive',
-    query: { couponId }
-  })
-}
-
-// 跳转到使用记录
-function navigateToRecord(couponId) {
-  router.push({
-    path: '/mall/mch-coupon/record',
-    query: { couponId }
-  })
-}
-
-function handleCouponAction(command, row) {
-  if (command === 'status') return handleStatusChange(row)
-  if (command === 'receive') return navigateToReceive(row.id)
-  if (command === 'record') return navigateToRecord(row.id)
-  if (command === 'delete') return handleDelete(row.id)
-}
-
-// 查询
-function handleQuery() {
+function handleSearch() {
+  applyDraft()
   pagination.current = 1
   getList()
 }
 
-// 重置
 function resetQuery() {
-  Object.assign(queryParams, {
-    name: '',
-    type: '',
-    status: ''
+  Object.assign(draft, emptyQuery())
+  Object.assign(query, emptyQuery())
+  pagination.current = 1
+  getList()
+}
+
+function changePage(payload) {
+  pagination.current = payload.page
+  pagination.pageSize = payload.limit
+  getList()
+}
+
+function flattenCategories(nodes, parentPath = '') {
+  ;(nodes || []).forEach((node) => {
+    const path = parentPath ? `${parentPath} / ${node.name}` : node.name
+    const id = String(node.id)
+    categoryNames.set(id, path)
+    categoryOptions.value.push({ id, name: path })
+    if (node.children?.length) flattenCategories(node.children, path)
   })
-  handleQuery()
 }
 
-// 分页大小变化
-function handleSizeChange(size) {
-  pagination.size = size
-  getList()
+function ensureCategories() {
+  if (categoryOptions.value.length) return Promise.resolve()
+  if (categoryLoadPromise) return categoryLoadPromise
+  const currentShopId = shopId()
+  if (!currentShopId) return Promise.resolve()
+  categoryLoadPromise = getCategoryTree({ shopId: currentShopId })
+    .then((response) => {
+      flattenCategories(response.data || [])
+    })
+    .catch(() => {})
+    .finally(() => {
+      categoryLoadPromise = null
+    })
+  return categoryLoadPromise
 }
 
-// 当前页码变化
-function handleCurrentChange(current) {
-  pagination.current = current
-  getList()
-}
-
-// 获取优惠券类型文本
-function getTypeText(type) {
-  const typeMap = {
-    '1': '满减券',
-    '2': '折扣券',
-    '3': '无门槛券'
+function mergeProductName(id, name) {
+  const key = String(id || '')
+  if (!key || !name) return
+  productNames.set(key, name)
+  if (!productOptions.value.some((item) => item.id === key)) {
+    productOptions.value.push({ id: key, name })
   }
-  return typeMap[type] || '未知'
 }
+
+function mergeProductOption(option) {
+  if (!option?.id) return
+  if (!productOptions.value.some((item) => item.id === option.id)) {
+    productOptions.value.push(option)
+  }
+}
+
+function ensureProductOption(id) {
+  const key = String(id || '')
+  if (!key) return Promise.resolve()
+  const known = productNames.get(key)
+  if (known) {
+    mergeProductOption({ id: key, name: known })
+    return Promise.resolve()
+  }
+  if (pendingSpuIds.has(key)) return Promise.resolve()
+  pendingSpuIds.add(key)
+  return getSpuDetail(key)
+    .then((response) => {
+      if (response.data) mergeProductName(key, response.data.name)
+    })
+    .catch(() => {})
+    .finally(() => {
+      pendingSpuIds.delete(key)
+    })
+}
+
+function resolveRowTargets(rows) {
+  rows.forEach((row) => {
+    if (Number(row.useRange) !== 2) return
+    const id = String(row.targetId || '')
+    if (id && !productNames.has(id)) ensureProductOption(id)
+  })
+}
+
+function loadInitialProducts() {
+  if (baseProductOptions.value.length) return Promise.resolve()
+  if (productLoadPromise) return productLoadPromise
+  const currentShopId = shopId()
+  if (!currentShopId) return Promise.resolve()
+  productLoadPromise = queryMchSpuList({ shopId: currentShopId, size: 100, current: 1 })
+    .then((response) => {
+      const options = (response.data?.records || []).map((item) => {
+        productNames.set(String(item.id), item.name)
+        return { id: String(item.id), name: item.name }
+      })
+      baseProductOptions.value = options
+      productOptions.value = [...options]
+    })
+    .catch(() => {})
+    .finally(() => {
+      productLoadPromise = null
+    })
+  return productLoadPromise
+}
+
+function prepareProductOptions() {
+  return loadInitialProducts().then(() => {
+    const selectedId = String(form.targetId || '')
+    const selected = productOptions.value.find((item) => item.id === selectedId)
+    productOptions.value = [...baseProductOptions.value]
+    if (selected && !productOptions.value.some((item) => item.id === selected.id)) {
+      productOptions.value.unshift(selected)
+    }
+    if (selectedId) ensureProductOption(selectedId)
+  })
+}
+
+async function searchProductOptions(keyword) {
+  if (!keyword) {
+    await prepareProductOptions()
+    return
+  }
+  const currentShopId = shopId()
+  if (!currentShopId) return
+  const seq = ++productSearchSeq
+  productLoading.value = true
+  try {
+    const response = await queryMchSpuList({
+      shopId: currentShopId,
+      size: 100,
+      current: 1,
+      name: keyword,
+    })
+    if (seq !== productSearchSeq) return
+    const selectedId = String(form.targetId || '')
+    const selected = productOptions.value.find((item) => item.id === selectedId)
+    const next = (response.data?.records || []).map((item) => {
+      productNames.set(String(item.id), item.name)
+      return { id: String(item.id), name: item.name }
+    })
+    if (selected && !next.some((item) => item.id === selected.id)) next.unshift(selected)
+    productOptions.value = next
+  } catch {
+    if (seq === productSearchSeq) productOptions.value = []
+  } finally {
+    if (seq === productSearchSeq) productLoading.value = false
+  }
+}
+
+function openCreate() {
+  Object.assign(form, defaultForm())
+  editor.mode = 'create'
+  editor.origin = null
+  editor.error = ''
+  editor.visible = true
+}
+
+function openEdit(row) {
+  const type = String(row.type)
+  Object.assign(form, {
+    id: String(row.id),
+    name: row.name || '',
+    description: row.description || '',
+    type,
+    amount: row.amount === null || row.amount === undefined ? '' : String(row.amount),
+    discount: String(Number((Number(row.discount || 0) * 10).toFixed(2))),
+    minAmount: String(Number(row.minAmount || 0)),
+    quantity: String(row.quantity ?? ''),
+    perLimit: String(row.perLimit ?? ''),
+    useRange: String(row.useRange || 1),
+    targetId: String(row.targetId || ''),
+    beginTime: toDbTime(row.beginTime),
+    endTime: toDbTime(row.endTime),
+    isEnabled: Boolean(row.isEnabled),
+    isSupportGroupBuy: Boolean(row.isSupportGroupBuy),
+    isPointsExchangeEnabled: Boolean(row.isPointsExchangeEnabled),
+  })
+  editor.mode = 'edit'
+  editor.origin = row
+  editor.error = ''
+  editor.visible = true
+  if (form.useRange === '2') prepareProductOptions()
+  if (form.useRange === '3') ensureCategories()
+}
+
+function switchType(type) {
+  form.type = type
+  if (type === '2') {
+    if (!(Number(form.discount) > 0)) form.discount = '9'
+    if (!(Number(form.minAmount) > 0)) form.minAmount = '99'
+  }
+  if (type === '3') form.minAmount = '0'
+  if (type === '1' && !(Number(form.minAmount) > 0)) form.minAmount = '199'
+  editor.error = ''
+}
+
+function handleRangeChange(range) {
+  form.targetId = ''
+  if (range === '2') prepareProductOptions()
+  if (range === '3') ensureCategories()
+}
+
+function formError() {
+  const name = String(form.name || '').trim()
+  if (!name) return '请输入优惠券名称'
+  if (name.length > 40) return '优惠券名称不能超过 40 个字符'
+  const type = Number(form.type)
+  const amount = Number(form.amount || 0)
+  const discount = Number(form.discount || 0)
+  const minAmount = type === 3 ? 0 : Number(form.minAmount || 0)
+  if (type === 1) {
+    if (!(amount > 0)) return '满减券的优惠金额必须大于 0'
+    if (!(minAmount > 0)) return '满减券的使用门槛必须大于 0'
+    if (minAmount < amount) return '使用门槛不能小于优惠金额'
+  }
+  if (type === 2) {
+    if (!(discount > 0 && discount < 10)) return '折扣券的折扣必须在 0.1–9.9 折之间'
+    if (!(minAmount > 0)) return '折扣券的使用门槛必须大于 0'
+  }
+  if (type === 3 && !(amount > 0)) return '无门槛券的优惠金额必须大于 0'
+  const quantity = Number(form.quantity)
+  const perLimit = Number(form.perLimit)
+  if (!Number.isInteger(quantity) || quantity < 1) return '发行总量必须为正整数'
+  if (!Number.isInteger(perLimit) || perLimit < 1) return '每人限领必须为正整数'
+  if (perLimit > quantity) return '每人限领不能大于发行总量'
+  if (editor.origin && quantity < Number(editor.origin.received || 0)) {
+    return `发行总量不能小于已领取数量（${editor.origin.received} 张）`
+  }
+  if (form.useRange !== '1' && !form.targetId) {
+    return form.useRange === '2' ? '请选择适用商品' : '请选择适用分类'
+  }
+  if (!form.beginTime || !form.endTime) return '请选择优惠券有效期'
+  if (toDbTime(form.beginTime) >= toDbTime(form.endTime)) return '结束时间必须晚于开始时间'
+  return ''
+}
+
+async function save() {
+  const error = formError()
+  if (error) {
+    editor.error = error
+    return
+  }
+  const currentShopId = shopId()
+  if (!currentShopId) {
+    ElMessage.warning('请先选择店铺')
+    return
+  }
+  const type = Number(form.type)
+  const payload = {
+    shopId: currentShopId,
+    name: form.name.trim(),
+    description: form.description.trim(),
+    type,
+    amount: type === 2 ? null : Number(form.amount || 0),
+    discount: type === 2 ? Number((Number(form.discount || 0) / 10).toFixed(2)) : null,
+    minAmount: type === 3 ? 0 : Number(form.minAmount || 0),
+    quantity: Number(form.quantity),
+    perLimit: Number(form.perLimit),
+    useRange: Number(form.useRange),
+    targetId: form.useRange === '1' ? currentShopId : form.targetId,
+    beginTime: toDbTime(form.beginTime),
+    endTime: toDbTime(form.endTime),
+    isEnabled: Boolean(form.isEnabled),
+    isSupportGroupBuy: Boolean(form.isSupportGroupBuy),
+    isPointsExchangeEnabled: Boolean(form.isPointsExchangeEnabled),
+  }
+  if (editor.mode === 'edit') payload.id = form.id
+
+  saving.value = true
+  try {
+    if (editor.mode === 'edit') {
+      await updateMchCoupon(payload)
+      ElMessage.success('优惠券已保存')
+    } else {
+      await createMchCoupon(payload)
+      ElMessage.success('优惠券已创建')
+    }
+    editor.visible = false
+    await getList()
+  } catch {
+    // 接口层已统一提示错误。
+  } finally {
+    saving.value = false
+  }
+}
+
+async function toggleStatus(row) {
+  const currentShopId = shopId()
+  if (!currentShopId) {
+    ElMessage.warning('请先选择店铺')
+    return
+  }
+  const wasEnabled = Boolean(row.isEnabled)
+  try {
+    await updateMchCouponStatus({ id: row.id, isEnabled: !wasEnabled })
+    if (wasEnabled) {
+      ElMessage.success('优惠券已停用，已领取的券仍可在有效期内使用')
+    } else if (Date.now() > toTime(row.endTime)) {
+      ElMessage.success('优惠券已启用，但已过有效期，需调整有效期后才会重新发放')
+    } else {
+      ElMessage.success('优惠券已启用')
+    }
+    await getList()
+  } catch {
+    // 接口层已统一提示错误。
+  }
+}
+
+function requestDelete(row) {
+  deleteState.row = row
+  deleteState.visible = true
+}
+
+async function confirmDelete() {
+  const row = deleteState.row
+  if (!row) return
+  deleteState.loading = true
+  try {
+    await deleteMchCoupon([row.id])
+    deleteState.visible = false
+    const received = Number(row.received || 0)
+    ElMessage.success(received ? `已删除「${row.name}」，已领取的 ${received} 张券不受影响` : `已删除「${row.name}」`)
+    await getList()
+  } catch {
+    // 接口层已统一提示错误。
+  } finally {
+    deleteState.loading = false
+  }
+}
+
+function handleCommand(command, row) {
+  if (command === 'toggle-status') toggleStatus(row)
+  else if (command === 'receive') router.push({ path: '/mall/mch-coupon/receive', query: { couponId: row.id } })
+  else if (command === 'usage') router.push({ path: '/mall/mch-coupon/record', query: { couponId: row.id } })
+  else if (command === 'delete') requestDelete(row)
+}
+
+onMounted(() => {
+  getList()
+  loadInitialProducts()
+  ensureCategories()
+})
 </script>
-
-<style scoped>
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.dialog-footer {
-  text-align: right;
-}
-
-.text-xs {
-  font-size: 12px;
-}
-
-.text-gray-400 {
-  color: var(--mall-muted, #65726a);
-}
-
-.mt-1 {
-  margin-top: 4px;
-}
-</style>
