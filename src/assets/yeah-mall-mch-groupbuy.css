@@ -1,0 +1,142 @@
+/* 商家端·拼团管理：活动列表 / 申请记录 / 拼团商品 / 拼团订单。
+   页面根 .groupbuy-page.merchant-groupbuy-page；表格、抽屉、弹窗复用
+   yeah-mall-groupbuy.css 的 .gb-*/.ss-* 与 yeah-mall-seckill.css 的 .ms-*。
+   列对齐由 yeah-mall-table-align.css + table-align.ts 运行时处理。 */
+
+/* ---------- 筛选栏 ---------- */
+
+.merchant-groupbuy-page .mall-filter-panel {
+  gap: 10px;
+}
+
+.merchant-groupbuy-page .mall-query-form {
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.merchant-groupbuy-page .ms-filter-fields {
+  display: flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.merchant-groupbuy-page .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+.merchant-groupbuy-page .ms-filter-field {
+  flex: 0 0 auto;
+}
+
+.merchant-groupbuy-page .ms-filter-field .el-form-item__content {
+  min-width: 0;
+  flex: 1;
+}
+
+.merchant-groupbuy-page .ms-filter-field .el-input,
+.merchant-groupbuy-page .ms-filter-field .el-select {
+  width: 100%;
+}
+
+#app .merchant-groupbuy-page .ms-filter-field .el-form-item__label,
+#app .merchant-groupbuy-page .ms-filter-field .el-input__inner,
+#app .merchant-groupbuy-page .ms-filter-field .el-select__selected-item,
+#app .merchant-groupbuy-page .ms-filter-field .el-select__placeholder {
+  font-size: 12px;
+}
+
+.merchant-groupbuy-page .ms-filter-field .el-input__wrapper,
+.merchant-groupbuy-page .ms-filter-field .el-select__wrapper {
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.merchant-groupbuy-page .ms-filter-field .el-select__wrapper {
+  gap: 0;
+}
+
+.merchant-groupbuy-page .mall-query-actions .el-button {
+  min-width: 62px;
+  padding: 0 15px;
+  font-size: 12px;
+}
+
+.merchant-groupbuy-page .mall-query-actions .el-button .el-icon {
+  font-size: 13px;
+}
+
+.merchant-groupbuy-page .mall-query-actions .el-button + .el-button {
+  margin-left: 0;
+}
+
+.merchant-groupbuy-page .ms-filter-keyword {
+  width: 240px;
+}
+
+.merchant-groupbuy-page .ms-filter-status {
+  width: 200px;
+}
+
+.merchant-groupbuy-page .ms-filter-record {
+  width: 280px;
+}
+
+.merchant-groupbuy-page .ms-filter-product {
+  width: 240px;
+}
+
+.merchant-groupbuy-page .ms-filter-order,
+.merchant-groupbuy-page .ms-filter-group {
+  width: 220px;
+}
+
+/* ---------- 页面表格 ---------- */
+
+.merchant-groupbuy-page .mall-table-panel {
+  overflow-x: auto;
+}
+
+.merchant-groupbuy-page .el-table__body td {
+  vertical-align: middle;
+}
+
+.merchant-groupbuy-page .ms-picker-table {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .merchant-groupbuy-page .ms-filter-fields {
+    width: 100%;
+  }
+
+  .merchant-groupbuy-page .ms-filter-field,
+  .merchant-groupbuy-page .ms-filter-keyword,
+  .merchant-groupbuy-page .ms-filter-status,
+  .merchant-groupbuy-page .ms-filter-record,
+  .merchant-groupbuy-page .ms-filter-product,
+  .merchant-groupbuy-page .ms-filter-order,
+  .merchant-groupbuy-page .ms-filter-group {
+    width: 100%;
+  }
+
+  .merchant-groupbuy-page .ss-table-intro,
+  .merchant-groupbuy-page .ms-table-intro {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .merchant-groupbuy-page .ss-activity-bar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .merchant-groupbuy-page .ss-activity-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

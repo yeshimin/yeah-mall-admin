@@ -215,3 +215,30 @@ export function queryMchGroupBuyApplyList(params) {
     params
   })
 }
+
+// 商家端拼团申请详情（含活动上下文/SKU/轮播图）
+export function getMchGroupBuyApplyDetail(params) {
+  return request({
+    url: '/mch/groupBuy/apply/detail',
+    method: 'get',
+    params
+  })
+}
+
+// 商家端拼团商品详情（含 SKU）
+export function getMchGroupBuyProductDetail(params) {
+  return request({
+    url: '/mch/groupBuy/product/detail',
+    method: 'get',
+    params
+  })
+}
+
+// 商家端拼团团详情（含成员名单）
+export function getMchGroupBuyGroupDetail(params) {
+  return request({
+    url: '/mch/groupBuy/group/detail',
+    method: 'get',
+    params
+  })
+}

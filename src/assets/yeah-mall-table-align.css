@@ -377,6 +377,57 @@
 [data-ym-table="r82"] .el-table__body td:nth-child(7) .cell { padding: 7px 12px; }
 [data-ym-table="r82"] .el-table__body td:nth-child(8) .cell { padding: 7px 12px; }
 
+/* views/mall/mch-group-buy/activity/index.vue #0 ← merchant/groupbuy 活动列表 */
+[data-ym-table="r83"] .el-table__body td:nth-child(1) .cell { padding: 7px 12px; }
+[data-ym-table="r83"] .el-table__body td:nth-child(2) .cell { padding: 7px 12px; }
+[data-ym-table="r83"] .el-table__body td:nth-child(3) .cell { padding: 7px 12px; }
+[data-ym-table="r83"] .el-table__body td:nth-child(4) .cell { padding: 7px 12px; }
+[data-ym-table="r83"] .el-table__body td:nth-child(5) .cell { padding: 7px 12px; }
+[data-ym-table="r83"] .el-table__body td:nth-child(6) .cell { padding: 7px 12px; }
+[data-ym-table="r83"] .el-table__body td:nth-child(7) .cell { padding: 7px 12px; }
+
+/* views/mall/mch-group-buy/apply/index.vue #0 ← merchant/groupbuy 申请记录 */
+[data-ym-table="r84"] .el-table__body td:nth-child(1) .cell { padding: 7px 12px; }
+[data-ym-table="r84"] .el-table__body td:nth-child(2) .cell { padding: 7px 12px; }
+[data-ym-table="r84"] .el-table__body td:nth-child(3) .cell { padding: 7px 12px; }
+[data-ym-table="r84"] .el-table__body td:nth-child(4) .cell { padding: 7px 12px; }
+[data-ym-table="r84"] .el-table__body td:nth-child(5) .cell { padding: 7px 12px; }
+[data-ym-table="r84"] .el-table__body td:nth-child(6) .cell { padding: 7px 12px; }
+[data-ym-table="r84"] .el-table__body td:nth-child(7) .cell { padding: 7px 12px; }
+[data-ym-table="r84"] .el-table__body td:nth-child(8) .cell { padding: 7px 12px; }
+
+/* views/mall/mch-group-buy/product/index.vue #0 ← merchant/groupbuy 拼团商品 */
+[data-ym-table="r85"] .el-table__body td:nth-child(1) .cell { padding: 7px 12px; }
+[data-ym-table="r85"] .el-table__body td:nth-child(2) .cell { padding: 7px 12px; }
+[data-ym-table="r85"] .el-table__body td:nth-child(3) .cell { padding: 7px 12px; }
+[data-ym-table="r85"] .el-table__body td:nth-child(4) .cell { padding: 7px 12px; }
+[data-ym-table="r85"] .el-table__body td:nth-child(5) .cell { padding: 7px 12px; }
+[data-ym-table="r85"] .el-table__body td:nth-child(6) .cell { padding: 7px 12px; }
+[data-ym-table="r85"] .el-table__body td:nth-child(7) .cell { padding: 7px 12px; }
+[data-ym-table="r85"] .el-table__body td:nth-child(8) .cell { padding: 7px 12px; }
+
+/* views/mall/mch-group-buy/order/index.vue #0 ← merchant/groupbuy 订单列表 */
+[data-ym-table="r86"] .el-table__body td:nth-child(1) .cell { padding: 7px 12px; }
+[data-ym-table="r86"] .el-table__body td:nth-child(2) .cell { padding: 7px 12px; }
+[data-ym-table="r86"] .el-table__body td:nth-child(3) .cell { padding: 7px 12px; }
+[data-ym-table="r86"] .el-table__body td:nth-child(4) .cell { padding: 7px 12px; }
+[data-ym-table="r86"] .el-table__body td:nth-child(5) .cell { padding: 7px 12px; }
+[data-ym-table="r86"] .el-table__body td:nth-child(6) .cell { padding: 7px 12px; }
+[data-ym-table="r86"] .el-table__body td:nth-child(7) .cell { padding: 7px 12px; }
+[data-ym-table="r86"] .el-table__body td:nth-child(8) .cell { padding: 7px 12px; }
+[data-ym-table="r86"] .el-table__body td:nth-child(9) .cell { padding: 7px 12px; }
+
+/* views/mall/mch-group-buy/order/index.vue #1 ← merchant/groupbuy 团概览 */
+[data-ym-table="r87"] .el-table__body td:nth-child(1) .cell { padding: 7px 12px; }
+[data-ym-table="r87"] .el-table__body td:nth-child(2) .cell { padding: 7px 12px; }
+[data-ym-table="r87"] .el-table__body td:nth-child(3) .cell { padding: 7px 12px; }
+[data-ym-table="r87"] .el-table__body td:nth-child(4) .cell { padding: 7px 12px; }
+[data-ym-table="r87"] .el-table__body td:nth-child(5) .cell { padding: 7px 12px; }
+[data-ym-table="r87"] .el-table__body td:nth-child(6) .cell { padding: 7px 12px; }
+[data-ym-table="r87"] .el-table__body td:nth-child(7) .cell { padding: 7px 12px; }
+[data-ym-table="r87"] .el-table__body td:nth-child(8) .cell { padding: 7px 12px; }
+[data-ym-table="r87"] .el-table__body td:nth-child(9) .cell { padding: 7px 12px; }
+
 /* views/mall/mch-review/index.vue #0 ← merchant/reviews */
 [data-ym-table="r76"] .el-table__body td:nth-child(1) .cell { padding: 7px 12px; }
 [data-ym-table="r76"] .el-table__body td:nth-child(2) .cell { padding: 7px 12px; }

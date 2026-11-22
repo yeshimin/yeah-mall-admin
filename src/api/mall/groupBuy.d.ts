@@ -22,3 +22,6 @@ export function queryMchGroupBuyProductList(...args: unknown[]): Promise<unknown
 export function queryMchGroupBuyOrderList(...args: unknown[]): Promise<unknown>
 export function queryMchGroupBuyGroupList(...args: unknown[]): Promise<unknown>
 export function queryMchGroupBuyApplyList(...args: unknown[]): Promise<unknown>
+export function getMchGroupBuyApplyDetail(...args: unknown[]): Promise<unknown>
+export function getMchGroupBuyProductDetail(...args: unknown[]): Promise<unknown>
+export function getMchGroupBuyGroupDetail(...args: unknown[]): Promise<unknown>

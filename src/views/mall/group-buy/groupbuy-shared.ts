@@ -70,6 +70,7 @@ export interface GroupBuyApply {
   minOriginPrice?: number | string
   maxOriginPrice?: number | string
   groupStock?: number | string
+  skuCount?: number | string
   auditStatus?: number | string
   applyRemark?: string
   auditRemark?: string
@@ -86,6 +87,7 @@ export interface GroupBuyApplyDetail extends GroupBuyApply {
   activityBeginTime?: string
   activityEndTime?: string
   detailDesc?: string
+  images?: string[]
   skus?: GroupBuySku[]
 }
 
