@@ -194,10 +194,15 @@
 
 .mall-table-panel {
   margin-top: 14px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid var(--mall-line);
   border-radius: 8px;
   background: #fff;
+}
+
+.mall-table-panel > .el-table {
+  overflow: hidden;
+  border-radius: 6px 6px 0 0;
 }
 
 .mall-table-panel .el-table {
@@ -243,6 +248,9 @@
 }
 
 .mall-table-panel > .mall-pagination {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   min-height: 48px;
   box-sizing: border-box;
   margin: 0 !important;

@@ -1,5 +1,5 @@
 {
-  "name": "yeah-boot-admin",
+  "name": "yeah-mall-admin",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -21,7 +21,6 @@
     "@vueup/vue-quill": "^1.5.5",
     "axios": "^1.13.2",
     "element-plus": "^2.13.1",
-    "lodash-es": "^4.17.22",
     "pinia": "2.2.4",
     "sm-crypto-v3": "1.0.6",
     "vue": "~3.4.0",

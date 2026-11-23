@@ -1,10 +1,32 @@
 <template>
   <div class="user-manage-container">
-    <div class="page-body">
-      <div class="org-tree-panel">
+    <div class="page-body" :class="{ 'is-tree-collapsed': treeCollapsed }">
+      <button
+        v-if="treeCollapsed"
+        type="button"
+        class="org-tree-restore"
+        title="展开组织树"
+        aria-label="展开组织树"
+        @click="treeCollapsed = false"
+      >
+        <el-icon><Expand /></el-icon>
+        <span>组织树</span>
+      </button>
+      <div v-else class="org-tree-panel">
         <div class="org-tree-header">
           <h3>组织树</h3>
-          <el-button link type="primary" @click="clearOrgFilter">全部用户</el-button>
+          <div class="org-tree-header-actions">
+            <el-button link type="primary" @click="clearOrgFilter">全部用户</el-button>
+            <el-button
+              link
+              type="primary"
+              title="收起组织树"
+              aria-label="收起组织树"
+              @click="treeCollapsed = true"
+            >
+              <el-icon><Fold /></el-icon>
+            </el-button>
+          </div>
         </div>
         <el-input
           v-model="treeFilterText"
@@ -100,13 +122,13 @@
             @selection-change="handleSelectionChange"
           >
             <el-table-column v-if="canDeleteUser" type="selection" width="55"></el-table-column>
-            <el-table-column prop="username" label="用户名" min-width="120"></el-table-column>
-            <el-table-column prop="nickname" label="昵称" min-width="100"></el-table-column>
-            <el-table-column prop="orgNames" label="组织" min-width="120"></el-table-column>
-            <el-table-column prop="postNames" label="岗位" min-width="120"></el-table-column>
-            <el-table-column prop="roleNames" label="角色" min-width="120"></el-table-column>
-            <el-table-column prop="remark" label="备注" min-width="160" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="status" label="状态" min-width="80">
+            <el-table-column prop="username" label="用户名" min-width="110"></el-table-column>
+            <el-table-column prop="nickname" label="昵称" min-width="80"></el-table-column>
+            <el-table-column prop="orgNames" label="组织" min-width="100"></el-table-column>
+            <el-table-column prop="postNames" label="岗位" min-width="90"></el-table-column>
+            <el-table-column prop="roleNames" label="角色" min-width="90"></el-table-column>
+            <el-table-column prop="remark" label="备注" min-width="120" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="status" label="状态" min-width="72">
               <template #default="scope">
                 <el-switch
                   v-model="scope.row.status"
@@ -117,8 +139,8 @@
                 ></el-switch>
               </template>
             </el-table-column>
-            <el-table-column prop="createTime" label="创建时间" min-width="160"></el-table-column>
-            <el-table-column v-if="hasUserRowActions" label="操作" min-width="200" fixed="right">
+            <el-table-column prop="createTime" label="创建时间" min-width="150"></el-table-column>
+            <el-table-column v-if="hasUserRowActions" label="操作" min-width="150" fixed="right">
               <template #default="scope">
                 <div class="table-row-actions">
                   <el-button
@@ -364,7 +386,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { ArrowDown, Download, Plus, Upload } from '@element-plus/icons-vue'
+import { ArrowDown, Download, Expand, Fold, Plus, Upload } from '@element-plus/icons-vue'
 import type { ElTree } from 'element-plus'
 import type { FormInstance, FormRules, TableInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -448,6 +470,7 @@ const roleOptions = ref<SelectOption[]>([])
 const orgTreeData = ref<SysOrgTreeNode[]>([])
 const orgTreeRef = ref<InstanceType<typeof ElTree>>()
 const treeFilterText = ref('')
+const treeCollapsed = ref(window.innerWidth < 1500)
 const selectedOrgId = ref<number | null>(null)
 const orgTreeProps = {
   children: 'children',
@@ -1175,6 +1198,42 @@ watch(() => userForm.roleIds, (value) => {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 20px;
+}
+
+.page-body.is-tree-collapsed {
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+}
+
+.org-tree-restore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 0;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #606266;
+  cursor: pointer;
+}
+
+.org-tree-restore:hover {
+  border-color: var(--el-color-primary-light-5);
+  color: var(--el-color-primary);
+}
+
+.org-tree-restore span {
+  font-size: 12px;
+  letter-spacing: 2px;
+  writing-mode: vertical-rl;
+}
+
+.org-tree-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .org-tree-panel {
