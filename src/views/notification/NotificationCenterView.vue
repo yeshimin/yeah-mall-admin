@@ -291,6 +291,15 @@ async function openRouteMessage(receiverIdValue: unknown, reloadMessages: boolea
 }
 
 async function handleReadAll() {
+  try {
+    await ElMessageBox.confirm(
+      `确认将 ${unreadCount.value} 条未读消息全部标记为已读吗？`,
+      '全部已读确认',
+      { type: 'warning', confirmButtonText: '确认', cancelButtonText: '取消' },
+    )
+  } catch {
+    return
+  }
   await markAllMessagesRead()
   ElMessage.success('已全部标记为已读')
   await Promise.all([loadMessages(), notificationStore.refreshSummary()])

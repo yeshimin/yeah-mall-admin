@@ -1,6 +1,6 @@
 /* 商家端·拼团管理：活动列表 / 申请记录 / 拼团商品 / 拼团订单。
    页面根 .groupbuy-page.merchant-groupbuy-page；表格、抽屉、弹窗复用
-   yeah-mall-groupbuy.css 的 .gb-*/.ss-* 与 yeah-mall-seckill.css 的 .ms-*。
+   yeah-mall-groupbuy.css 的 .gb-* 与 .ss-*，以及 yeah-mall-seckill.css 的 .ms-*。
    列对齐由 yeah-mall-table-align.css + table-align.ts 运行时处理。 */
 
 /* ---------- 筛选栏 ---------- */

@@ -16,7 +16,12 @@
     </div>
 
     <div v-else class="header-left">
-      <el-button link class="header-collapse-btn" @click="handleNavigationButton">
+      <el-button
+        link
+        class="header-collapse-btn"
+        :aria-label="collapseLabel"
+        @click="handleNavigationButton"
+      >
         <el-icon class="header-collapse-icon">
           <Menu v-if="props.mobile" />
           <component :is="collapseIcon" v-else />
@@ -44,7 +49,7 @@
       >
         <template #reference>
           <el-badge :value="notificationStore.unreadCount" :hidden="notificationStore.unreadCount === 0" :max="99">
-            <button type="button" class="header-action" title="通知">
+            <button type="button" class="header-action" title="通知" :aria-label="notificationLabel">
               <el-icon><Bell /></el-icon>
             </button>
           </el-badge>
@@ -75,11 +80,11 @@
       </el-popover>
 
       <el-dropdown trigger="click" @command="handleCommand">
-        <div class="user-info">
+        <button type="button" class="user-info" aria-label="用户菜单">
           <el-avatar :size="32" :src="avatarUrl || defaultAvatar" @error="handleAvatarError"></el-avatar>
           <span class="user-name">{{ authStore.displayName }}</span>
           <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-        </div>
+        </button>
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="profile">
@@ -137,6 +142,15 @@ const avatarLoadFailed = ref(false)
 const currentShop = ref<CurrentShop | null>(getCurrentShop())
 const notificationPopoverVisible = ref(false)
 const collapseIcon = computed(() => (appStore.sidebarCollapsed ? Expand : Fold))
+const collapseLabel = computed(() => {
+  if (props.mobile) {
+    return '打开导航菜单'
+  }
+  return appStore.sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'
+})
+const notificationLabel = computed(() => (
+  notificationStore.unreadCount > 0 ? `通知，${notificationStore.unreadCount} 条未读` : '通知'
+))
 
 const avatarSource = computed(() => authStore.mine?.user?.avatar || '')
 const avatarUrl = computed(() => {
@@ -362,7 +376,11 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   padding: 8px 10px;
+  border: none;
   border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }

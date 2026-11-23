@@ -10,8 +10,8 @@
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --build",
+    "build-only": "node --max-old-space-size=4096 ./node_modules/vite/bin/vite.js build",
+    "type-check": "node --max-old-space-size=4096 ./node_modules/vue-tsc/bin/vue-tsc.js --build",
     "lint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/"
   },
@@ -20,7 +20,6 @@
     "@noble/hashes": "^2.4.0",
     "@vueup/vue-quill": "^1.5.5",
     "axios": "^1.13.2",
-    "echarts": "^6.0.0",
     "element-plus": "^2.13.1",
     "lodash-es": "^4.17.22",
     "pinia": "2.2.4",
