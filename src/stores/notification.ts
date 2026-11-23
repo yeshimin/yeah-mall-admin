@@ -50,7 +50,8 @@ export const useNotificationStore = defineStore('notification', () => {
       if (sequence !== summarySequence || stopped) {
         return
       }
-      unreadCount.value = Number(countResponse.data || 0)
+      const count = Number(countResponse.data)
+      unreadCount.value = Number.isFinite(count) && count > 0 ? Math.floor(count) : 0
       recentMessages.value = recentResponse.data || []
       revision.value += 1
     } catch {

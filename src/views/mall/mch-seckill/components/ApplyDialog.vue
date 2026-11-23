@@ -636,9 +636,9 @@ async function fetchAllSkus() {
   const size = 500
   for (let guard = 0; guard < 10; guard += 1) {
     const response = await request({
-      url: '/mch/productSku/crud/query',
+      url: '/mch/productSku/query',
       method: 'get',
-      params: { shopId: shopId(), current, size },
+      params: { current, size },
     })
     const data = response?.data || {}
     const records = data.records || []

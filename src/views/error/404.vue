@@ -34,19 +34,19 @@ const goBack = () => {
   justify-content: center;
   height: 100vh;
   text-align: center;
-  background-color: #f5f7fa;
+  background-color: var(--ym-paper);
 }
 
 .error-code {
   font-size: 120px;
   font-weight: bold;
-  color: #409eff;
+  color: var(--ym-brand);
   margin-bottom: 20px;
 }
 
 .error-message {
   font-size: 20px;
-  color: #606266;
+  color: var(--ym-ink-secondary);
   margin-bottom: 30px;
 }
 

@@ -242,6 +242,15 @@
   border-top: 1px solid var(--mall-line);
 }
 
+.mall-table-panel > .mall-pagination {
+  min-height: 48px;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 7px 12px;
+  border-top: 1px solid var(--mall-line);
+  background: #fff;
+}
+
 .mall-table-panel .el-pagination {
   --el-pagination-button-bg-color: #fff;
   --el-pagination-hover-color: var(--mall-brand);

@@ -954,7 +954,7 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
   padding: 0 0 18px;
-  border-bottom: 1px solid #e4e9e5;
+  border-bottom: 1px solid var(--ym-line);
 }
 
 .fb-member-summary :deep(.el-avatar) {
@@ -992,7 +992,7 @@ onMounted(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 13px 16px;
   padding: 16px 0;
-  border-bottom: 1px solid #e4e9e5;
+  border-bottom: 1px solid var(--ym-line);
 }
 
 .fb-meta-grid > div {
@@ -1127,7 +1127,7 @@ onMounted(() => {
   align-items: start;
   gap: 10px;
   padding: 12px;
-  border: 1px solid #e4e9e5;
+  border: 1px solid var(--ym-line);
   border-radius: 7px;
   background: var(--ym-row-hover);
 }
@@ -1179,7 +1179,7 @@ onMounted(() => {
   gap: 9px;
   padding: 11px 12px;
   text-align: left;
-  border: 1px solid #e4e9e5;
+  border: 1px solid var(--ym-line);
   border-radius: 7px;
   background: #fff;
   cursor: pointer;
@@ -1269,7 +1269,7 @@ onMounted(() => {
   min-height: 24px;
   padding: 0 8px;
   color: var(--ym-ink-secondary);
-  border: 1px solid #e4e9e5;
+  border: 1px solid var(--ym-line);
   border-radius: 5px;
   background: #fff;
   font-size: 10px;

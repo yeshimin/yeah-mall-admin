@@ -452,7 +452,7 @@
   padding: 14px 16px;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: linear-gradient(90deg, #fff 0%, #f6faf7 100%);
+  background: linear-gradient(90deg, #fff 0%, var(--ym-surface-2) 100%);
 }
 
 .groupbuy-page .ss-activity-icon {
@@ -557,7 +557,7 @@
 
 .groupbuy-page .ss-back-link:hover {
   border-color: var(--ym-brand);
-  background: #dfeee6;
+  background: var(--ym-brand-soft);
 }
 
 /* ---------- 页面框架：队列页签 / 摘要 ---------- */

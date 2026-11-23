@@ -334,14 +334,18 @@ const replyDialogTip = computed(() => {
 async function loadStats() {
   const currentShopId = shopId()
   if (!currentShopId) return
-  const result: any = await getMchReviewStats({ shopId: currentShopId })
-  const data = result.data || {}
-  stats.total = Number(data.total || 0)
-  stats.goodCount = Number(data.goodCount || 0)
-  stats.middleCount = Number(data.middleCount || 0)
-  stats.badCount = Number(data.badCount || 0)
-  stats.pendingCount = Number(data.pendingCount || 0)
-  stats.repliedCount = Number(data.repliedCount || 0)
+  try {
+    const result: any = await getMchReviewStats({ shopId: currentShopId })
+    const data = result.data || {}
+    stats.total = Number(data.total || 0)
+    stats.goodCount = Number(data.goodCount || 0)
+    stats.middleCount = Number(data.middleCount || 0)
+    stats.badCount = Number(data.badCount || 0)
+    stats.pendingCount = Number(data.pendingCount || 0)
+    stats.repliedCount = Number(data.repliedCount || 0)
+  } catch {
+    // 错误提示由 request 拦截器统一处理
+  }
 }
 
 async function load(reset = false) {
@@ -364,6 +368,9 @@ async function load(reset = false) {
     })
     records.value = result.data?.records || []
     pagination.total = Number(result.data?.total || 0)
+  } catch {
+    records.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }

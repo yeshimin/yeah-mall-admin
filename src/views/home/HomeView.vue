@@ -77,7 +77,7 @@ import {
   queryMerchantDashboardTrend,
 } from '@/api/mall/dashboard'
 import { queryMchReviews } from '@/api/mall/review'
-import request from '@/utils/request'
+import { queryMchGroupBuyApplyList } from '@/api/mall/groupBuy'
 import type { ResourceTreeNode } from '@/types/upms'
 
 interface PlatformOverview {
@@ -353,11 +353,7 @@ async function loadOverview() {
         queryMerchantDashboard(shopId),
         queryMerchantDashboardTrend(shopId, 7),
         queryMchReviews({ shopId, isReplied: false, current: 1, size: 1 }).catch(() => null),
-        request({
-          url: '/mch/groupBuy/apply/query',
-          method: 'get',
-          params: { shopId, auditStatus: '1', current: 1, size: 1 },
-        }).catch(() => null),
+        queryMchGroupBuyApplyList({ shopId, auditStatus: '1', current: 1, size: 1 }).catch(() => null),
       ])
       merchantOverview.value = overviewResponse.data || null
       trend.value = normalizeTrend(trendResponse.data)

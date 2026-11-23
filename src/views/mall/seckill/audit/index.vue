@@ -1182,7 +1182,7 @@ function pad2(value: number) {
   padding: 14px 16px;
   border: 1px solid var(--mall-line);
   border-radius: 8px;
-  background: linear-gradient(90deg, #fff 0%, #f6faf7 100%);
+  background: linear-gradient(90deg, #fff 0%, var(--ym-surface-2) 100%);
 }
 
 .sa-activity-icon {
@@ -1287,7 +1287,7 @@ function pad2(value: number) {
 
 .sa-back-link:hover {
   border-color: var(--mall-brand);
-  background: #dfeee6;
+  background: var(--ym-brand-soft);
 }
 
 .sa-status-ticket {

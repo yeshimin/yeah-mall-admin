@@ -552,9 +552,9 @@ async function fetchAllSkus() {
   const rows: any[] = []
   for (let current = 1; current <= 10; current += 1) {
     const response = await request({
-      url: '/mch/productSku/crud/query',
+      url: '/mch/productSku/query',
       method: 'get',
-      params: { shopId: shopId(), current, size: 500 },
+      params: { current, size: 500 },
     })
     const data = (response?.data || {}) as { records?: any[]; total?: number | string }
     const records = data.records || []

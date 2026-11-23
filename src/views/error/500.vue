@@ -37,25 +37,25 @@ const refreshPage = () => {
   justify-content: center;
   height: 100vh;
   text-align: center;
-  background-color: #f5f7fa;
+  background-color: var(--ym-paper);
 }
 
 .error-code {
   font-size: 120px;
   font-weight: bold;
-  color: #f56c6c;
+  color: var(--ym-danger);
   margin-bottom: 20px;
 }
 
 .error-message {
   font-size: 20px;
-  color: #606266;
+  color: var(--ym-ink-secondary);
   margin-bottom: 10px;
 }
 
 .error-description {
   font-size: 14px;
-  color: #909399;
+  color: var(--ym-muted);
   margin-bottom: 30px;
   max-width: 400px;
   line-height: 1.5;

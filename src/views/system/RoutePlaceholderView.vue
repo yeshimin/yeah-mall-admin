@@ -30,19 +30,20 @@ const route = useRoute()
 .placeholder-card {
   width: min(720px, 100%);
   padding: 32px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--ym-line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(20, 32, 36, 0.08);
 }
 
 .placeholder-card h2 {
   margin: 0 0 12px;
   font-size: 24px;
-  color: #1f2937;
+  color: var(--ym-ink);
 }
 
 .placeholder-card p {
   margin: 0 0 20px;
-  color: #6b7280;
+  color: var(--ym-muted);
 }
 </style>

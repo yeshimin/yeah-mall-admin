@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<{
   layout: 'total, sizes, prev, pager, next, jumper',
   background: false,
   hidden: false,
-  variant: 'default',
+  variant: 'admin',
 })
 
 const emit = defineEmits<{
@@ -73,7 +73,7 @@ function emitSizeChange(limit: number) {
 .mall-pagination {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .mall-pagination.is-admin {
@@ -136,13 +136,13 @@ function emitSizeChange(limit: number) {
 }
 
 .mall-pagination.is-admin :deep(.el-pagination__sizes) {
-  width: 67px;
+  width: 96px;
   margin-left: 6px;
 }
 
 .mall-pagination.is-admin :deep(.el-pagination__sizes .el-select) {
   position: relative;
-  width: 67px;
+  width: 96px;
 }
 
 .mall-pagination.is-admin :deep(.el-pagination__sizes .el-select__wrapper) {

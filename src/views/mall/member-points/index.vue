@@ -208,6 +208,9 @@ async function loadLedger(reset = false) {
     })
     ledger.value = result.data?.records || []
     ledgerPage.total = Number(result.data?.total || 0)
+  } catch {
+    ledger.value = []
+    ledgerPage.total = 0
   } finally {
     loading.value = false
   }
@@ -221,6 +224,8 @@ async function loadRules() {
   try {
     const result: any = await queryPointsRules()
     rules.value = result.data || []
+  } catch {
+    rules.value = []
   } finally {
     loading.value = false
   }

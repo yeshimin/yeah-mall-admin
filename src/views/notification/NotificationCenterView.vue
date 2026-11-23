@@ -1,26 +1,28 @@
 <template>
-  <div class="notification-center">
+  <div class="notification-center mall-page">
     <section class="message-board">
-      <div class="message-actions">
-        <el-button v-if="canSend" type="primary" @click="openSendDialog">发送消息</el-button>
-        <el-button :disabled="unreadCount === 0" @click="handleReadAll">全部已读</el-button>
-        <el-tag effect="light">{{ unreadCount }} 条未读</el-tag>
-      </div>
-      <div class="filter-bar">
-        <el-segmented v-model="searchForm.readStatus" :options="readStatusOptions" @change="handleSearch" />
-        <el-select v-model="searchForm.messageType" placeholder="消息类型" clearable @change="handleSearch">
-          <el-option label="系统消息" value="1" />
-          <el-option label="业务消息" value="2" />
-          <el-option label="通告" value="3" />
-        </el-select>
-        <el-input
-          v-model="searchForm.title"
-          class="title-search"
-          placeholder="搜索标题"
-          clearable
-          @keyup.enter="handleSearch"
-          @clear="handleSearch"
-        />
+      <div class="message-toolbar">
+        <div class="message-actions">
+          <el-button v-if="canSend" type="primary" @click="openSendDialog">发送消息</el-button>
+          <el-button :disabled="unreadCount === 0" @click="handleReadAll">全部已读</el-button>
+          <el-tag effect="light">{{ unreadCount }} 条未读</el-tag>
+        </div>
+        <div class="filter-bar">
+          <el-segmented v-model="searchForm.readStatus" :options="readStatusOptions" @change="handleSearch" />
+          <el-select v-model="searchForm.messageType" placeholder="消息类型" clearable @change="handleSearch">
+            <el-option label="系统消息" value="1" />
+            <el-option label="业务消息" value="2" />
+            <el-option label="通告" value="3" />
+          </el-select>
+          <el-input
+            v-model="searchForm.title"
+            class="title-search"
+            placeholder="搜索标题"
+            clearable
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
+          />
+        </div>
       </div>
 
       <div v-loading="loading" class="message-list">
@@ -48,17 +50,13 @@
         <el-empty v-if="!loading && messages.length === 0" description="暂无消息" />
       </div>
 
-      <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="pagination.currentPage"
-          v-model:page-size="pagination.pageSize"
-          :page-sizes="[10, 20, 50]"
-          layout="total, sizes, prev, pager, next"
-          :total="pagination.total"
-          @size-change="loadMessages"
-          @current-change="loadMessages"
-        />
-      </div>
+      <MallPagination
+        class="message-pagination"
+        :total="pagination.total"
+        :page="pagination.currentPage"
+        :limit="pagination.pageSize"
+        @pagination="changePage"
+      />
     </section>
 
     <el-drawer v-model="detailVisible" title="消息详情" size="520px">
@@ -156,6 +154,7 @@ import {
   queryMyMessages,
   sendNotifMessage,
 } from '@/api/notification'
+import MallPagination from '@/components/mall/MallPagination.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notification'
 import type {
@@ -238,6 +237,11 @@ async function loadMessages() {
     }
     messages.value = response.data.records || []
     pagination.total = Number(response.data.total || 0)
+  } catch {
+    if (sequence === loadSequence) {
+      messages.value = []
+      pagination.total = 0
+    }
   } finally {
     if (sequence === loadSequence) {
       loading.value = false
@@ -247,6 +251,12 @@ async function loadMessages() {
 
 function handleSearch() {
   pagination.currentPage = 1
+  void loadMessages()
+}
+
+function changePage(value: { page: number; limit: number }) {
+  pagination.currentPage = value.page
+  pagination.pageSize = value.limit
   void loadMessages()
 }
 
@@ -403,8 +413,15 @@ watch(() => route.query.receiverId, (receiverId) => {
 .notification-center {
   width: 100%;
   min-height: 100%;
-  padding: 20px;
-  background: #fff;
+  box-sizing: border-box;
+}
+
+.message-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ym-line);
 }
 
 .message-actions {
@@ -412,23 +429,25 @@ watch(() => route.query.receiverId, (receiverId) => {
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  margin-bottom: 16px;
 }
 
 .unread-summary {
   margin-left: 4px;
-  color: #606266;
+  color: var(--ym-muted);
 }
 
 .message-board {
   width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--ym-line);
+  border-radius: 8px;
   background: #fff;
 }
 
 .filter-bar {
   display: flex;
   gap: 12px;
-  margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
 .filter-bar .el-select {
@@ -450,19 +469,19 @@ watch(() => route.query.receiverId, (receiverId) => {
   gap: 14px;
   padding: 18px 16px;
   border: none;
-  border-bottom: 1px solid #eef2f6;
+  border-bottom: 1px solid var(--ym-line);
   background: transparent;
-  color: #334155;
+  color: var(--ym-ink-secondary);
   cursor: pointer;
   text-align: left;
 }
 
 .message-item:hover {
-  background: #f8fbff;
+  background: var(--ym-surface-2);
 }
 
 .message-item.unread {
-  background: #f3f9ff;
+  background: var(--ym-brand-soft);
 }
 
 .message-state {
@@ -470,12 +489,12 @@ watch(() => route.query.receiverId, (receiverId) => {
   height: 8px;
   margin-top: 7px;
   border-radius: 50%;
-  background: #cbd5e1;
+  background: var(--ym-line-strong);
 }
 
 .unread .message-state {
-  background: #1687d9;
-  box-shadow: 0 0 0 5px rgb(22 135 217 / 10%);
+  background: var(--ym-brand);
+  box-shadow: 0 0 0 5px var(--ym-brand-soft);
 }
 
 .message-main {
@@ -494,43 +513,41 @@ watch(() => route.query.receiverId, (receiverId) => {
 
 .message-heading strong {
   overflow: hidden;
-  color: #1e293b;
+  color: var(--ym-ink);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .message-preview {
   overflow: hidden;
-  color: #64748b;
+  color: var(--ym-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .message-meta,
 .detail-meta {
-  color: #94a3b8;
+  color: var(--ym-muted);
   font-size: 12px;
 }
 
 .message-status {
-  color: #94a3b8;
+  color: var(--ym-muted);
   font-size: 12px;
 }
 
-.pagination-container {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 18px;
+.message-pagination {
+  border-top: 1px solid var(--ym-line);
 }
 
 .message-detail h2 {
   margin: 18px 0 8px;
-  color: #172033;
+  color: var(--ym-ink);
 }
 
 .detail-content {
   margin: 24px 0;
-  color: #475569;
+  color: var(--ym-ink-secondary);
   line-height: 1.8;
   white-space: pre-wrap;
 }

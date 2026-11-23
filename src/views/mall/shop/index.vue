@@ -117,17 +117,12 @@
         </template>
       </el-table>
 
-      <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="pagination.current"
-          v-model:page-size="pagination.size"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="Number(pagination.total)"
-          @current-change="loadShops"
-          @size-change="handlePageSizeChange"
-        />
-      </div>
+      <MallPagination
+        :total="Number(pagination.total)"
+        :page="pagination.current"
+        :limit="pagination.size"
+        @pagination="changePage"
+      />
     </section>
 
     <el-drawer v-model="detailVisible" class="shop-detail-drawer" size="600px" @closed="handleDetailClosed">
@@ -270,6 +265,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Operation, Shop as ShopIcon } from '@element-plus/icons-vue'
 import CopyableText from '@/components/mall/CopyableText.vue'
+import MallPagination from '@/components/mall/MallPagination.vue'
 import ReadOnlyStatus from '@/components/mall/ReadOnlyStatus.vue'
 import StorageImage from '@/components/mall/StorageImage.vue'
 import {
@@ -425,8 +421,9 @@ function handleReset() {
   handleSearch()
 }
 
-function handlePageSizeChange() {
-  pagination.current = 1
+function changePage(value: { page: number; limit: number }) {
+  pagination.current = value.page
+  pagination.size = value.limit
   void loadShops()
 }
 

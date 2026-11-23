@@ -136,9 +136,12 @@
       </template>
     </el-table>
 
-    <div class="pagination-container">
-      <el-pagination v-model:current-page="page.current" v-model:page-size="page.size" :page-sizes="[10, 20, 50, 100]" :total="Number(page.total)" layout="total, sizes, prev, pager, next, jumper" @size-change="load(true)" @current-change="load()" />
-    </div>
+    <MallPagination
+      :total="Number(page.total)"
+      :page="page.current"
+      :limit="page.size"
+      @pagination="changePage"
+    />
     </section>
 
     <el-drawer v-model="dialog.visible" size="520px" class="review-detail-drawer">
@@ -221,6 +224,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChatDotRound } from '@element-plus/icons-vue'
 import { getStoragePreviewUrl } from '@/utils/storage'
 import { getAdminReviewDetail, queryAdminReviews, updateReviewVisibility } from '@/api/mall/review'
+import MallPagination from '@/components/mall/MallPagination.vue'
 import { queryShops } from '@/api/mall/platform'
 import { queryProductSpuOptions, type ProductSpuOption } from '@/api/mall/productSpu'
 import type { ShopRecord } from '@/types/mall'
@@ -320,6 +324,12 @@ function reset() {
   load(true)
 }
 
+function changePage(value: { page: number; limit: number }) {
+  page.current = value.page
+  page.size = value.limit
+  void load()
+}
+
 function replyStatusText(row: any) {
   if (!row.isReplied) return '待商家回复'
   return row.lastReplySenderType === 1 ? '待商家回复' : '待买家回复'
@@ -396,7 +406,7 @@ onMounted(() => load())
 .review-drawer-heading span { color: var(--mall-brand, var(--ym-brand)); font-family: var(--ym-font-mono, monospace); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; }
 .review-drawer-heading strong { color: var(--mall-ink, var(--ym-ink)); font-size: 19px; }
 .review-detail { display: flex; flex-direction: column; gap: 16px; }
-.review-detail-product { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--ym-line, #e4e9e5); }
+.review-detail-product { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--ym-line, var(--ym-line)); }
 .review-detail-image { width: 76px; height: 76px; border-radius: 8px; }
 .review-detail-copy { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
 .review-detail-copy strong { overflow: hidden; color: var(--mall-ink, var(--ym-ink)); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
@@ -408,7 +418,7 @@ onMounted(() => load())
 .review-image { width: 96px; height: 96px; border-radius: 8px; }
 .review-replies h4 { margin: 0 0 10px; color: var(--mall-ink, var(--ym-ink)); font-size: 13px; }
 .review-reply-list { display: flex; flex-direction: column; gap: 8px; }
-.review-reply-item { padding: 10px 12px; border: 1px solid var(--ym-line, #e4e9e5); border-radius: 8px; background: var(--ym-row-hover); line-height: 1.6; }
+.review-reply-item { padding: 10px 12px; border: 1px solid var(--ym-line, var(--ym-line)); border-radius: 8px; background: var(--ym-row-hover); line-height: 1.6; }
 .review-reply-item b { color: var(--mall-ink, var(--ym-ink)); font-size: 12px; }
 .review-reply-item p { margin: 5px 0; color: var(--mall-ink, var(--ym-ink)); font-size: 12px; }
 .review-reply-item span { display: block; color: var(--mall-muted, var(--ym-muted)); font-size: 10px; }

@@ -965,3 +965,73 @@ html body {
   border-color: var(--ym-line-strong) !important;
   border-radius: 6px !important;
 }
+
+/* Pagination: one geometry for every admin list page. */
+#app .el-pagination {
+  --el-pagination-font-size: 12px;
+  --el-pagination-button-width: 27px;
+  --el-pagination-button-height: 30px;
+  height: 30px;
+  gap: 5px;
+  font-size: 12px;
+}
+
+#app .el-pagination > * {
+  margin: 0;
+}
+
+#app .el-pagination :is(.btn-prev, .btn-next, .el-pager li) {
+  box-sizing: border-box;
+  width: 27px;
+  min-width: 27px;
+  height: 30px;
+  margin: 0;
+  padding: 1px 6px;
+  color: var(--ym-ink);
+  border: 1px solid var(--ym-line);
+  border-radius: 5px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+#app .el-pagination :is(.btn-prev, .btn-next) .el-icon {
+  font-size: 16px;
+}
+
+#app .el-pagination :is(.btn-prev:disabled, .btn-next:disabled) {
+  color: var(--ym-ink);
+  border-color: var(--ym-line);
+  background: #fff;
+}
+
+#app .el-pagination .el-pager li.is-active {
+  color: #fff;
+  border-color: var(--ym-brand);
+  background: var(--ym-brand);
+}
+
+#app .el-pagination :is(.el-pagination__total, .el-pagination__sizes, .el-pagination__jump) {
+  font-size: 12px;
+}
+
+#app .el-pagination .el-pagination__sizes .el-select {
+  width: 96px;
+}
+
+#app .el-pagination .el-pagination__sizes .el-select__wrapper {
+  min-height: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+#app .mall-page {
+  padding-bottom: 18px !important;
+}
+
+#app .notification-center .mall-pagination {
+  margin-top: 12px;
+}
