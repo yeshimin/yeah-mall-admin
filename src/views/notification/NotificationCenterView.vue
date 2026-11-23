@@ -440,11 +440,6 @@ watch(() => route.query.receiverId, (receiverId) => {
   gap: 10px;
 }
 
-.unread-summary {
-  margin-left: 4px;
-  color: var(--ym-muted);
-}
-
 .message-board {
   width: 100%;
   overflow: hidden;

@@ -324,8 +324,8 @@ onBeforeUnmount(() => {
   margin-right: 20px;
   padding: 0;
   border-radius: 8px;
-  background-color: #f4f7f5;
-  color: #52635a;
+  background-color: var(--ym-surface-2);
+  color: var(--ym-ink-secondary);
 }
 
 .header-collapse-btn:hover,
@@ -347,8 +347,8 @@ onBeforeUnmount(() => {
   padding: 7px 10px;
   overflow: hidden;
   border-radius: 6px;
-  color: #52635a;
-  background: #f4f7f5;
+  color: var(--ym-ink-secondary);
+  background: var(--ym-surface-2);
 }
 
 .current-shop span {
@@ -367,7 +367,7 @@ onBeforeUnmount(() => {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #606266;
+  color: var(--ym-ink-secondary);
   cursor: pointer;
   font-size: 18px;
 }
@@ -386,7 +386,7 @@ onBeforeUnmount(() => {
 }
 
 .user-info:hover {
-  background-color: #f5f7fa;
+  background-color: var(--ym-row-hover);
 }
 
 .user-name {
@@ -408,11 +408,11 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   padding-bottom: 10px;
-  border-bottom: 1px solid #eef2f6;
+  border-bottom: 1px solid var(--ym-line);
 }
 
 .notification-panel-header strong {
-  color: #303133;
+  color: var(--ym-ink);
   font-size: 14px;
 }
 
@@ -420,7 +420,7 @@ onBeforeUnmount(() => {
   padding: 0;
   border: none;
   background: transparent;
-  color: #409eff;
+  color: var(--ym-brand);
   cursor: pointer;
   font-size: 12px;
 }
@@ -433,7 +433,7 @@ onBeforeUnmount(() => {
 
 .notification-list p {
   margin: 14px 0 4px;
-  color: #909399;
+  color: var(--ym-muted);
   font-size: 13px;
   text-align: center;
 }
@@ -445,14 +445,14 @@ onBeforeUnmount(() => {
   gap: 10px;
   padding: 12px 4px;
   border: none;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--ym-line);
   background: transparent;
   cursor: pointer;
   text-align: left;
 }
 
 .notification-item:hover {
-  background: #f8fbff;
+  background: var(--ym-brand-soft);
 }
 
 .notification-dot {
@@ -460,11 +460,11 @@ onBeforeUnmount(() => {
   height: 7px;
   margin-top: 6px;
   border-radius: 50%;
-  background: #cbd5e1;
+  background: var(--ym-line-strong);
 }
 
 .notification-item.unread .notification-dot {
-  background: #409eff;
+  background: var(--ym-brand);
 }
 
 .notification-item-main {
@@ -477,14 +477,14 @@ onBeforeUnmount(() => {
 
 .notification-item-main strong {
   overflow: hidden;
-  color: #334155;
+  color: var(--ym-ink-secondary);
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .notification-item-main span {
-  color: #94a3b8;
+  color: var(--ym-muted);
   font-size: 11px;
 }
 
