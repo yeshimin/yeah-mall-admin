@@ -198,7 +198,7 @@ export interface FeedEvent {
   amount: number
 }
 
-export const SHARE_COLORS = ['#24634f', '#376d80', '#986019', '#be412b', '#65538d', '#4a7c59', '#8a6d3b', '#2f6a8a']
+export const SHARE_COLORS = ['#2f6f86', '#5a6b7e', '#96601a', '#b23a2a', '#65538d', '#4f8293', '#8a6d3b', '#2f6a8a']
 export const REFRESH_INTERVALS = [5, 10, 30]
 export const WARN_RATIOS = [
   { value: 0.1, label: '剩余 ≤ 10%' },

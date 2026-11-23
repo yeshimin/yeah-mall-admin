@@ -1161,7 +1161,7 @@ function weekdayOf(value?: string) {
   place-items: center;
   color: #fff;
   border-radius: 10px;
-  background: linear-gradient(135deg, #2f6a55, #173f31);
+  background: linear-gradient(135deg, var(--ym-brand), #1e4e60);
   box-shadow: 0 6px 14px rgba(23, 63, 49, 0.18);
 }
 
@@ -1245,7 +1245,7 @@ function weekdayOf(value?: string) {
   gap: 5px;
   padding: 0 11px;
   color: var(--mall-brand);
-  border: 1px solid #bcd4c7;
+  border: 1px solid #c7d8de;
   border-radius: 6px;
   background: var(--mall-brand-soft);
   font-size: 12px;
@@ -1395,7 +1395,7 @@ function weekdayOf(value?: string) {
   padding: 8px 14px;
   color: var(--mall-muted);
   border-bottom: 1px solid var(--mall-line);
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -1432,7 +1432,7 @@ function weekdayOf(value?: string) {
 }
 
 .ss-session-table :deep(.el-table__row.is-off) {
-  --el-table-row-hover-bg-color: #f8faf8;
+  --el-table-row-hover-bg-color: var(--ym-surface-2);
 }
 
 .ss-row-actions {
@@ -1483,7 +1483,7 @@ function weekdayOf(value?: string) {
 .ss-session-table :deep(.el-table__row.is-off) .ss-sort-chip {
   color: var(--mall-muted);
   border-color: var(--mall-line);
-  background: #f4f6f3;
+  background: var(--ym-paper);
 }
 
 .ss-session-cell > div {
@@ -1579,7 +1579,7 @@ function weekdayOf(value?: string) {
   color: var(--mall-muted);
   border: 1px solid var(--mall-line-strong);
   border-radius: 4px;
-  background: #f4f6f3;
+  background: var(--ym-paper);
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
@@ -1587,7 +1587,7 @@ function weekdayOf(value?: string) {
 
 .ss-status-ticket.tone-success {
   color: var(--mall-brand);
-  border-color: #bcd4c7;
+  border-color: #c7d8de;
   background: var(--mall-brand-soft);
 }
 
@@ -1600,7 +1600,7 @@ function weekdayOf(value?: string) {
 .ss-status-ticket.tone-neutral {
   color: var(--mall-muted);
   border-color: var(--mall-line);
-  background: #f4f6f3;
+  background: var(--ym-paper);
 }
 
 .ss-toggle {

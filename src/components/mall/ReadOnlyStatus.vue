@@ -20,7 +20,7 @@ withDefaults(defineProps<{
   align-items: center;
   justify-content: center;
   gap: 6px;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   font-size: 12px;
   white-space: nowrap;
 }
@@ -33,8 +33,8 @@ withDefaults(defineProps<{
   background: currentColor;
 }
 
-.read-only-status.is-success { color: var(--mall-brand, #24634f); }
-.read-only-status.is-warning { color: #986019; }
-.read-only-status.is-danger { color: #b6403a; }
-.read-only-status.is-info { color: #376d80; }
+.read-only-status.is-success { color: var(--mall-brand, var(--ym-brand)); }
+.read-only-status.is-warning { color: var(--ym-warning); }
+.read-only-status.is-danger { color: var(--ym-danger); }
+.read-only-status.is-info { color: var(--ym-info); }
 </style>

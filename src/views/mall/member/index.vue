@@ -540,7 +540,7 @@ onMounted(() => loadMembers())
   padding: 12px;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #fafcfa;
+  background: var(--ym-row-hover);
 }
 
 .member-metric span {

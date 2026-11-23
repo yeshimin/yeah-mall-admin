@@ -5,14 +5,14 @@
 
 /* ===== 设计令牌 + 页面底色（压过 scoped 的白底/20px padding） ===== */
 #app [class$="-manage-container"] {
-  --mall-ink: #17251f;
-  --mall-ink-secondary: #30423a;
-  --mall-brand: #24634f;
-  --mall-brand-soft: #e8f2ed;
-  --mall-paper: #f4f6f3;
-  --mall-line: #dce4de;
-  --mall-line-strong: #c8d4cc;
-  --mall-muted: #65726a;
+  --mall-ink: var(--ym-ink);
+  --mall-ink-secondary: var(--ym-ink-secondary);
+  --mall-brand: var(--ym-brand);
+  --mall-brand-soft: var(--ym-brand-soft);
+  --mall-paper: var(--ym-paper);
+  --mall-line: var(--ym-line);
+  --mall-line-strong: var(--ym-line-strong);
+  --mall-muted: var(--ym-muted);
   box-sizing: border-box;
   min-height: 100%;
   padding: 12px 12px 18px !important;
@@ -121,9 +121,9 @@
   background: #fff;
 }
 #app [class$="-manage-container"] .el-table {
-  --el-table-border-color: #edf1ee;
-  --el-table-header-bg-color: #f5f8f5;
-  --el-table-row-hover-bg-color: #fbfdfb;
+  --el-table-border-color: var(--ym-row-line);
+  --el-table-header-bg-color: var(--ym-table-head);
+  --el-table-row-hover-bg-color: var(--ym-row-hover);
   color: var(--mall-ink-secondary);
 }
 #app [class$="-manage-container"] .el-table th.el-table__cell {
@@ -156,34 +156,34 @@
 /* ===== 特殊页：RoutePlaceholderView（根 class 非 -manage-container） ===== */
 #app .placeholder-container {
   padding: 12px !important;
-  background: var(--mall-paper, #f4f6f3) !important;
+  background: var(--mall-paper, var(--ym-paper)) !important;
 }
 #app .placeholder-card {
   padding: 24px !important;
-  border: 1px solid var(--mall-line, #dce4de);
+  border: 1px solid var(--mall-line, var(--ym-line));
   border-radius: 8px !important;
   background: #fff !important;
 }
 #app .placeholder-card h2 {
-  color: var(--mall-ink, #17251f);
+  color: var(--mall-ink, var(--ym-ink));
   font-size: 16px;
 }
 #app .placeholder-card p {
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   font-size: 13px;
 }
 
 /* ===== 个人中心（ProfileView，与 yeahboot 同源，哈希一致） =====
    同样只覆盖视觉令牌：蓝渐变→商城灰底 paper、20/18px 圆角→8px、蓝阴影去除。 */
 #app .profile-view {
-  --mall-ink: #17251f;
-  --mall-ink-secondary: #30423a;
-  --mall-brand: #24634f;
-  --mall-brand-soft: #e8f2ed;
-  --mall-paper: #f4f6f3;
-  --mall-line: #dce4de;
-  --mall-line-strong: #c8d4cc;
-  --mall-muted: #65726a;
+  --mall-ink: var(--ym-ink);
+  --mall-ink-secondary: var(--ym-ink-secondary);
+  --mall-brand: var(--ym-brand);
+  --mall-brand-soft: var(--ym-brand-soft);
+  --mall-paper: var(--ym-paper);
+  --mall-line: var(--ym-line);
+  --mall-line-strong: var(--ym-line-strong);
+  --mall-muted: var(--ym-muted);
   padding: 12px 12px 18px !important;
   background: var(--mall-paper) !important;
   color: var(--mall-ink);

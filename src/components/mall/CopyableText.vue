@@ -69,7 +69,7 @@ async function copy() {
 
 .copyable-text:hover,
 .copyable-text:focus-visible {
-  color: var(--mall-brand, #24634f);
+  color: var(--mall-brand, var(--ym-brand));
   text-decoration-line: underline;
   text-decoration-style: dashed;
   outline: 0;

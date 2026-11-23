@@ -16,7 +16,7 @@
   color: var(--ym-muted);
   border: 1px solid var(--ym-line-strong);
   border-radius: 5px;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
   font-size: 12px;
   font-weight: 600;
   line-height: normal;
@@ -31,7 +31,7 @@
 
 .status-ticket.tone-success {
   color: var(--ym-brand);
-  border-color: #bcd4c7;
+  border-color: #c7d8de;
   background: var(--ym-brand-soft);
 }
 
@@ -56,7 +56,7 @@
 .status-ticket.tone-neutral {
   color: var(--ym-muted);
   border-color: var(--ym-line);
-  background: #f8faf8;
+  background: var(--ym-surface-2);
 }
 
 .ss-status-live {
@@ -117,7 +117,7 @@
   overflow: hidden;
   border: 1px solid var(--ym-line);
   border-radius: 6px;
-  background: #edf1ee;
+  background: var(--ym-row-line);
 }
 
 .sk-cover-art.small {
@@ -262,7 +262,7 @@
   color: var(--ym-muted);
   border: 1px solid var(--ym-line-strong);
   border-radius: 5px;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
@@ -271,7 +271,7 @@
 
 .sk-ticket.tone-success {
   color: var(--ym-brand);
-  border-color: #bcd4c7;
+  border-color: #c7d8de;
   background: var(--ym-brand-soft);
 }
 
@@ -410,12 +410,12 @@
   display: block;
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, #2f6a55, #7fae97);
+  background: linear-gradient(90deg, var(--ym-brand), #83aebf);
   transition: width 0.3s ease;
 }
 
 .gb-progress.is-full .gb-progress-track em {
-  background: linear-gradient(90deg, #2f6a55, #4a7c59);
+  background: linear-gradient(90deg, var(--ym-brand), #4f8293);
 }
 
 .gb-progress.is-fail .gb-progress-track em {
@@ -463,7 +463,7 @@
   place-items: center;
   color: #fff;
   border-radius: 10px;
-  background: linear-gradient(135deg, #2f6a55, #173f31);
+  background: linear-gradient(135deg, var(--ym-brand), #1e4e60);
   box-shadow: 0 6px 14px rgba(23, 63, 49, 0.18);
 }
 
@@ -547,7 +547,7 @@
   gap: 5px;
   padding: 0 11px;
   color: var(--ym-brand);
-  border: 1px solid #bcd4c7;
+  border: 1px solid #c7d8de;
   border-radius: 6px;
   background: var(--ym-brand-soft);
   font-size: 12px;
@@ -703,7 +703,7 @@
   padding: 8px 14px;
   color: var(--ym-muted);
   border-bottom: 1px solid var(--ym-line);
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -722,7 +722,7 @@
 
 .groupbuy-page .ss-table-intro.is-open {
   color: var(--ym-ink-secondary);
-  border-bottom-color: #d5e3da;
+  border-bottom-color: #d5e2e7;
   background: #f4faf6;
 }
 
@@ -841,7 +841,7 @@
   padding: 8px 14px;
   color: var(--ym-muted);
   border-bottom: 1px solid var(--ym-line);
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -991,7 +991,7 @@
 }
 
 .groupbuy-page .gb-page-empty-action:hover {
-  background: #174b3b;
+  background: #22576b;
 }
 
 /* ---------- 订单管理：视图切换 ---------- */
@@ -1142,7 +1142,7 @@
   overflow: hidden;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #edf1ee;
+  background: var(--ym-row-line);
 }
 
 .gb-scope .sk-detail-cover .el-image {
@@ -1206,7 +1206,7 @@
   padding: 10px 12px;
   border: 1px solid var(--ym-line);
   border-radius: 7px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
   text-align: left;
 }
 
@@ -1336,7 +1336,7 @@
   margin-top: 12px;
   padding: 10px 12px;
   color: var(--ym-ink-secondary);
-  border: 1px solid #d5e3da;
+  border: 1px solid #d5e2e7;
   border-radius: 7px;
   background: var(--ym-brand-soft);
   font-size: 12px;
@@ -1356,7 +1356,7 @@
   margin-top: 12px;
   padding: 10px 12px;
   color: var(--ym-ink-secondary);
-  border: 1px solid #d5e3da;
+  border: 1px solid #d5e2e7;
   border-radius: 7px;
   background: var(--ym-brand-soft);
   font-size: 11.5px;
@@ -1427,7 +1427,7 @@
   padding: 8px;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .gb-scope .sk-cover-preview {
@@ -1439,7 +1439,7 @@
   overflow: hidden;
   border: 1px solid var(--ym-line);
   border-radius: 6px;
-  background: #edf1ee;
+  background: var(--ym-row-line);
 }
 
 .gb-scope .sk-cover-preview .el-image {
@@ -1566,7 +1566,7 @@
   padding: 12px;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .gb-scope .sk-transition-copy {
@@ -1618,7 +1618,7 @@
   padding: 12px;
   border: 1px solid var(--ym-line);
   border-radius: 7px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .gb-scope .sk-check.is-fail {
@@ -1627,7 +1627,7 @@
 }
 
 .gb-scope .sk-check.is-pass {
-  border-color: #bcd4c7;
+  border-color: #c7d8de;
   background: var(--ym-brand-soft);
 }
 
@@ -1756,7 +1756,7 @@
   flex: 0 0 auto;
   margin-right: 0;
   padding: 18px 22px 12px;
-  border-bottom: 1px solid #dce4de;
+  border-bottom: 1px solid var(--ym-line);
 }
 
 .sa-audit-dialog .el-dialog__body {
@@ -1769,18 +1769,18 @@
 .sa-audit-dialog .el-dialog__footer {
   flex: 0 0 auto;
   padding: 12px 22px 18px;
-  border-top: 1px solid #dce4de;
+  border-top: 1px solid var(--ym-line);
 }
 
 .gb-scope .sa-dialog-heading span {
-  color: #24634f;
+  color: var(--ym-brand);
   font: 600 10px var(--ym-font-mono);
   letter-spacing: 0.12em;
 }
 
 .gb-scope .sa-dialog-heading h2 {
   margin: 3px 0 0;
-  color: #17251f;
+  color: var(--ym-ink);
   font-size: 19px;
   line-height: 1.3;
 }
@@ -1794,15 +1794,15 @@
   grid-template-columns: 1fr 1.15fr 0.95fr 0.85fr;
   margin-top: 12px;
   overflow: hidden;
-  border: 1px solid #dce4de;
+  border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .gb-scope .sa-context-item {
   min-width: 0;
   padding: 10px 12px;
-  border-right: 1px solid #dce4de;
+  border-right: 1px solid var(--ym-line);
 }
 
 .gb-scope .sa-context-item:last-child {
@@ -1812,14 +1812,14 @@
 .gb-scope .sa-context-item > span:first-child {
   display: block;
   margin-bottom: 4px;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10px;
 }
 
 .gb-scope .sa-context-item > b {
   display: block;
   overflow: hidden;
-  color: #17251f;
+  color: var(--ym-ink);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1829,7 +1829,7 @@
   display: block;
   margin-top: 3px;
   overflow: hidden;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1846,7 +1846,7 @@
   gap: 14px;
   margin-top: 10px;
   padding: 12px;
-  border: 1px solid #dce4de;
+  border: 1px solid var(--ym-line);
   border-radius: 9px;
   background: #fff;
 }
@@ -1868,7 +1868,7 @@
 
 .gb-scope .sa-product-info h3 {
   margin: 0;
-  color: #17251f;
+  color: var(--ym-ink);
   font-size: 16px;
   line-height: 1.3;
 }
@@ -1877,7 +1877,7 @@
   display: -webkit-box;
   margin: 6px 0 8px;
   overflow: hidden;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 11px;
   line-height: 1.6;
   -webkit-box-orient: vertical;
@@ -1889,7 +1889,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10.5px;
 }
 
@@ -1900,34 +1900,34 @@
 }
 
 .gb-scope .sa-product-tags .el-icon {
-  color: #24634f;
+  color: var(--ym-brand);
   opacity: 0.8;
 }
 
 .gb-scope .sa-price-panel {
   min-width: 158px;
   padding-left: 16px;
-  border-left: 1px dashed #c8d4cc;
+  border-left: 1px dashed var(--ym-line-strong);
   text-align: right;
 }
 
 .gb-scope .sa-price-panel > span {
   display: block;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10px;
 }
 
 .gb-scope .sa-price-panel > b {
   display: block;
   margin: 4px 0 3px;
-  color: #be412b;
+  color: var(--ym-price);
   font: 700 19px var(--ym-font-mono);
   white-space: nowrap;
 }
 
 .gb-scope .sa-price-panel > small {
   display: block;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10px;
   white-space: nowrap;
 }
@@ -1938,25 +1938,25 @@
   gap: 8px;
   margin-top: 10px;
   padding: 8px 12px;
-  border: 1px solid #d5e3da;
+  border: 1px solid #d5e2e7;
   border-radius: 7px;
-  background: #e8f2ed;
+  background: var(--ym-brand-soft);
 }
 
 .gb-scope .sa-apply-note > .el-icon {
   flex: 0 0 auto;
   margin-top: 1px;
-  color: #24634f;
+  color: var(--ym-brand);
 }
 
 .gb-scope .sa-apply-note b {
-  color: #30423a;
+  color: var(--ym-ink-secondary);
   font-size: 11px;
 }
 
 .gb-scope .sa-apply-note p {
   margin: 3px 0 0;
-  color: #30423a;
+  color: var(--ym-ink-secondary);
   font-size: 11px;
   line-height: 1.55;
   white-space: pre-wrap;
@@ -1975,19 +1975,19 @@
 }
 
 .gb-scope .sa-section-head b {
-  color: #17251f;
+  color: var(--ym-ink);
   font-size: 13px;
 }
 
 .gb-scope .sa-section-head small {
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10px;
 }
 
 .gb-scope .sa-sku-table {
   width: 100%;
   overflow: hidden;
-  border: 1px solid #dce4de;
+  border: 1px solid var(--ym-line);
   border-radius: 8px;
   border-collapse: separate;
   border-spacing: 0;
@@ -1997,9 +1997,9 @@
 .gb-scope .sa-sku-table th {
   height: 34px;
   padding: 0 8px;
-  color: #65726a;
-  border-bottom: 1px solid #dce4de;
-  background: #f8faf8;
+  color: var(--ym-muted);
+  border-bottom: 1px solid var(--ym-line);
+  background: var(--ym-surface-2);
   font-size: 10.5px;
   font-weight: 600;
   text-align: center;
@@ -2008,8 +2008,8 @@
 .gb-scope .sa-sku-table td {
   height: 44px;
   padding: 5px 8px;
-  color: #30423a;
-  border-bottom: 1px solid #edf1ee;
+  color: var(--ym-ink-secondary);
+  border-bottom: 1px solid var(--ym-row-line);
   font-size: 11.5px;
   text-align: center;
 }
@@ -2029,7 +2029,7 @@
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
-  color: #17251f;
+  color: var(--ym-ink);
   font-size: 11.5px;
   font-weight: 600;
   text-overflow: ellipsis;
@@ -2044,9 +2044,9 @@
   height: 32px;
   margin: 0 auto;
   overflow: hidden;
-  border: 1px solid #dce4de;
+  border: 1px solid var(--ym-line);
   border-radius: 6px;
-  background: #edf1ee;
+  background: var(--ym-row-line);
 }
 
 .gb-scope .sa-sku-art .el-image {
@@ -2055,7 +2055,7 @@
 }
 
 .gb-scope .sa-sku-mono {
-  color: #65726a;
+  color: var(--ym-muted);
   font-family: var(--ym-font-mono);
 }
 
@@ -2066,15 +2066,15 @@
 }
 
 .gb-scope .sa-sku-price {
-  color: #be412b;
+  color: var(--ym-price);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .gb-scope .sa-empty-sku {
   padding: 24px;
-  color: #65726a;
-  border: 1px dashed #c8d4cc;
+  color: var(--ym-muted);
+  border: 1px dashed var(--ym-line-strong);
   border-radius: 8px;
   text-align: center;
   font-size: 11px;
@@ -2082,14 +2082,14 @@
 
 .gb-scope .sa-richtext-wrap {
   overflow: hidden;
-  border: 1px solid #dce4de;
+  border: 1px solid var(--ym-line);
   border-radius: 8px;
   background: #fff;
 }
 
 .gb-scope .sa-richtext-wrap .ql-editor {
   padding: 12px 14px;
-  color: #30423a;
+  color: var(--ym-ink-secondary);
   font-size: 12px;
   line-height: 1.7;
 }
@@ -2125,7 +2125,7 @@
 
 .gb-scope .sa-review-section {
   padding-top: 12px;
-  border-top: 1px dashed #c8d4cc;
+  border-top: 1px dashed var(--ym-line-strong);
 }
 
 .gb-scope .sa-result-options {
@@ -2141,7 +2141,7 @@
   gap: 10px;
   padding: 10px 12px;
   text-align: left;
-  border: 1px solid #c8d4cc;
+  border: 1px solid var(--ym-line-strong);
   border-radius: 8px;
   background: #fff;
   cursor: pointer;
@@ -2150,7 +2150,7 @@
 
 .gb-scope .sa-result-option:hover {
   border-color: #b9cec1;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .gb-scope .sa-result-check {
@@ -2159,8 +2159,8 @@
   height: 28px;
   flex: 0 0 28px;
   place-items: center;
-  color: #65726a;
-  border: 1px solid #c8d4cc;
+  color: var(--ym-muted);
+  border: 1px solid var(--ym-line-strong);
   border-radius: 50%;
   background: #fff;
 }
@@ -2174,44 +2174,44 @@
 }
 
 .gb-scope .sa-result-copy b {
-  color: #17251f;
+  color: var(--ym-ink);
   font-size: 12.5px;
 }
 
 .gb-scope .sa-result-copy small {
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10.5px;
   line-height: 1.5;
 }
 
 .gb-scope .sa-result-option.is-pass.is-active {
-  border-color: #24634f;
-  background: #e8f2ed;
+  border-color: var(--ym-brand);
+  background: var(--ym-brand-soft);
 }
 
 .gb-scope .sa-result-option.is-pass.is-active .sa-result-check {
   color: #fff;
-  border-color: #24634f;
-  background: #24634f;
+  border-color: var(--ym-brand);
+  background: var(--ym-brand);
 }
 
 .gb-scope .sa-result-option.is-pass.is-active .sa-result-copy b {
-  color: #24634f;
+  color: var(--ym-brand);
 }
 
 .gb-scope .sa-result-option.is-reject.is-active {
-  border-color: #be412b;
+  border-color: var(--ym-price);
   background: #fcf1ef;
 }
 
 .gb-scope .sa-result-option.is-reject.is-active .sa-result-check {
   color: #fff;
-  border-color: #be412b;
-  background: #be412b;
+  border-color: var(--ym-price);
+  background: var(--ym-price);
 }
 
 .gb-scope .sa-result-option.is-reject.is-active .sa-result-copy b {
-  color: #be412b;
+  color: var(--ym-price);
 }
 
 .gb-scope .sa-remark-field {
@@ -2226,13 +2226,13 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
-  color: #30423a;
+  color: var(--ym-ink-secondary);
   font-size: 12px;
   font-weight: 600;
 }
 
 .gb-scope .sa-remark-field > span small {
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10px;
   font-weight: 400;
 }
@@ -2240,15 +2240,15 @@
 .gb-scope .sa-remark-field .el-textarea__inner {
   min-height: 66px;
   padding: 8px 10px;
-  color: #17251f;
+  color: var(--ym-ink);
   border-radius: 6px;
   font-size: 12px;
   line-height: 1.6;
-  box-shadow: 0 0 0 1px #c8d4cc inset;
+  box-shadow: 0 0 0 1px var(--ym-line-strong) inset;
 }
 
 .gb-scope .sa-remark-field .el-textarea__inner:focus {
-  box-shadow: 0 0 0 1px #24634f inset, 0 0 0 2px rgba(36, 99, 79, 0.1);
+  box-shadow: 0 0 0 1px var(--ym-brand) inset, 0 0 0 2px rgba(36, 99, 79, 0.1);
 }
 
 .gb-scope .sa-remark-meta {
@@ -2256,7 +2256,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10px;
 }
 
@@ -2269,7 +2269,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 8px;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10.5px;
 }
 
@@ -2280,9 +2280,9 @@
 
 .gb-scope .sa-audit-result {
   overflow: hidden;
-  border: 1px solid #dce4de;
+  border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .gb-scope .sa-audit-result.is-passed {
@@ -2299,17 +2299,17 @@
   justify-content: space-between;
   gap: 10px;
   padding: 11px 13px;
-  border-bottom: 1px solid #dce4de;
+  border-bottom: 1px solid var(--ym-line);
 }
 
 .gb-scope .sa-result-head > span:last-child {
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10.5px;
 }
 
 .gb-scope .sa-result-head > span:last-child b {
   margin-left: 4px;
-  color: #30423a;
+  color: var(--ym-ink-secondary);
   font-weight: 600;
 }
 
@@ -2320,13 +2320,13 @@
 .gb-scope .sa-result-note > span {
   display: block;
   margin-bottom: 5px;
-  color: #65726a;
+  color: var(--ym-muted);
   font-size: 10px;
 }
 
 .gb-scope .sa-result-note p {
   margin: 0;
-  color: #30423a;
+  color: var(--ym-ink-secondary);
   font-size: 11.5px;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -2338,7 +2338,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  color: #be412b;
+  color: var(--ym-price);
   font-size: 12px;
 }
 
@@ -2355,7 +2355,7 @@
   padding: 12px 14px;
   border: 1px solid var(--ym-line);
   border-radius: 9px;
-  background: linear-gradient(135deg, #fbfdfb 0%, #f4f8f5 100%);
+  background: linear-gradient(135deg, var(--ym-row-hover) 0%, var(--ym-surface-2) 100%);
 }
 
 .gb-scope .gb-group-card-head {
@@ -2585,7 +2585,7 @@
   }
 
   .gb-scope .sa-context-item:nth-child(-n + 2) {
-    border-bottom: 1px solid #dce4de;
+    border-bottom: 1px solid var(--ym-line);
   }
 
   .gb-scope .sa-product-panel {
@@ -2601,7 +2601,7 @@
     grid-column: 1 / -1;
     padding-top: 9px;
     padding-left: 0;
-    border-top: 1px dashed #c8d4cc;
+    border-top: 1px dashed var(--ym-line-strong);
     border-left: 0;
     text-align: left;
   }
@@ -2626,7 +2626,7 @@
 
   .gb-scope .sa-context-item {
     border-right: 0;
-    border-bottom: 1px solid #dce4de;
+    border-bottom: 1px solid var(--ym-line);
   }
 
   .gb-scope .sa-context-item:last-child {

@@ -16,7 +16,7 @@
   place-items: center;
   overflow: hidden;
   color: var(--ym-muted);
-  background: #f8faf8;
+  background: var(--ym-surface-2);
   border: 1px solid var(--ym-line);
   border-radius: 8px;
 }
@@ -94,7 +94,7 @@
   font-weight: 600;
   vertical-align: middle;
   border-radius: 9px;
-  background: #eef2ef;
+  background: var(--ym-surface-2);
 }
 
 .ptc-thumb {
@@ -107,7 +107,7 @@
   font-size: 12px;
   font-weight: 700;
   border-radius: 6px;
-  background: linear-gradient(135deg, #7fa695, #24634f);
+  background: linear-gradient(135deg, #7fa695, var(--ym-brand));
 }
 
 .ptc-thumb.t2 {
@@ -366,7 +366,7 @@
   font-size: 12px;
   border: 1px dashed var(--ym-line-strong);
   border-radius: 6px;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
 }
 
 /* ---------- SKU 上下文条 ---------- */
@@ -377,7 +377,7 @@
   gap: 10px;
   margin-bottom: 12px;
   padding: 10px 14px;
-  border: 1px solid #cfe0d6;
+  border: 1px solid #c7d8de;
   border-radius: 8px;
   background: var(--ym-brand-soft);
 }
@@ -398,7 +398,7 @@
   margin-left: auto;
   padding: 0 12px;
   font-size: 12px;
-  border-color: #cfe0d6;
+  border-color: #c7d8de;
   border-radius: 6px;
   background: #fff;
 }
@@ -431,7 +431,7 @@
   font-weight: 700;
   border: 1px solid var(--ym-line-strong);
   border-radius: 50%;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
 }
 
 .mp-step:not(:last-child)::after {
@@ -520,7 +520,7 @@
   font-size: 12px;
   border: 1px solid var(--ym-line);
   border-radius: 6px;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
   cursor: pointer;
 }
 
@@ -593,7 +593,7 @@
   overflow: hidden;
   border: 1px solid var(--ym-line);
   border-radius: 12px;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
 }
 
 .mp-main-preview .el-image {
@@ -669,7 +669,7 @@
   font-size: 11px;
   border: 1px dashed var(--ym-line-strong);
   border-radius: 10px;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
   cursor: pointer;
 }
 
@@ -759,7 +759,7 @@
   font-size: 12px;
   border: 1px dashed var(--ym-line-strong);
   border-radius: 8px;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
 }
 
 /* ---------- 规格选项弹窗 ---------- */

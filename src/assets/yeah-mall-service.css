@@ -103,14 +103,14 @@
   gap: 9px;
   padding: 0 12px;
   border: 0;
-  border-bottom: 1px solid #edf1ee;
+  border-bottom: 1px solid var(--ym-row-line);
   background: #fff;
   text-align: left;
   cursor: pointer;
 }
 
 .merchant-service-console .cs-conversation-item:hover {
-  background: #f7faf8;
+  background: var(--ym-surface-2);
 }
 
 .merchant-service-console .cs-conversation-item.active {
@@ -308,7 +308,7 @@
 
 .merchant-service-console .cs-chat::-webkit-scrollbar-thumb {
   border-radius: 3px;
-  background: #c8d4cc;
+  background: var(--ym-line-strong);
 }
 
 .merchant-service-console .cs-chat-hint,
@@ -619,7 +619,7 @@
 }
 
 .merchant-service-console .cs-send-button:hover:not(:disabled) {
-  background: var(--mall-brand-strong, #174b3b);
+  background: var(--mall-brand-strong, #22576b);
 }
 
 .merchant-service-console .cs-send-button:disabled {

@@ -18,11 +18,11 @@ type ActionKey = 'seckill' | 'group' | 'coupons' | 'pointsMall' | 'shops' | 'pro
 
 const ACTIONS: Record<ActionKey, { icon: typeof Lightning; color: string; bg: string }> = {
   seckill: { icon: Lightning, color: '#be412b', bg: '#f9ebe7' },
-  group: { icon: UserFilled, color: '#24634f', bg: '#e8f2ed' },
+  group: { icon: UserFilled, color: 'var(--ym-brand)', bg: 'var(--ym-brand-soft)' },
   coupons: { icon: Ticket, color: '#986019', bg: '#fbf0de' },
   pointsMall: { icon: Coin, color: '#5b4a86', bg: '#efecf7' },
   shops: { icon: Shop, color: '#315c67', bg: '#e8eff2' },
-  products: { icon: Grid, color: '#65726a', bg: '#eef2ef' },
+  products: { icon: Grid, color: 'var(--ym-muted)', bg: 'var(--ym-surface-2)' },
 }
 
 const TARGET_ACTIONS: Record<string, ActionKey> = {

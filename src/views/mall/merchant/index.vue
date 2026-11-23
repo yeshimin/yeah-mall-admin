@@ -335,42 +335,42 @@ onMounted(() => void loadMerchants())
 
 <style scoped>
 .merchant-account-cell { display: flex; width: 220px; max-width: 100%; min-width: 0; align-items: center; justify-content: flex-start; gap: 10px; margin: 0 auto; text-align: left; }
-.merchant-avatar, .merchant-detail-avatar { display: inline-flex; width: 36px; height: 36px; flex: 0 0 36px; align-items: center; justify-content: center; border-radius: 10px; color: var(--mall-brand, #24634f); background: var(--mall-brand-soft, #e8f2ed); font-size: 13px; font-weight: 700; }
+.merchant-avatar, .merchant-detail-avatar { display: inline-flex; width: 36px; height: 36px; flex: 0 0 36px; align-items: center; justify-content: center; border-radius: 10px; color: var(--mall-brand, var(--ym-brand)); background: var(--mall-brand-soft, var(--ym-brand-soft)); font-size: 13px; font-weight: 700; }
 .merchant-account-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
-.merchant-account-copy strong { overflow: hidden; color: var(--mall-ink, #17251f); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-.merchant-account-copy small { overflow: hidden; color: var(--mall-muted, #65726a); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.merchant-account-copy strong { overflow: hidden; color: var(--mall-ink, var(--ym-ink)); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.merchant-account-copy small { overflow: hidden; color: var(--mall-muted, var(--ym-muted)); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .merchant-shop-count { display: inline-flex; align-items: baseline; gap: 4px; padding: 0; border: 0; background: transparent; cursor: pointer; }
-.merchant-shop-count:hover strong { color: var(--ym-brand-strong, #174b3b); }
-.merchant-shop-count strong { color: var(--mall-brand, #24634f); font-family: var(--ym-font-mono, monospace); font-size: 15px; }
-.merchant-shop-count span { color: var(--mall-muted, #65726a); font-size: 11px; }
+.merchant-shop-count:hover strong { color: var(--ym-brand-strong, #22576b); }
+.merchant-shop-count strong { color: var(--mall-brand, var(--ym-brand)); font-family: var(--ym-font-mono, monospace); font-size: 15px; }
+.merchant-shop-count span { color: var(--mall-muted, var(--ym-muted)); font-size: 11px; }
 .merchant-account-status { display: inline-flex; align-items: center; gap: 6px; color: #89938d; font-size: 12px; font-weight: 600; }
 .merchant-account-status i { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: currentColor; }
-.merchant-account-status.is-enabled { color: var(--mall-brand, #24634f); }
+.merchant-account-status.is-enabled { color: var(--mall-brand, var(--ym-brand)); }
 .drawer-heading, .dialog-heading { display: flex; flex-direction: column; gap: 5px; }
-.drawer-heading span, .dialog-heading span { color: var(--mall-brand, #24634f); font-family: var(--ym-font-mono, monospace); font-size: 10px; font-weight: 700; letter-spacing: .12em; }
-.drawer-heading strong, .dialog-heading strong { color: var(--mall-ink, #17251f); font-size: 19px; }
+.drawer-heading span, .dialog-heading span { color: var(--mall-brand, var(--ym-brand)); font-family: var(--ym-font-mono, monospace); font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.drawer-heading strong, .dialog-heading strong { color: var(--mall-ink, var(--ym-ink)); font-size: 19px; }
 .merchant-detail-content { display: flex; flex-direction: column; }
 .merchant-detail-profile { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding-bottom: 18px; }
 .merchant-detail-avatar { width: 54px; height: 54px; flex-basis: 54px; font-size: 18px; }
 .merchant-detail-profile > div { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
-.merchant-detail-profile h3 { margin: 0; color: var(--mall-ink, #17251f); font-size: 16px; }
-.merchant-detail-profile > div span { color: var(--mall-muted, #65726a); font-size: 11px; }
-.merchant-description-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--mall-line, #dce4de); border-left: 1px solid var(--mall-line, #dce4de); }
-.merchant-description-grid > div { display: flex; min-height: 62px; justify-content: center; flex-direction: column; gap: 6px; padding: 10px 12px; border-right: 1px solid var(--mall-line, #dce4de); border-bottom: 1px solid var(--mall-line, #dce4de); }
-.merchant-description-grid span { color: var(--mall-muted, #65726a); font-size: 11px; }
-.merchant-description-grid strong { color: var(--mall-ink-secondary, #30423a); font-size: 13px; }
-.merchant-shop-section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--mall-line, #dce4de); }
+.merchant-detail-profile h3 { margin: 0; color: var(--mall-ink, var(--ym-ink)); font-size: 16px; }
+.merchant-detail-profile > div span { color: var(--mall-muted, var(--ym-muted)); font-size: 11px; }
+.merchant-description-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--mall-line, var(--ym-line)); border-left: 1px solid var(--mall-line, var(--ym-line)); }
+.merchant-description-grid > div { display: flex; min-height: 62px; justify-content: center; flex-direction: column; gap: 6px; padding: 10px 12px; border-right: 1px solid var(--mall-line, var(--ym-line)); border-bottom: 1px solid var(--mall-line, var(--ym-line)); }
+.merchant-description-grid span { color: var(--mall-muted, var(--ym-muted)); font-size: 11px; }
+.merchant-description-grid strong { color: var(--mall-ink-secondary, var(--ym-ink-secondary)); font-size: 13px; }
+.merchant-shop-section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--mall-line, var(--ym-line)); }
 .merchant-detail-section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.merchant-detail-section-title h3 { margin: 0; color: var(--mall-ink, #17251f); font-size: 14px; }
+.merchant-detail-section-title h3 { margin: 0; color: var(--mall-ink, var(--ym-ink)); font-size: 14px; }
 .merchant-detail-actions { display: flex; justify-content: flex-end; gap: 8px; }
-.password-merchant-summary { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 11px; border-radius: 7px; background: var(--mall-paper, #f4f6f3); }
+.password-merchant-summary { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 11px; border-radius: 7px; background: var(--mall-paper, var(--ym-paper)); }
 .password-merchant-summary > div { display: flex; flex-direction: column; gap: 3px; }
-.password-merchant-summary small, .form-tip { color: var(--mall-muted, #65726a); font-size: 12px; }
+.password-merchant-summary small, .form-tip { color: var(--mall-muted, var(--ym-muted)); font-size: 12px; }
 .merchant-edit-tip { margin: 4px 0 8px; }
 .merchant-manage-page .mall-filter-panel { background: #fff; }
 .merchant-manage-page :deep(.mall-query-form .el-input), .merchant-manage-page :deep(.mall-query-form .el-select) { width: 188px; }
 .merchant-manage-page :deep(.mall-table-panel > .mall-pagination) { min-height: 48px; align-items: center; margin: 0; padding: 7px 12px; border-top: 1px solid var(--mall-line); background: #fff; }
-:global(.merchant-detail-drawer .el-drawer__footer) { padding: 14px 20px; border-top: 1px solid #dce4de; }
-:global(.merchant-account-dialog .el-dialog__header), :global(.merchant-password-dialog .el-dialog__header) { margin-right: 0; padding-bottom: 16px; border-bottom: 1px solid #dce4de; }
-:global(.merchant-account-dialog .el-dialog__footer), :global(.merchant-password-dialog .el-dialog__footer) { padding-top: 16px; border-top: 1px solid #dce4de; }
+:global(.merchant-detail-drawer .el-drawer__footer) { padding: 14px 20px; border-top: 1px solid var(--ym-line); }
+:global(.merchant-account-dialog .el-dialog__header), :global(.merchant-password-dialog .el-dialog__header) { margin-right: 0; padding-bottom: 16px; border-bottom: 1px solid var(--ym-line); }
+:global(.merchant-account-dialog .el-dialog__footer), :global(.merchant-password-dialog .el-dialog__footer) { padding-top: 16px; border-top: 1px solid var(--ym-line); }
 </style>

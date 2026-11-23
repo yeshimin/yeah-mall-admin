@@ -274,7 +274,7 @@ onBeforeUnmount(() => {
   padding: 0;
   border: none;
   background: transparent;
-  color: #17251f;
+  color: var(--ym-ink);
   cursor: pointer;
 }
 
@@ -285,7 +285,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: #24634f;
+  background: var(--ym-brand);
   color: #fff;
   font-size: 19px;
   font-weight: 700;
@@ -316,8 +316,8 @@ onBeforeUnmount(() => {
 
 .header-collapse-btn:hover,
 .header-action:hover {
-  color: #24634f;
-  background-color: #e8f2ed;
+  color: var(--ym-brand);
+  background-color: var(--ym-brand-soft);
 }
 
 .header-collapse-icon {

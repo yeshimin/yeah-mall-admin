@@ -23,7 +23,7 @@
           >
             <div style="display: flex; min-width: 0; flex-direction: column; gap: 2px;">
               <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ spu.name }}</span>
-              <small style="color: var(--mall-muted, #65726a); font-size: 10px;">SPU {{ spu.id }}</small>
+              <small style="color: var(--mall-muted, var(--ym-muted)); font-size: 10px;">SPU {{ spu.id }}</small>
             </div>
           </el-option>
         </el-select>
@@ -49,7 +49,7 @@
           >
             <div style="display: flex; min-width: 0; flex-direction: column; gap: 2px;">
               <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ shop.shopName }}</span>
-              <small style="color: var(--mall-muted, #65726a); font-size: 10px;">{{ shop.shopNo || shop.id }}</small>
+              <small style="color: var(--mall-muted, var(--ym-muted)); font-size: 10px;">{{ shop.shopNo || shop.id }}</small>
             </div>
           </el-option>
         </el-select>
@@ -384,34 +384,34 @@ onMounted(() => load())
   text-align: left;
 }
 .review-product-copy { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; gap: 4px; text-align: left; }
-.review-product-copy strong { overflow: hidden; color: var(--mall-ink, #17251f); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-.review-product-copy small { color: var(--mall-muted, #65726a); font-family: var(--ym-font-mono, monospace); font-size: 10px; }
-.review-product-placeholder { display: grid; place-items: center; background: #f4f6f3; color: var(--mall-muted, #65726a); }
-.review-empty { display: flex; min-height: 180px; align-items: center; justify-content: center; flex-direction: column; gap: 7px; color: var(--mall-muted, #65726a); }
-.review-empty .el-icon { margin-bottom: 3px; color: var(--mall-brand, #24634f); font-size: 28px; }
-.review-empty strong { color: var(--mall-ink, #17251f); font-size: 13px; }
+.review-product-copy strong { overflow: hidden; color: var(--mall-ink, var(--ym-ink)); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.review-product-copy small { color: var(--mall-muted, var(--ym-muted)); font-family: var(--ym-font-mono, monospace); font-size: 10px; }
+.review-product-placeholder { display: grid; place-items: center; background: var(--ym-paper); color: var(--mall-muted, var(--ym-muted)); }
+.review-empty { display: flex; min-height: 180px; align-items: center; justify-content: center; flex-direction: column; gap: 7px; color: var(--mall-muted, var(--ym-muted)); }
+.review-empty .el-icon { margin-bottom: 3px; color: var(--mall-brand, var(--ym-brand)); font-size: 28px; }
+.review-empty strong { color: var(--mall-ink, var(--ym-ink)); font-size: 13px; }
 .review-empty span { font-size: 12px; }
 .pagination-container { display: flex; justify-content: flex-end; }
 .review-drawer-heading { display: flex; flex-direction: column; gap: 5px; }
-.review-drawer-heading span { color: var(--mall-brand, #24634f); font-family: var(--ym-font-mono, monospace); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; }
-.review-drawer-heading strong { color: var(--mall-ink, #17251f); font-size: 19px; }
+.review-drawer-heading span { color: var(--mall-brand, var(--ym-brand)); font-family: var(--ym-font-mono, monospace); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; }
+.review-drawer-heading strong { color: var(--mall-ink, var(--ym-ink)); font-size: 19px; }
 .review-detail { display: flex; flex-direction: column; gap: 16px; }
 .review-detail-product { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--ym-line, #e4e9e5); }
 .review-detail-image { width: 76px; height: 76px; border-radius: 8px; }
 .review-detail-copy { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
-.review-detail-copy strong { overflow: hidden; color: var(--mall-ink, #17251f); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-.review-detail-copy span { color: var(--mall-muted, #65726a); font-size: 10px; }
-.review-detail-content { color: var(--mall-ink, #17251f); font-size: 13px; line-height: 1.8; }
-.review-visibility-remark { padding: 10px 12px; border-radius: 7px; background: #f4f6f3; color: var(--mall-muted, #65726a); font-size: 12px; line-height: 1.6; }
-.review-visibility-remark span { margin-right: 8px; color: var(--mall-ink, #17251f); font-weight: 600; }
+.review-detail-copy strong { overflow: hidden; color: var(--mall-ink, var(--ym-ink)); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.review-detail-copy span { color: var(--mall-muted, var(--ym-muted)); font-size: 10px; }
+.review-detail-content { color: var(--mall-ink, var(--ym-ink)); font-size: 13px; line-height: 1.8; }
+.review-visibility-remark { padding: 10px 12px; border-radius: 7px; background: var(--ym-paper); color: var(--mall-muted, var(--ym-muted)); font-size: 12px; line-height: 1.6; }
+.review-visibility-remark span { margin-right: 8px; color: var(--mall-ink, var(--ym-ink)); font-weight: 600; }
 .review-images { display: flex; flex-wrap: wrap; gap: 10px; }
 .review-image { width: 96px; height: 96px; border-radius: 8px; }
-.review-replies h4 { margin: 0 0 10px; color: var(--mall-ink, #17251f); font-size: 13px; }
+.review-replies h4 { margin: 0 0 10px; color: var(--mall-ink, var(--ym-ink)); font-size: 13px; }
 .review-reply-list { display: flex; flex-direction: column; gap: 8px; }
-.review-reply-item { padding: 10px 12px; border: 1px solid var(--ym-line, #e4e9e5); border-radius: 8px; background: #fafcfa; line-height: 1.6; }
-.review-reply-item b { color: var(--mall-ink, #17251f); font-size: 12px; }
-.review-reply-item p { margin: 5px 0; color: var(--mall-ink, #17251f); font-size: 12px; }
-.review-reply-item span { display: block; color: var(--mall-muted, #65726a); font-size: 10px; }
-.review-no-reply { margin: 0; color: var(--mall-muted, #65726a); font-size: 12px; }
+.review-reply-item { padding: 10px 12px; border: 1px solid var(--ym-line, #e4e9e5); border-radius: 8px; background: var(--ym-row-hover); line-height: 1.6; }
+.review-reply-item b { color: var(--mall-ink, var(--ym-ink)); font-size: 12px; }
+.review-reply-item p { margin: 5px 0; color: var(--mall-ink, var(--ym-ink)); font-size: 12px; }
+.review-reply-item span { display: block; color: var(--mall-muted, var(--ym-muted)); font-size: 10px; }
+.review-no-reply { margin: 0; color: var(--mall-muted, var(--ym-muted)); font-size: 12px; }
 .review-detail-actions { display: flex; justify-content: flex-end; gap: 10px; }
 </style>

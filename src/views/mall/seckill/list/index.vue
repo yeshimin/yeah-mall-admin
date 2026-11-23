@@ -1445,7 +1445,7 @@ onBeforeUnmount(() => {
   padding: 8px 14px;
   color: var(--ym-muted);
   border-bottom: 1px solid var(--ym-line);
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -1511,7 +1511,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   border: 1px solid var(--ym-line);
   border-radius: 6px;
-  background: #edf1ee;
+  background: var(--ym-row-line);
 }
 
 .sk-cover-art.small {
@@ -1640,7 +1640,7 @@ onBeforeUnmount(() => {
   color: var(--ym-muted);
   border: 1px solid var(--ym-line-strong);
   border-radius: 5px;
-  background: #f8faf8;
+  background: var(--ym-surface-2);
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
@@ -1649,7 +1649,7 @@ onBeforeUnmount(() => {
 
 .sk-ticket.tone-success {
   color: var(--ym-brand);
-  border-color: #bcd4c7;
+  border-color: #c7d8de;
   background: var(--ym-brand-soft);
 }
 
@@ -1806,7 +1806,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #edf1ee;
+  background: var(--ym-row-line);
 }
 
 .sk-detail-copy {
@@ -1858,7 +1858,7 @@ onBeforeUnmount(() => {
   padding: 10px 12px;
   border: 1px solid var(--ym-line);
   border-radius: 7px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
   text-align: left;
 }
 
@@ -1988,7 +1988,7 @@ onBeforeUnmount(() => {
   margin-top: 12px;
   padding: 10px 12px;
   color: var(--ym-ink-secondary);
-  border: 1px solid #d5e3da;
+  border: 1px solid #d5e2e7;
   border-radius: 7px;
   background: var(--ym-brand-soft);
   font-size: 12px;
@@ -2057,7 +2057,7 @@ onBeforeUnmount(() => {
   padding: 8px;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .sk-cover-preview {
@@ -2069,7 +2069,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   border: 1px solid var(--ym-line);
   border-radius: 6px;
-  background: #edf1ee;
+  background: var(--ym-row-line);
 }
 
 .sk-cover-copy {
@@ -2175,7 +2175,7 @@ onBeforeUnmount(() => {
   padding: 12px;
   border: 1px solid var(--ym-line);
   border-radius: 8px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .sk-transition-copy {
@@ -2227,7 +2227,7 @@ onBeforeUnmount(() => {
   padding: 12px;
   border: 1px solid var(--ym-line);
   border-radius: 7px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
 }
 
 .sk-check.is-fail {
@@ -2236,7 +2236,7 @@ onBeforeUnmount(() => {
 }
 
 .sk-check.is-pass {
-  border-color: #bcd4c7;
+  border-color: #c7d8de;
   background: var(--ym-brand-soft);
 }
 

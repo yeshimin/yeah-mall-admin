@@ -399,7 +399,7 @@ onMounted(() => void loadCategories())
   gap: 12px;
   padding: 10px 14px;
   border-bottom: 1px solid var(--mall-line);
-  background: #f8faf8;
+  background: var(--ym-surface-2);
 }
 
 .category-tree-summary {
@@ -462,7 +462,7 @@ onMounted(() => void loadCategories())
   font-size: 11px;
   font-weight: 600;
   border-radius: 9px;
-  background: #eef2ef;
+  background: var(--ym-surface-2);
 }
 
 .category-muted {

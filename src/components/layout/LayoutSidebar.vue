@@ -70,12 +70,12 @@ async function openHome() {
 .sidebar-container :deep(.el-sub-menu__title:hover),
 .sidebar-container :deep(.el-menu-item:not(.is-active)):hover,
 .sidebar-container :deep(.el-sub-menu__title:not(.is-active)):hover {
-  background-color: #24634f;
+  background-color: var(--ym-brand);
 }
 
 .sidebar-container :deep(.el-menu-item.is-active) {
   color: #fff;
-  background-color: #24634f;
+  background-color: var(--ym-brand);
 }
 
 .sidebar-container :deep(.el-icon) {
@@ -96,7 +96,7 @@ async function openHome() {
 }
 
 .sidebar-logo:focus-visible {
-  outline: 2px solid #8eafa0;
+  outline: 2px solid #97b7c2;
   outline-offset: -2px;
 }
 

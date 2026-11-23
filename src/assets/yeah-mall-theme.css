@@ -2,45 +2,60 @@
   --ym-font-body: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --ym-font-display: "DIN Condensed", "Arial Narrow", "Roboto Condensed", var(--ym-font-body);
   --ym-font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --ym-ink: #17251f;
-  --ym-ink-secondary: #30423a;
-  --ym-brand: #24634f;
-  --ym-brand-strong: #174b3b;
-  --ym-brand-soft: #e8f2ed;
-  --ym-price: #be412b;
-  --ym-paper: #f4f6f3;
-  --ym-line: #dce4de;
-  --ym-line-strong: #c8d4cc;
-  --ym-muted: #65726a;
-  --ym-warning: #986019;
-  --ym-warning-soft: #fbf0de;
-  --ym-danger: #b6403a;
-  --ym-danger-soft: #f9e8e6;
-  --ym-info: #376d80;
-  --ym-info-soft: #e7f0f3;
+  --ym-ink: #1c2830;
+  --ym-ink-secondary: #374a55;
+  --ym-brand: #2f6f86;
+  --ym-brand-strong: #22576b;
+  --ym-brand-soft: #e7f1f4;
+  --ym-price: #b23a2a;
+  --ym-paper: #f5f5f0;
+  --ym-surface-2: #f9f9f5;
+  --ym-table-head: #f0f1eb;
+  --ym-row-line: #e9eae4;
+  --ym-row-hover: #f9faf6;
+  --ym-line: #dddfd7;
+  --ym-line-strong: #c9cdbf;
+  --ym-muted: #676e68;
+  --ym-warning: #96601a;
+  --ym-warning-soft: #fbf0db;
+  --ym-danger: #b23a2e;
+  --ym-danger-soft: #f9e6e2;
+  --ym-info: #5a6b7e;
+  --ym-info-soft: #e9eef2;
+  --mall-ink: var(--ym-ink);
+  --mall-ink-secondary: var(--ym-ink-secondary);
+  --mall-brand: var(--ym-brand);
+  --mall-brand-strong: var(--ym-brand-strong);
+  --mall-brand-soft: var(--ym-brand-soft);
+  --mall-paper: var(--ym-paper);
+  --mall-line: var(--ym-line);
+  --mall-line-strong: var(--ym-line-strong);
+  --mall-muted: var(--ym-muted);
+  --mall-price: var(--ym-price);
+  --mall-danger: var(--ym-danger);
   --el-color-primary: var(--ym-brand);
-  --el-color-primary-light-3: #5f8b79;
-  --el-color-primary-light-5: #8eafa0;
-  --el-color-primary-light-7: #bfd2c8;
-  --el-color-primary-light-8: #d8e5de;
+  --el-color-primary-light-3: #6d9aaa;
+  --el-color-primary-light-5: #97b7c2;
+  --el-color-primary-light-7: #c1d5dc;
+  --el-color-primary-light-8: #d5e2e7;
   --el-color-primary-light-9: var(--ym-brand-soft);
   --el-color-primary-dark-2: var(--ym-brand-strong);
   --el-color-success: var(--ym-brand);
-  --el-color-success-light-8: #d8e5de;
+  --el-color-success-light-8: #d5e2e7;
   --el-color-success-light-9: var(--ym-brand-soft);
   --el-color-warning: var(--ym-warning);
-  --el-color-warning-light-8: #f4dfbd;
+  --el-color-warning-light-8: #eadfd0;
   --el-color-warning-light-9: var(--ym-warning-soft);
   --el-color-danger: var(--ym-danger);
-  --el-color-danger-light-8: #efcbc6;
+  --el-color-danger-light-8: #f0d8d5;
   --el-color-danger-light-9: var(--ym-danger-soft);
   --el-color-info: var(--ym-info);
-  --el-color-info-light-8: #c9dce3;
+  --el-color-info-light-8: #dee1e5;
   --el-color-info-light-9: var(--ym-info-soft);
   --el-border-radius-base: 6px;
   --el-border-color: var(--ym-line);
-  --el-border-color-light: #e7ece8;
-  --el-fill-color-light: #f5f8f5;
+  --el-border-color-light: #e8e9e2;
+  --el-fill-color-light: #f6f6f1;
   --el-text-color-primary: var(--ym-ink);
   --el-text-color-regular: var(--ym-ink-secondary);
   --el-text-color-secondary: var(--ym-muted);
@@ -195,7 +210,7 @@ html body {
 .mobile-navigation-drawer .sidebar-container .layout-navigation.is-vertical > .el-sub-menu > .el-sub-menu__title {
   padding-right: 10px !important;
   padding-left: 10px !important;
-  color: #7a877f !important;
+  color: var(--ym-muted) !important;
   font-size: 11px;
   letter-spacing: 0.04em;
 }
@@ -323,7 +338,7 @@ html body {
 
 #app .tab-item.active {
   color: var(--ym-brand) !important;
-  border-color: #cbdcd3 !important;
+  border-color: #c7d8de !important;
   background: var(--ym-brand-soft) !important;
   font-weight: 600;
 }
@@ -349,7 +364,7 @@ html body {
 .tab-context-menu {
   border-color: var(--ym-line) !important;
   border-radius: 6px !important;
-  box-shadow: 0 12px 30px rgba(23, 37, 31, 0.14) !important;
+  box-shadow: 0 12px 30px rgba(20, 32, 36, 0.14) !important;
 }
 
 #app .el-card {
@@ -371,9 +386,9 @@ html body {
 }
 
 #app .el-table {
-  --el-table-border-color: #edf1ee;
-  --el-table-header-bg-color: #f5f8f5;
-  --el-table-row-hover-bg-color: #fbfdfb;
+  --el-table-border-color: var(--ym-row-line);
+  --el-table-header-bg-color: var(--ym-table-head);
+  --el-table-row-hover-bg-color: var(--ym-row-hover);
 }
 
 #app .el-table th.el-table__cell {
@@ -502,7 +517,7 @@ html body {
 
 #app button.merchant-card:hover {
   border-color: var(--ym-line-strong);
-  background: #fafcfa;
+  background: #f9faf6;
   filter: none;
   transform: none;
 }
@@ -765,7 +780,7 @@ html body {
 }
 
 #app .el-table th.el-table__cell {
-  background: #f8faf8;
+  background: var(--ym-table-head);
 }
 
 #app .el-table .el-button.is-link {
@@ -787,7 +802,7 @@ html body {
 
 #app .el-dialog {
   border-radius: 12px;
-  box-shadow: 0 24px 70px rgba(18, 36, 27, 0.22);
+  box-shadow: 0 24px 70px rgba(20, 32, 36, 0.22);
 }
 
 #app .el-dialog__title,
@@ -838,7 +853,7 @@ html body {
   border-color: var(--ym-line);
   border-radius: 12px;
   background: #fff;
-  box-shadow: 0 24px 70px rgba(18, 36, 27, 0.22);
+  box-shadow: 0 24px 70px rgba(20, 32, 36, 0.22);
 }
 
 .el-overlay .el-message-box {
@@ -866,7 +881,7 @@ html body {
 .el-overlay .el-drawer {
   color: var(--ym-ink);
   background: #fff;
-  box-shadow: -18px 0 48px rgba(18, 36, 27, 0.16);
+  box-shadow: -18px 0 48px rgba(20, 32, 36, 0.16);
 }
 
 .el-overlay .el-drawer__header {
@@ -885,7 +900,7 @@ html body {
   color: var(--ym-ink-secondary);
   border-color: var(--ym-line);
   border-radius: 7px;
-  box-shadow: 0 12px 30px rgba(18, 36, 27, 0.14);
+  box-shadow: 0 12px 30px rgba(20, 32, 36, 0.14);
 }
 
 .el-dropdown-menu__item,
@@ -899,16 +914,16 @@ html body {
 }
 
 #app :focus-visible {
-  outline-color: rgba(36, 99, 79, 0.28);
+  outline-color: rgba(47, 111, 134, 0.28);
 }
 
 #app .login-container {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(circle at 20% 18%, rgba(112, 157, 136, 0.28), transparent 30%),
+    radial-gradient(circle at 20% 18%, rgba(112, 157, 183, 0.28), transparent 30%),
     radial-gradient(circle at 82% 76%, rgba(190, 65, 43, 0.12), transparent 26%),
-    linear-gradient(145deg, #10271e 0%, #1c4b3b 52%, #2f6b55 100%) !important;
+    linear-gradient(145deg, #10202a 0%, #1c3f4c 52%, #2f6f86 100%) !important;
 }
 
 #app .login-container::before {
@@ -931,7 +946,7 @@ html body {
 #app .login-box {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px !important;
-  box-shadow: 0 28px 70px rgba(5, 18, 12, 0.3) !important;
+  box-shadow: 0 28px 70px rgba(6, 18, 24, 0.3) !important;
 }
 
 #app .login-header h2 {
@@ -943,7 +958,7 @@ html body {
 }
 
 #app .login-notice {
-  filter: drop-shadow(0 12px 28px rgba(5, 18, 12, 0.18)) !important;
+  filter: drop-shadow(0 12px 28px rgba(6, 18, 24, 0.18)) !important;
 }
 
 #app .captcha-trigger {

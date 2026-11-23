@@ -216,7 +216,7 @@ function configure(tab: 'banner' | 'quick-entry') {
   color: var(--ym-muted);
   border: 1px solid var(--ym-line);
   border-radius: 6px;
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -302,7 +302,7 @@ function configure(tab: 'banner' | 'quick-entry') {
   border: 0;
   border-radius: 0;
   aspect-ratio: 15 / 8;
-  background: #1c4b3b;
+  background: #1c3f4c;
   cursor: pointer;
 }
 
@@ -399,7 +399,7 @@ function configure(tab: 'banner' | 'quick-entry') {
   height: 36px;
   place-items: center;
   border-radius: 10px;
-  background: var(--ym-brand-soft, #e8f2ed);
+  background: var(--ym-brand-soft, var(--ym-brand-soft));
 }
 
 .phone-quick-icon :deep(.home-quick-icon) {

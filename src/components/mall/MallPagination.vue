@@ -86,7 +86,7 @@ function emitSizeChange(limit: number) {
 
 .mall-pagination.is-admin .mall-pagination-summary {
   margin-right: 8px;
-  color: var(--ym-muted, #65726a);
+  color: var(--ym-muted, var(--ym-muted));
   font-size: 12px;
   line-height: 17px;
 }
@@ -109,8 +109,8 @@ function emitSizeChange(limit: number) {
   height: 30px;
   margin: 0;
   padding: 1px 6px;
-  color: var(--ym-ink, #17251f);
-  border: 1px solid var(--ym-line, #dce4de);
+  color: var(--ym-ink, var(--ym-ink));
+  border: 1px solid var(--ym-line, var(--ym-line));
   border-radius: 5px;
   background: #fff;
   font-size: 12px;
@@ -124,15 +124,15 @@ function emitSizeChange(limit: number) {
 
 .mall-pagination.is-admin :deep(.btn-prev:disabled),
 .mall-pagination.is-admin :deep(.btn-next:disabled) {
-  color: var(--ym-ink, #17251f);
-  border-color: var(--ym-line, #dce4de);
+  color: var(--ym-ink, var(--ym-ink));
+  border-color: var(--ym-line, var(--ym-line));
   background: #fff;
 }
 
 .mall-pagination.is-admin :deep(.el-pager li.is-active) {
   color: #fff;
-  border-color: var(--ym-brand, #24634f);
-  background: var(--ym-brand, #24634f);
+  border-color: var(--ym-brand, var(--ym-brand));
+  background: var(--ym-brand, var(--ym-brand));
 }
 
 .mall-pagination.is-admin :deep(.el-pagination__sizes) {
@@ -150,12 +150,12 @@ function emitSizeChange(limit: number) {
   box-sizing: border-box;
   padding: 0 0 0 4px;
   border-radius: 5px;
-  box-shadow: 0 0 0 1px var(--ym-line, #dce4de) inset;
+  box-shadow: 0 0 0 1px var(--ym-line, var(--ym-line)) inset;
   font-size: 12px;
 }
 
 .mall-pagination.is-admin :deep(.el-pagination__sizes .el-select__selected-item) {
-  color: var(--ym-ink, #17251f);
+  color: var(--ym-ink, var(--ym-ink));
   font-size: 12px;
 }
 
@@ -169,8 +169,8 @@ function emitSizeChange(limit: number) {
   right: 8px;
   width: 5px;
   height: 5px;
-  border-right: 1px solid var(--ym-ink, #17251f);
-  border-bottom: 1px solid var(--ym-ink, #17251f);
+  border-right: 1px solid var(--ym-ink, var(--ym-ink));
+  border-bottom: 1px solid var(--ym-ink, var(--ym-ink));
   content: '';
   pointer-events: none;
   transform: translateY(-65%) rotate(45deg);

@@ -592,8 +592,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  color: var(--mall-brand, #24634f);
-  background: var(--mall-brand-soft, #e8f2ed);
+  color: var(--mall-brand, var(--ym-brand));
+  background: var(--mall-brand-soft, var(--ym-brand-soft));
   font-size: 13px;
   font-weight: 700;
 }
@@ -618,7 +618,7 @@ onMounted(() => {
   display: block;
   overflow: hidden;
   max-width: 100%;
-  color: var(--mall-ink, #17251f);
+  color: var(--mall-ink, var(--ym-ink));
   font-size: 13px;
   line-height: 18px;
   text-overflow: ellipsis;
@@ -640,7 +640,7 @@ onMounted(() => {
   min-width: 0;
   align-items: center;
   overflow: hidden;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   font-family: var(--ym-font-mono, monospace);
   font-size: 10px;
   line-height: 14px;
@@ -682,17 +682,17 @@ onMounted(() => {
   justify-content: center;
   flex-direction: column;
   gap: 7px;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
 }
 
 .shop-empty-state .el-icon {
   margin-bottom: 3px;
-  color: var(--mall-brand, #24634f);
+  color: var(--mall-brand, var(--ym-brand));
   font-size: 28px;
 }
 
 .shop-empty-state strong {
-  color: var(--mall-ink-secondary, #30423a);
+  color: var(--mall-ink-secondary, var(--ym-ink-secondary));
   font-size: 14px;
 }
 
@@ -707,14 +707,14 @@ onMounted(() => {
 }
 
 .drawer-heading > span {
-  color: var(--mall-brand, #24634f);
+  color: var(--mall-brand, var(--ym-brand));
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
 
 .drawer-heading > strong {
-  color: var(--mall-ink, #17251f);
+  color: var(--mall-ink, var(--ym-ink));
   font-size: 19px;
 }
 
@@ -729,7 +729,7 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
   padding: 16px 0 18px;
-  border-bottom: 1px solid var(--mall-line, #dce4de);
+  border-bottom: 1px solid var(--mall-line, var(--ym-line));
 }
 
 .shop-profile-copy {
@@ -743,7 +743,7 @@ onMounted(() => {
 .shop-profile-copy h3 {
   overflow: hidden;
   margin: 0;
-  color: var(--mall-ink, #17251f);
+  color: var(--mall-ink, var(--ym-ink));
   font-size: 17px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -754,7 +754,7 @@ onMounted(() => {
   min-width: 0;
   align-items: center;
   overflow: hidden;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   font-family: var(--ym-font-mono, monospace);
   font-size: 10px;
   white-space: nowrap;
@@ -771,7 +771,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 18px;
-  border: 1px solid var(--mall-line, #dce4de);
+  border: 1px solid var(--mall-line, var(--ym-line));
   border-right: 0;
   border-bottom: 0;
 }
@@ -783,17 +783,17 @@ onMounted(() => {
   gap: 7px;
   box-sizing: border-box;
   padding: 11px 12px;
-  border-right: 1px solid var(--mall-line, #dce4de);
-  border-bottom: 1px solid var(--mall-line, #dce4de);
+  border-right: 1px solid var(--mall-line, var(--ym-line));
+  border-bottom: 1px solid var(--mall-line, var(--ym-line));
 }
 
 .shop-description-grid span {
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   font-size: 11px;
 }
 
 .shop-description-grid strong {
-  color: var(--mall-ink-secondary, #30423a);
+  color: var(--mall-ink-secondary, var(--ym-ink-secondary));
   font-size: 13px;
 }
 
@@ -803,13 +803,13 @@ onMounted(() => {
 
 .shop-intro-section h4 {
   margin: 0 0 10px;
-  color: var(--mall-ink, #17251f);
+  color: var(--mall-ink, var(--ym-ink));
   font-size: 13px;
 }
 
 .shop-intro-section p {
   margin: 0;
-  color: var(--mall-ink-secondary, #30423a);
+  color: var(--mall-ink-secondary, var(--ym-ink-secondary));
   font-size: 12px;
   line-height: 1.7;
 }
@@ -833,7 +833,7 @@ onMounted(() => {
   width: 100%;
   min-height: 14px;
   margin-top: 4px;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   font-size: 10px;
   line-height: 1.4;
 }
@@ -847,7 +847,7 @@ onMounted(() => {
 
 .number-field > span {
   min-width: 18px;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   font-size: 12px;
 }
 
@@ -857,9 +857,9 @@ onMounted(() => {
   gap: 8px;
   margin-top: 2px;
   padding: 10px 12px;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   border-radius: 6px;
-  background: var(--mall-paper, #f4f6f3);
+  background: var(--mall-paper, var(--ym-paper));
   font-size: 11px;
 }
 

@@ -499,7 +499,7 @@ onMounted(() => {
   gap: 8px;
   padding: 0 14px;
   border: 0;
-  border-bottom: 1px solid #edf1ee;
+  border-bottom: 1px solid var(--ym-row-line);
   background: #fff;
   color: var(--ym-ink);
   font-size: 13px;
@@ -512,7 +512,7 @@ onMounted(() => {
 }
 
 .overview-tasks button:hover {
-  background: #fafcfa;
+  background: var(--ym-row-hover);
 }
 
 .overview-tasks button:focus-visible {
@@ -577,13 +577,13 @@ onMounted(() => {
   background-image: linear-gradient(
     to bottom,
     transparent 24%,
-    #edf1ee 25%,
+    var(--ym-row-line) 25%,
     transparent 26%,
     transparent 49%,
-    #edf1ee 50%,
+    var(--ym-row-line) 50%,
     transparent 51%,
     transparent 74%,
-    #edf1ee 75%,
+    var(--ym-row-line) 75%,
     transparent 76%
   );
 }
@@ -600,7 +600,7 @@ onMounted(() => {
   width: 100%;
   min-height: 12px;
   border-radius: 5px 5px 1px 1px;
-  background: linear-gradient(to top, var(--ym-brand), #68a38a);
+  background: linear-gradient(to top, var(--ym-brand), #83aebf);
   transition: height 0.2s ease;
 }
 

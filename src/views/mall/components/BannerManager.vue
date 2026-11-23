@@ -418,7 +418,7 @@ onMounted(() => void loadBanners())
   padding: 8px 14px;
   color: var(--mall-muted);
   border-bottom: 1px solid var(--mall-line);
-  background: #fbfdfb;
+  background: var(--ym-row-hover);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -465,9 +465,9 @@ onMounted(() => void loadBanners())
 .ho-empty b { color: var(--ym-ink); font-size: 14px; font-weight: 600; }
 .ho-empty span { font-size: 12px; }
 
-.current-image { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; color: var(--mall-ink-secondary, #30423a); }
-.upload-tip { margin-top: 8px; color: var(--mall-muted, #65726a); font-size: 12px; }
-.field-tip { margin-top: 6px; color: var(--mall-muted, #65726a); font-size: 12px; line-height: 1.5; }
+.current-image { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; color: var(--mall-ink-secondary, var(--ym-ink-secondary)); }
+.upload-tip { margin-top: 8px; color: var(--mall-muted, var(--ym-muted)); font-size: 12px; }
+.field-tip { margin-top: 6px; color: var(--mall-muted, var(--ym-muted)); font-size: 12px; line-height: 1.5; }
 
 .banner-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
 .form-switch { display: flex; align-items: center; gap: 8px; }

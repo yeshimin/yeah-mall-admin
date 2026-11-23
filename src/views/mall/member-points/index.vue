@@ -333,7 +333,7 @@ watch(
 .points-time-sub {
   display: block;
   margin-top: 4px;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
   font-family: var(--ym-font-mono, monospace);
   font-size: 10px;
 }
@@ -345,17 +345,17 @@ watch(
   justify-content: center;
   flex-direction: column;
   gap: 7px;
-  color: var(--mall-muted, #65726a);
+  color: var(--mall-muted, var(--ym-muted));
 }
 
 .points-empty .el-icon {
   margin-bottom: 3px;
-  color: var(--mall-brand, #24634f);
+  color: var(--mall-brand, var(--ym-brand));
   font-size: 28px;
 }
 
 .points-empty strong {
-  color: var(--mall-ink, #17251f);
+  color: var(--mall-ink, var(--ym-ink));
   font-size: 13px;
 }
 
