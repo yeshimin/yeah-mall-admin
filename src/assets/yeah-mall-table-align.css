@@ -106,6 +106,7 @@
 [data-ym-table="r4"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
 [data-ym-table="r4"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
 [data-ym-table="r4"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
+[data-ym-table="r4"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
 
 /* views/mall/components/SettlementManager.vue #0 ← platform/settlement?tab=结算台账 */
 [data-ym-table="r5"] .el-table__body td:nth-child(1) .cell { text-align: center !important; width: auto !important; }
@@ -115,8 +116,19 @@
 [data-ym-table="r5"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
 [data-ym-table="r5"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
 [data-ym-table="r5"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r5"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
 [data-ym-table="r5"] .el-table__body td:nth-child(9) .cell { padding: 0 12px; }
 [data-ym-table="r5"] .el-table__body td:nth-child(10) .cell { padding: 0 12px; }
+
+/* views/mall/components/SettlementManager.vue #0 ← merchant/settlement?tab=结算记录 */
+[data-ym-table="r5m"] .el-table__body td:nth-child(1) .cell { padding: 0 12px; }
+[data-ym-table="r5m"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }
+[data-ym-table="r5m"] .el-table__body td:nth-child(3) .cell { padding: 0 12px; }
+[data-ym-table="r5m"] .el-table__body td:nth-child(4) .cell { padding: 0 12px; }
+[data-ym-table="r5m"] .el-table__body td:nth-child(5) .cell { padding: 0 12px; }
+[data-ym-table="r5m"] .el-table__body td:nth-child(6) .cell { padding: 0 12px; }
+[data-ym-table="r5m"] .el-table__body td:nth-child(7) .cell { padding: 0 12px; }
+[data-ym-table="r5m"] .el-table__body td:nth-child(8) .cell { padding: 0 12px; }
 
 /* views/mall/cschat/index.vue #0 ← platform/reviews */
 [data-ym-table="r6"] .el-table__body td:nth-child(2) .cell { padding: 0 12px; }

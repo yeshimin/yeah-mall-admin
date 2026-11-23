@@ -1,0 +1,715 @@
+/* 资金结算：平台结算台账 / 账户审核 / 支付通道 / 商家结算与账户配置 */
+.settlement-page {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.settlement-page .mall-table-panel {
+  flex: 1;
+  min-height: 0;
+}
+
+.settlement-page .mall-query-form .el-select {
+  width: 168px;
+}
+
+.settlement-page .mall-query-form .el-input {
+  width: 100%;
+}
+
+.settlement-page .mall-filter-panel {
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.settlement-filter-query {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.settlement-filter-query .mall-query-form {
+  flex: 0 1 auto;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.settlement-filter-query .el-form-item {
+  margin-right: 0;
+}
+
+.settlement-filter-query .el-form-item__label {
+  padding-right: 8px;
+  color: var(--mall-ink-secondary, #30423a);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.settlement-page .settlement-filter-query .el-input,
+.settlement-page .settlement-filter-query .el-select {
+  width: 168px;
+}
+
+#app .settlement-filter-query .el-input__inner,
+#app .settlement-filter-query .el-select__selected-item,
+#app .settlement-filter-query .el-select__placeholder,
+#app .settlement-filter-query .el-select__input,
+#app .settlement-filter-actions .el-button,
+#app .settlement-business-actions .el-button {
+  font-size: 12px;
+}
+
+.settlement-page .mall-filter-panel .el-input__wrapper,
+.settlement-page .mall-filter-panel .el-select__wrapper {
+  min-height: 36px;
+}
+
+.settlement-page .mall-filter-panel .el-button {
+  min-height: 36px;
+}
+
+.settlement-filter-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.settlement-filter-actions .el-button {
+  min-width: 67px;
+}
+
+.settlement-business-actions .el-button {
+  min-width: 132px;
+}
+
+.settlement-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.settlement-kpi {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+  padding: 15px 16px;
+  border: 1px solid #e2e8e4;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.settlement-kpi::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--mall-brand, #24634f);
+  content: '';
+}
+
+.settlement-kpi > span {
+  color: var(--mall-muted, #65726a);
+  font-size: 11px;
+}
+
+.settlement-kpi b {
+  color: var(--mall-ink, #17251f);
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.settlement-kpi small {
+  overflow: hidden;
+  color: var(--mall-muted, #65726a);
+  font-size: 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.settlement-kpi.is-pending::before { background: #c9922f; }
+.settlement-kpi.is-available::before { background: var(--mall-brand, #24634f); }
+.settlement-kpi.is-settled::before { background: #4d7b68; }
+.settlement-kpi.is-canceled::before { background: #b9b3a7; }
+.settlement-kpi.is-canceled b {
+  color: var(--mall-muted, #65726a);
+  font-size: 18px;
+}
+
+.settlement-batch-guide,
+.settlement-auto-include,
+.settlement-route-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  border: 1px solid #d9e4dc;
+  border-radius: 6px;
+  color: #4f6d5e;
+  background: #f4f8f5;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.settlement-batch-guide {
+  align-items: center;
+  margin: -2px 0 12px;
+  padding: 9px 12px;
+}
+
+.settlement-batch-guide .el-icon,
+.settlement-auto-include .el-icon,
+.settlement-route-note .el-icon {
+  flex: none;
+  color: #8a6a24;
+}
+
+.settlement-batch-guide .el-icon,
+.settlement-auto-include .el-icon {
+  margin-top: 1px;
+}
+
+.settlement-auto-include {
+  margin: -4px 0 14px;
+  padding: 9px 11px;
+  border-color: #e7d9b6;
+  color: #8a6420;
+  background: #fdf8ec;
+}
+
+.settlement-auto-include.is-danger {
+  border-color: #e3b9b5;
+  color: #a63b34;
+  background: #fbf1f0;
+}
+
+.settlement-auto-include.is-danger .el-icon {
+  color: #b6403a;
+}
+
+.settlement-scope-note {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid #e2e8e4;
+  border-radius: 6px;
+  color: var(--mall-muted, #65726a);
+  background: #f7f9f7;
+  font-size: 11px;
+}
+
+.settlement-shop-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.settlement-shop-cell b {
+  color: #30423a;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.settlement-shop-cell small {
+  color: var(--mall-muted, #65726a);
+  font-size: 10px;
+}
+
+.settlement-cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.settlement-cell-sub {
+  color: var(--mall-muted, #65726a);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.settlement-mono {
+  font-family: var(--ym-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+}
+
+.settlement-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.settlement-proof-chip {
+  display: inline-grid;
+  min-width: 34px;
+  height: 22px;
+  place-items: center;
+  padding: 0 5px;
+  border: 1px solid #cfdcd4;
+  border-radius: 4px;
+  color: var(--mall-brand, #24634f);
+  background: #eef5f1;
+  font-size: 9px;
+}
+
+.settlement-status-tag.el-tag {
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.settlement-status-tag.el-tag--success {
+  color: #24634f;
+  border-color: #bcd4c7;
+  background: #e8f2ed;
+}
+
+.settlement-status-tag.el-tag--info {
+  color: #65726a;
+  border-color: #dce4de;
+  background: #f4f6f3;
+}
+
+.settlement-status-tag.el-tag--warning {
+  color: #986019;
+  border-color: #ead3b1;
+  background: #fbf0de;
+}
+
+.settlement-status-tag.el-tag--danger {
+  color: #b6403a;
+  border-color: #e7bfbb;
+  background: #f9e8e6;
+}
+
+.positive-amount { color: #24634f; }
+.negative-amount { color: #b6403a; }
+
+.settlement-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--mall-muted, #65726a);
+}
+
+.settlement-empty .el-icon {
+  margin-bottom: 2px;
+  color: #9aa7a0;
+  font-size: 28px;
+}
+
+.settlement-empty b {
+  color: var(--mall-ink, #17251f);
+  font-size: 13px;
+}
+
+.settlement-empty span {
+  font-size: 11px;
+}
+
+.settlement-channel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.settlement-channel-actions .el-button + .el-button {
+  margin-left: 0;
+}
+
+.settlement-editor {
+  overflow: hidden;
+  border: 1px solid #e2e8e4;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.settlement-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8e4;
+}
+
+.settlement-editor-head > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settlement-editor-head b {
+  color: var(--mall-ink, #17251f);
+  font-size: 15px;
+}
+
+.settlement-editor-head span {
+  color: var(--mall-muted, #65726a);
+  font-size: 12px;
+}
+
+.settlement-editor-body {
+  padding: 22px 20px;
+}
+
+.settlement-editor-body > .settlement-form-grid:first-child {
+  margin-top: 0;
+}
+
+.settlement-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  margin-top: 18px;
+}
+
+.settlement-editor .settlement-form-grid {
+  max-width: 980px;
+  margin-top: 0;
+}
+
+.settlement-form-grid .el-form-item {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.settlement-form-grid .el-form-item.wide {
+  grid-column: 1 / -1;
+}
+
+.settlement-form-grid .el-select,
+.settlement-form-grid .el-input,
+.settlement-form-grid .el-textarea {
+  width: 100%;
+}
+
+.settlement-form-grid .el-form-item__label {
+  padding-bottom: 6px;
+  color: #30423a;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.settlement-form-section-title {
+  margin: 18px 0 4px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8e4;
+  color: #30423a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.settlement-form-section-title:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.settlement-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  padding: 12px 20px;
+  border-top: 1px solid #e2e8e4;
+  background: #f7f9f7;
+}
+
+.settlement-save-bar > span {
+  color: var(--mall-muted, #65726a);
+  font-size: 11px;
+}
+
+.settlement-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 7px;
+  color: #30423a;
+  background: #eef5f1;
+  font-size: 12px;
+}
+
+.settlement-summary b {
+  color: var(--mall-brand, #24634f);
+  font-size: 16px;
+}
+
+.settlement-description {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: 14px 0;
+  border-top: 1px solid #e2e8e4;
+  border-left: 1px solid #e2e8e4;
+}
+
+.settlement-description > div {
+  display: flex;
+  min-width: 0;
+  min-height: 62px;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-right: 1px solid #e2e8e4;
+  border-bottom: 1px solid #e2e8e4;
+}
+
+.settlement-description > div.wide {
+  grid-column: 1 / -1;
+}
+
+.settlement-description span {
+  color: var(--mall-muted, #65726a);
+  font-size: 11px;
+}
+
+.settlement-description b {
+  color: #30423a;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.settlement-account-state {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid #e2e8e4;
+  border-radius: 7px;
+  background: #f7f9f7;
+}
+
+.settlement-account-state > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settlement-account-state > div.wide {
+  grid-column: 1 / -1;
+}
+
+.settlement-account-state span {
+  color: var(--mall-muted, #65726a);
+  font-size: 10px;
+}
+
+.settlement-account-state b {
+  color: #30423a;
+  font-size: 12px;
+  line-height: 1.55;
+  word-break: break-all;
+}
+
+.settlement-audit-readonly {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 2px;
+  padding: 11px 12px;
+  border: 1px solid #e2e8e4;
+  border-radius: 6px;
+  background: #f7f9f7;
+}
+
+.settlement-audit-readonly span {
+  color: var(--mall-muted, #65726a);
+  font-size: 10px;
+}
+
+.settlement-audit-readonly b {
+  color: #30423a;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.settlement-route-note {
+  margin-top: 10px;
+  padding: 11px 12px;
+}
+
+.settlement-route-note .el-icon {
+  margin-top: 2px;
+}
+
+.settlement-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 13px 14px;
+  border: 1px solid #e2e8e4;
+  border-radius: 7px;
+  background: #f7f9f7;
+}
+
+.settlement-switch-row > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.settlement-switch-row b {
+  color: #30423a;
+  font-size: 12px;
+}
+
+.settlement-switch-row small {
+  color: var(--mall-muted, #65726a);
+  font-size: 10px;
+}
+
+.settlement-dialog .settlement-form-grid {
+  margin-top: 0;
+}
+
+.settlement-dialog .storage-file-upload .el-button {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px dashed var(--mall-line-strong, #c8d4cc);
+  border-radius: 6px;
+  color: var(--mall-brand, #24634f);
+  background: #f7faf8;
+  box-shadow: none;
+}
+
+.settlement-dialog .storage-file-upload .el-button:hover {
+  border-color: var(--mall-brand, #24634f);
+  color: var(--mall-brand, #24634f);
+  background: #f7faf8;
+}
+
+.settlement-field-hint {
+  color: var(--mall-muted, #65726a);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.settlement-dialog .el-dialog__headerbtn,
+.channel-dialog .el-dialog__headerbtn {
+  width: 29px;
+  height: 29px;
+  border: 1px solid #dce4de;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.settlement-dialog .el-dialog__headerbtn .el-dialog__close,
+.channel-dialog .el-dialog__headerbtn .el-dialog__close {
+  color: var(--mall-muted, #65726a);
+}
+
+.settlement-dialog .settlement-form-section-title {
+  margin-top: 16px;
+}
+
+.settlement-dialog .settlement-description {
+  margin-top: 0;
+}
+
+.settlement-dialog .el-form-item {
+  margin-bottom: 14px;
+}
+
+.settlement-dialog .settlement-form-grid .el-form-item {
+  margin-bottom: 0;
+}
+
+.settlement-ledger-table .settlement-col-order { min-width: 142px; }
+.settlement-ledger-table .settlement-col-shop { min-width: 116px; }
+.settlement-ledger-table .settlement-col-biz { min-width: 78px; }
+.settlement-ledger-table .settlement-col-amount { min-width: 92px; }
+.settlement-ledger-table .settlement-col-rate { min-width: 100px; }
+.settlement-ledger-table .settlement-col-change { min-width: 98px; }
+.settlement-ledger-table .settlement-col-time { min-width: 100px; }
+.settlement-ledger-table .settlement-col-status { min-width: 92px; }
+.settlement-ledger-table .settlement-col-settle { min-width: 154px; }
+.settlement-ledger-table .el-table__cell .cell {
+  line-height: 1.5;
+}
+
+.settlement-account-table .settlement-col-shop { min-width: 116px; }
+.settlement-account-table .settlement-col-type { min-width: 80px; }
+.settlement-account-table .settlement-col-name { min-width: 158px; }
+.settlement-account-table .settlement-col-account { min-width: 124px; }
+.settlement-account-table .settlement-col-bank { min-width: 122px; }
+.settlement-account-table .settlement-col-status { min-width: 82px; }
+.settlement-account-table .settlement-col-remark { min-width: 142px; }
+.settlement-account-table .settlement-col-time { min-width: 100px; }
+.settlement-account-table .settlement-col-actions { min-width: 58px; }
+
+/* 收款名称 / 开户银行 / 审核备注 与原型一致按字换行，不省略截断 */
+:is(#app, body) .settlement-account-table td.el-table__cell:is(.settlement-col-name, .settlement-col-bank, .settlement-col-remark) .cell[data-ym-align="trunc"] {
+  text-align: center !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+@media (max-width: 1180px) {
+  .settlement-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .settlement-form-grid,
+  .settlement-description,
+  .settlement-account-state {
+    grid-template-columns: 1fr;
+  }
+
+  .settlement-channel-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 700px) {
+  .settlement-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .settlement-save-bar {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

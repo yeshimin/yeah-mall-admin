@@ -5,6 +5,8 @@ export interface SettlementRecord {
   id: string
   mchId: string
   shopId: string
+  shopName?: string
+  shopNo?: string
   ledgerNo: string
   bizType: string
   bizId: string
@@ -36,10 +38,22 @@ export interface SettlementPreview {
   settlementBankName?: string
 }
 
+export interface SettlementStats {
+  pendingAmount: number
+  pendingCount: number
+  availableAmount: number
+  availableCount: number
+  settledAmount: number
+  settledCount: number
+  canceledCount: number
+}
+
 export interface SettlementAccountRecord {
   id: string
   mchId: string
   shopId: string
+  shopName?: string
+  shopNo?: string
   accountType: string
   accountName: string
   accountNo: string
@@ -106,6 +120,14 @@ export function queryPlatformSettlements(params: Record<string, unknown>) {
   })
 }
 
+export function queryPlatformSettlementStats(params: Record<string, unknown>) {
+  return request<SettlementStats>({
+    url: '/admin/settlement/stats',
+    method: 'get',
+    params,
+  })
+}
+
 export function confirmPlatformSettlement(data: {
   ids: string[]
   expectedAmount: number
@@ -129,6 +151,14 @@ export function previewPlatformSettlement(ids: string[]) {
 export function queryMerchantSettlements(params: Record<string, unknown>) {
   return request<PageResponse<SettlementRecord>>({
     url: '/mch/settlement/query',
+    method: 'get',
+    params,
+  })
+}
+
+export function queryMerchantSettlementStats(params: Record<string, unknown>) {
+  return request<SettlementStats>({
+    url: '/mch/settlement/stats',
     method: 'get',
     params,
   })
