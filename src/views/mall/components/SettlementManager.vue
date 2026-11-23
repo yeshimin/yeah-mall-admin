@@ -35,16 +35,16 @@
         <el-table-column v-if="scope === 'platform'" type="selection" width="52" :selectable="isSelectable" />
         <el-table-column prop="orderNo" label="订单编号" min-width="170" />
         <el-table-column v-if="scope === 'platform'" prop="shopId" label="店铺ID" min-width="100" />
-        <el-table-column label="业务类型" width="100">
+        <el-table-column label="业务类型" min-width="100">
           <template #default="{ row }">{{ bizTypeText(row.bizType) }}</template>
         </el-table-column>
-        <el-table-column label="实际支付" width="110" align="right">
+        <el-table-column label="实际支付" min-width="110" align="right">
           <template #default="{ row }">¥{{ amountText(row.grossAmount) }}</template>
         </el-table-column>
-        <el-table-column label="平台佣金" width="130" align="right">
+        <el-table-column label="平台佣金" min-width="130" align="right">
           <template #default="{ row }">¥{{ amountText(row.commissionAmount) }}（{{ row.commissionRate || 0 }}%）</template>
         </el-table-column>
-        <el-table-column label="结算变动" width="120" align="right">
+        <el-table-column label="结算变动" min-width="120" align="right">
           <template #default="{ row }">
             <span :class="Number(row.amount) < 0 ? 'negative' : 'positive'">
               {{ Number(row.amount) >= 0 ? '+' : '' }}¥{{ amountText(row.amount) }}
@@ -52,7 +52,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="availableTime" label="可结算时间" min-width="170" />
-        <el-table-column label="状态" width="100">
+        <el-table-column label="状态" min-width="100">
           <template #default="{ row }">
             <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
           </template>
@@ -63,7 +63,7 @@
         <el-table-column prop="transactionNo" label="转账流水号" min-width="160">
           <template #default="{ row }">{{ row.transactionNo || '-' }}</template>
         </el-table-column>
-        <el-table-column label="打款凭证" width="110">
+        <el-table-column label="打款凭证" min-width="110">
           <template #default="{ row }">
             <StorageImage v-if="row.proof" :src="row.proof" :width="64" :height="48" />
             <span v-else>-</span>

@@ -65,7 +65,7 @@
         <b>当前 {{ page.total }} 条</b>
       </div>
       <el-table data-ym-table="r7" v-loading="loading" :data="records">
-        <el-table-column label="会员" min-width="200">
+        <el-table-column label="会员" min-width="170">
           <template #default="{ row }">
             <div class="fb-member-cell">
               <el-avatar :size="38" :src="avatarUrl(row.avatar)">{{ memberName(row).slice(0, 1) }}</el-avatar>
@@ -76,7 +76,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="反馈内容" min-width="300">
+        <el-table-column label="反馈内容" min-width="260">
           <template #default="{ row }">
             <div class="fb-content-cell">
               <b class="fb-content-text" :title="row.content">{{ row.content || '-' }}</b>
@@ -91,7 +91,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="联系方式" min-width="140">
+        <el-table-column label="联系方式" min-width="120">
           <template #default="{ row }">
             <div v-if="row.contact" class="fb-contact-cell">
               <CopyableText :value="row.contact" label="联系方式" />
@@ -99,7 +99,7 @@
             <span v-else class="fb-muted-text">未留联系方式</span>
           </template>
         </el-table-column>
-        <el-table-column label="提交时间" width="170">
+        <el-table-column label="提交时间" min-width="160">
           <template #default="{ row }">
             <div class="fb-time-cell">
               <span>{{ formatDate(row.createTime) }}</span>
@@ -107,12 +107,12 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="100">
+        <el-table-column label="状态" min-width="90">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.status)">{{ statusText(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="最近处理" width="170">
+        <el-table-column label="最近处理" min-width="160">
           <template #default="{ row }">
             <div v-if="recentHandledTime(row)" class="fb-time-cell">
               <span>{{ formatDate(recentHandledTime(row)) }}</span>

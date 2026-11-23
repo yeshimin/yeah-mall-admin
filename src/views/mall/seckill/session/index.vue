@@ -112,7 +112,7 @@
         :row-class-name="sessionRowClass"
         class="ss-session-table"
       >
-        <el-table-column label="场次" width="220" align="center">
+        <el-table-column label="场次" min-width="220" align="center">
           <template #default="{ row }">
             <div class="ss-session-cell">
               <span class="ss-sort-chip">{{ sortChip(row.sort) }}</span>
@@ -134,7 +134,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="时间状态" width="110" align="center">
+        <el-table-column label="时间状态" min-width="110" align="center">
           <template #default="{ row }">
             <span class="ss-status-ticket" :class="`tone-${sessionState(row).tone}`">
               <span class="ss-status-live">
@@ -143,7 +143,7 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="启用" width="96" align="center">
+        <el-table-column label="启用" min-width="96" align="center">
           <template #default="{ row }">
             <button
               type="button"
@@ -159,14 +159,14 @@
             </button>
           </template>
         </el-table-column>
-        <el-table-column label="商品数" width="90" align="center">
+        <el-table-column label="商品数" min-width="90" align="center">
           <template #default="{ row }">
             <span class="ss-product-count" :class="{ 'is-zero': !row.productCount }">
               <b>{{ row.productCount }}</b>件
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="最近更新" width="130" align="center">
+        <el-table-column label="最近更新" min-width="130" align="center">
           <template #default="{ row }">
             <div v-if="row.updateTime" class="ss-time-stamp">
               <span>{{ dateOnly(row.updateTime) }}</span>
@@ -1759,8 +1759,6 @@ function weekdayOf(value?: string) {
 
 .ss-session-dialog :deep(.el-dialog__body),
 .ss-delete-dialog :deep(.el-dialog__body) {
-  max-height: calc(100vh - 210px);
-  overflow-y: auto;
   padding: 0 20px 8px;
 }
 

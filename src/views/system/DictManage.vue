@@ -129,7 +129,7 @@
           <el-table-column prop="name" label="名称" min-width="160"></el-table-column>
           <el-table-column prop="code" label="编码" min-width="140"></el-table-column>
           <el-table-column prop="value" label="值" min-width="140"></el-table-column>
-          <el-table-column prop="sort" label="排序" width="90"></el-table-column>
+          <el-table-column prop="sort" label="排序" min-width="90"></el-table-column>
           <el-table-column prop="remark" label="备注" min-width="180"></el-table-column>
           <el-table-column prop="createTime" label="创建时间" min-width="180"></el-table-column>
         <el-table-column v-if="hasDictRowActions" label="操作" width="220" fixed="right">

@@ -45,13 +45,13 @@
       stripe
       style="width: 100%"
     >
-      <el-table-column prop="id" label="ID" width="90"></el-table-column>
-      <el-table-column prop="triggerType" label="触发类型" width="110">
+      <el-table-column prop="id" label="ID" min-width="90"></el-table-column>
+      <el-table-column prop="triggerType" label="触发类型" min-width="110">
         <template #default="{ row }">
           {{ getTriggerTypeLabel(row.triggerType) }}
         </template>
       </el-table-column>
-      <el-table-column prop="category" label="类别" width="120">
+      <el-table-column prop="category" label="类别" min-width="120">
         <template #default="{ row }">
           {{ getCategoryLabel(row.category) }}
         </template>
@@ -60,14 +60,14 @@
       <el-table-column prop="comment" label="方法" min-width="220" show-overflow-tooltip></el-table-column>
       <el-table-column prop="createBy" label="执行人" min-width="120"></el-table-column>
       <el-table-column prop="clientIp" label="客户端IP" min-width="140"></el-table-column>
-      <el-table-column prop="success" label="结果" width="100">
+      <el-table-column prop="success" label="结果" min-width="100">
         <template #default="{ row }">
           <el-tag :type="row.success === 1 ? 'success' : 'danger'">
             {{ row.success === 1 ? '成功' : '失败' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="time" label="耗时(ms)" width="110"></el-table-column>
+      <el-table-column prop="time" label="耗时(ms)" min-width="110"></el-table-column>
       <el-table-column prop="input" label="输入" min-width="220" show-overflow-tooltip></el-table-column>
       <el-table-column prop="output" label="输出" min-width="220" show-overflow-tooltip></el-table-column>
       <el-table-column prop="extra" label="额外信息" min-width="180" show-overflow-tooltip></el-table-column>

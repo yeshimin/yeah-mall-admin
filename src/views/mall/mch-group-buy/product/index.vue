@@ -115,7 +115,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="拼团价" width="170" align="center" header-align="center">
+          <el-table-column label="拼团价" min-width="170" align="center" header-align="center">
             <template #default="{ row }">
               <div class="skp-price-cell">
                 <b>{{ seckillRange(row.minGroup, row.maxGroup) }}</b>
@@ -126,7 +126,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="拼团库存" width="140" align="center" header-align="center">
+          <el-table-column label="拼团库存" min-width="140" align="center" header-align="center">
             <template #default="{ row }">
               <div class="skp-stock-cell">
                 <b>{{ seckillNumber(row.stock) }} 件</b>
@@ -134,7 +134,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="销量" width="150" align="center" header-align="center">
+          <el-table-column label="销量" min-width="150" align="center" header-align="center">
             <template #default="{ row }">
               <div class="skp-sales-cell">
                 <b>{{ row.passed ? seckillNumber(row.sold) : '—' }}</b>
@@ -142,19 +142,19 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="售罄率" width="100" align="center" header-align="center">
+          <el-table-column label="售罄率" min-width="100" align="center" header-align="center">
             <template #default="{ row }">
               {{ row.passed ? seckillPercent(row.sellThrough) : '—' }}
             </template>
           </el-table-column>
-          <el-table-column label="审核状态" width="104" align="center" header-align="center">
+          <el-table-column label="审核状态" min-width="104" align="center" header-align="center">
             <template #default="{ row }">
               <span class="status-ticket" :class="`tone-${applyStatusMeta(row.auditStatus).tone}`">
                 {{ applyStatusMeta(row.auditStatus).label }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="商品状态" width="110" align="center" header-align="center">
+          <el-table-column label="商品状态" min-width="110" align="center" header-align="center">
             <template #default="{ row }">
               <span class="status-ticket is-small" :class="`tone-${stockStateOf(row).tone}`">
                 {{ stockStateOf(row).label }}

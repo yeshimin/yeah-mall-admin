@@ -1081,13 +1081,6 @@
   display: none;
 }
 
-.el-overlay .el-dialog.sk-editor-dialog {
-  margin-top: 4vh !important;
-}
-
-.el-overlay .el-dialog.sk-editor-dialog .el-dialog__body {
-  max-height: calc(100vh - 82px);
-}
 
 .gb-scope .sk-dialog-head {
   display: flex;

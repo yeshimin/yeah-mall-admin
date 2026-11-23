@@ -1,344 +1,223 @@
 <template>
-  <div class="basic-settings mall-page">
-    <el-card class="settings-card" shadow="never">
-      <template #header>
-        <div class="settings-section-title">
-          <div>
-            <h3>店铺信息设置</h3>
-            <p>资料仅作用于当前登录选择的店铺，保存后同步展示在 App 店铺页。</p>
-          </div>
-          <el-tag :type="settingsForm.isOpen ? 'success' : 'info'">
-            {{ settingsForm.isOpen ? '营业中' : '已停业' }}
-          </el-tag>
+  <div class="mall-page merchant-shop-page merchant-settings-page">
+    <div v-loading="loading" class="mchs-settings-card">
+      <div class="mchs-section-title">
+        <span class="shelf-mark" />
+        <div>
+          <b>店铺信息设置</b>
+          <small>资料仅作用于当前登录选择的店铺，保存后同步展示在 App 店铺页</small>
         </div>
-      </template>
+        <span class="status-ticket" :class="`tone-${form.isOpen ? 'success' : 'neutral'}`">
+          {{ form.isOpen ? '营业中' : '已停业' }}
+        </span>
+      </div>
 
-      <div class="settings-form-layout">
-        <aside class="settings-logo-panel">
+      <div class="mchs-settings-body">
+        <div class="mchs-logo-block">
           <el-upload
-            class="logo-upload"
+            class="mchs-logo-upload"
             :action="merchantStorageUploadUrl"
-            :headers="{ 'Authorization': `Bearer ${getToken()}` }"
+            :headers="{ Authorization: `Bearer ${getToken()}` }"
             :show-file-list="false"
-            :on-success="handleLogoUpload"
-            :on-error="handleUploadError"
+            :disabled="logoUploading"
             accept="image/*"
+            :before-upload="beforeLogoUpload"
+            :on-success="handleLogoUpload"
+            :on-error="handleLogoUploadError"
           >
-            <div class="upload-area">
-              <el-image
-                v-if="settingsForm.shopLogo"
-                :src="getFullImageUrl(settingsForm.shopLogo)"
-                fit="cover"
-                class="shop-logo-preview"
-              >
-                <template #error>
-                  <div class="upload-placeholder"><el-icon><picture-filled /></el-icon></div>
-                </template>
-              </el-image>
-              <div v-else class="upload-placeholder">
-                <el-icon><upload-filled /></el-icon>
-                <span>上传 Logo</span>
-              </div>
-            </div>
+            <span class="mchs-logo-stack">
+              <span class="mchs-logo-tile" :class="{ 'is-uploading': logoUploading }">
+                <StorageImage v-if="form.shopLogo" :src="form.shopLogo" width="100%" height="100%" :preview="false" />
+                <span v-else class="mchs-logo-char">{{ logoChar }}</span>
+              </span>
+              <span class="mchs-logo-replace">{{ logoUploading ? '上传中…' : '更换 Logo' }}</span>
+            </span>
           </el-upload>
-          <strong>店铺 Logo</strong>
-          <span>建议 200 × 200，支持 JPG、PNG</span>
-        </aside>
+          <small>建议 200 × 200，支持 JPG、PNG</small>
+        </div>
 
-      <el-form ref="settingsFormRef" :model="settingsForm" label-position="top" :rules="settingsRules" class="settings-form-grid">
-        <el-form-item label="店铺编号" prop="shopNo">
-          <el-input v-model="settingsForm.shopNo" placeholder="店铺编号" disabled />
-        </el-form-item>
-
-        <el-form-item label="店铺名称" prop="shopName">
-          <el-input v-model="settingsForm.shopName" placeholder="请输入店铺名称" />
-        </el-form-item>
-
-        <el-form-item label="店铺简介" prop="shopIntro" class="settings-form-wide">
-          <el-input
-            v-model="settingsForm.shopIntro"
-            type="textarea"
-            :rows="4"
-            maxlength="500"
-            show-word-limit
-            placeholder="简要介绍店铺经营内容与特色"
-          />
-        </el-form-item>
-
-        <el-form-item label="营业状态" class="business-status-field">
-          <el-switch v-model="settingsForm.isOpen" active-text="营业中" inactive-text="已停业" />
-          <div class="form-tip">停业后商品仍可在平台浏览，但用户不能提交新订单。</div>
-        </el-form-item>
-
-        <el-form-item label="平台佣金">
-          <el-input :model-value="`${settingsForm.settlementCommissionRate}%`" disabled />
-          <div class="form-tip">由平台统一设置。</div>
-        </el-form-item>
-
-        <el-form-item label="结算周期">
-          <el-input :model-value="`订单完成后 ${settingsForm.settlementDelayDays} 天`" disabled />
-          <div class="form-tip">结算规则由平台设置，如有疑问请联系平台管理员。</div>
-        </el-form-item>
-      </el-form>
+        <div class="mchs-settings-fields">
+          <label class="mchs-field">
+            <span>店铺编号</span>
+            <input :value="form.shopNo" disabled />
+          </label>
+          <label class="mchs-field">
+            <span>店铺名称 <em class="mchs-required">*</em></span>
+            <input v-model="form.shopName" maxlength="50" placeholder="请输入店铺名称" />
+          </label>
+          <label class="mchs-field wide">
+            <span>店铺简介</span>
+            <textarea v-model="form.shopIntro" maxlength="500" rows="4" />
+            <small class="mchs-intro-counter">{{ form.shopIntro.length }}/500</small>
+          </label>
+          <div class="mchs-business-switch">
+            <span>
+              <b>营业状态</b>
+              <small>停业后商品仍可浏览，但用户不能提交新订单</small>
+            </span>
+            <button
+              type="button"
+              class="mchs-switch"
+              :class="{ 'is-on': form.isOpen }"
+              :aria-pressed="form.isOpen"
+              aria-label="切换营业状态"
+              @click="form.isOpen = !form.isOpen"
+            ><i /></button>
+          </div>
+          <label class="mchs-field">
+            <span>平台佣金</span>
+            <input :value="commissionText" disabled />
+            <small>由平台统一设置</small>
+          </label>
+          <label class="mchs-field">
+            <span>结算周期</span>
+            <input :value="settlementText" disabled />
+            <small>如有疑问请联系平台管理员</small>
+          </label>
+        </div>
       </div>
 
-      <div class="settings-save-bar">
-        <el-button @click="handleResetForm">重置</el-button>
-        <el-button type="primary" :loading="saving" @click="handleSaveSettings">保存设置</el-button>
+      <div class="mchs-settings-savebar">
+        <span>修改后需保存生效</span>
+        <div>
+          <button type="button" @click="resetForm">重置</button>
+          <button type="button" class="primary" :disabled="saving" @click="saveSettings">保存设置</button>
+        </div>
       </div>
-    </el-card>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue';
-import { getStoragePreviewUrl } from '@/utils/storage'
-import { ElMessage } from 'element-plus';
-import { getToken } from '@/utils/auth';
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import StorageImage from '@/components/mall/StorageImage.vue'
+import { getMchShopDetail, updateMchShop } from '@/api/mall/shop'
+import { getToken } from '@/utils/auth'
 import { resolveApiUrl } from '@/utils/download'
-import { getMchShopDetail, updateMchShop } from '@/api/mall/shop';
 import { getCurrentShop, setCurrentShop } from '@/utils/shop'
+import '@/assets/yeah-mall-shop.css'
 
-const loading = ref(false);
-const saving = ref(false);
-const settingsFormRef = ref(null);
+defineOptions({ name: 'MerchantSettingsPage' })
+
+interface ShopForm {
+  shopNo: string
+  shopName: string
+  shopLogo: string
+  shopIntro: string
+  isOpen: boolean
+  settlementCommissionRate: number
+  settlementDelayDays: number
+}
+
 const merchantStorageUploadUrl = resolveApiUrl('/mch/storage/upload')
 
-const settingsForm = reactive({
-  shopNo: '',
-  shopName: '',
-  shopLogo: '',
-  shopIntro: '',
-  isOpen: true,
-  settlementCommissionRate: 0,
-  settlementDelayDays: 7
-});
+const loading = ref(false)
+const saving = ref(false)
+const logoUploading = ref(false)
+const form = reactive<ShopForm>(emptyForm())
+let loadedForm: ShopForm = emptyForm()
 
-const settingsRules = {
-  shopName: [
-    { required: true, message: '请输入店铺名称', trigger: 'blur' },
-    { max: 50, message: '店铺名称长度不能超过50个字符', trigger: 'blur' }
-  ]
-};
+const logoChar = computed(() => form.shopName.trim().slice(0, 1) || '店')
+const commissionText = computed(() => `${Number(form.settlementCommissionRate || 0)}%`)
+const settlementText = computed(() => `订单完成后 ${Number(form.settlementDelayDays ?? 7)} 天`)
 
-// 获取完整图片URL
-function getFullImageUrl(fileKey) {
-  return getStoragePreviewUrl(fileKey)
-}
-
-// 与其他商家业务页面共用当前选择的店铺标识。
-function getCurrentShopId() {
-  return getCurrentShop()?.id || null;
-}
-
-// 处理Logo上传成功
-const handleLogoUpload = (response) => {
-  if (response.code === 0 && response.data && response.data.fileKey) {
-    settingsForm.shopLogo = response.data.fileKey;
-    ElMessage.success('Logo上传成功');
-  } else {
-    ElMessage.error('Logo上传失败');
+function emptyForm(): ShopForm {
+  return {
+    shopNo: '',
+    shopName: '',
+    shopLogo: '',
+    shopIntro: '',
+    isOpen: true,
+    settlementCommissionRate: 0,
+    settlementDelayDays: 7,
   }
-};
+}
 
-// 处理上传错误
-const handleUploadError = () => {
-  ElMessage.error('上传失败，请检查网络连接');
-};
-
-// 保存设置
-const handleSaveSettings = async () => {
-  const shopId = getCurrentShopId();
+async function loadShop() {
+  const shopId = getCurrentShop()?.id
   if (!shopId) {
-    ElMessage.warning('请先选择店铺');
-    return;
+    ElMessage.warning('请先选择店铺')
+    return
   }
-
+  loading.value = true
   try {
-    await settingsFormRef.value.validate();
+    const response = await getMchShopDetail(shopId)
+    const data = response.data || {}
+    form.shopNo = data.shopNo || ''
+    form.shopName = data.shopName || ''
+    form.shopLogo = data.shopLogo || ''
+    form.shopIntro = data.shopIntro || ''
+    form.isOpen = data.isOpen !== false
+    form.settlementCommissionRate = Number(data.settlementCommissionRate || 0)
+    form.settlementDelayDays = Number(data.settlementDelayDays ?? 7)
+    loadedForm = { ...form }
+  } catch {
+    // 请求错误已由全局拦截器提示
+  } finally {
+    loading.value = false
+  }
+}
 
-    saving.value = true;
+function beforeLogoUpload(file: File) {
+  if (!file.type.startsWith('image/')) {
+    ElMessage.warning('请选择 JPG、PNG 等图片文件')
+    return false
+  }
+  logoUploading.value = true
+  return true
+}
 
-    const response = await updateMchShop({
+function handleLogoUpload(response: { code?: number; data?: { fileKey?: string }; message?: string }) {
+  logoUploading.value = false
+  if (response?.code === 0 && response.data?.fileKey) {
+    form.shopLogo = response.data.fileKey
+    ElMessage.success('Logo 上传成功')
+    return
+  }
+  ElMessage.error(response?.message || 'Logo 上传失败')
+}
+
+function handleLogoUploadError() {
+  logoUploading.value = false
+  ElMessage.error('Logo 上传失败，请检查网络连接')
+}
+
+function resetForm() {
+  Object.assign(form, loadedForm)
+  ElMessage.success('店铺设置已恢复为加载值')
+}
+
+async function saveSettings() {
+  const shopId = getCurrentShop()?.id
+  if (!shopId) {
+    ElMessage.warning('请先选择店铺')
+    return
+  }
+  const shopName = form.shopName.trim()
+  if (!shopName) {
+    ElMessage.warning('请输入店铺名称')
+    return
+  }
+  saving.value = true
+  try {
+    await updateMchShop({
       id: shopId,
-      shopName: settingsForm.shopName,
-      shopLogo: settingsForm.shopLogo,
-      shopIntro: settingsForm.shopIntro,
-      isOpen: settingsForm.isOpen
-    });
-
-    if (response.code === 0) {
-      setCurrentShop({ id: shopId, name: settingsForm.shopName });
-      ElMessage.success('设置保存成功');
-    } else {
-      ElMessage.error(response.message || '保存失败');
-    }
-  } catch (error) {
-    console.error('保存设置失败:', error);
-    ElMessage.error('保存设置失败');
+      shopName,
+      shopLogo: form.shopLogo,
+      shopIntro: form.shopIntro,
+      isOpen: form.isOpen,
+    })
+    form.shopName = shopName
+    loadedForm = { ...form }
+    setCurrentShop({ id: shopId, name: shopName })
+    ElMessage.success('店铺设置已保存')
+  } catch {
+    // 请求错误已由全局拦截器提示
   } finally {
-    saving.value = false;
+    saving.value = false
   }
-};
+}
 
-// 重置表单
-const handleResetForm = () => {
-  settingsFormRef.value.resetFields();
-};
-
-// 获取店铺信息
-const getShopInfo = async () => {
-  const shopId = getCurrentShopId();
-  if (!shopId) {
-    ElMessage.warning('请先选择店铺');
-    return;
-  }
-
-  try {
-    loading.value = true;
-
-    const response = await getMchShopDetail(shopId);
-
-    if (response.code === 0 && response.data) {
-      const shopInfo = response.data;
-      settingsForm.shopNo = shopInfo.shopNo || '';
-      settingsForm.shopName = shopInfo.shopName || '';
-      settingsForm.shopLogo = shopInfo.shopLogo || '';
-      settingsForm.shopIntro = shopInfo.shopIntro || '';
-      settingsForm.isOpen = shopInfo.isOpen !== false;
-      settingsForm.settlementCommissionRate = Number(shopInfo.settlementCommissionRate || 0);
-      settingsForm.settlementDelayDays = Number(shopInfo.settlementDelayDays ?? 7);
-    } else {
-      ElMessage.error(response.message || '获取店铺信息失败');
-    }
-  } catch (error) {
-    console.error('获取店铺信息失败:', error);
-    ElMessage.error('获取店铺信息失败');
-  } finally {
-    loading.value = false;
-  }
-};
-
-onMounted(() => {
-  getShopInfo();
-});
+onMounted(loadShop)
 </script>
-
-<style lang="scss" scoped>
-.settings-section-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  h3,
-  p {
-    margin: 0;
-  }
-
-  p {
-    margin-top: 5px;
-    color: var(--mall-muted);
-    font-size: 12px;
-  }
-}
-
-.settings-form-layout {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 28px;
-  padding: 24px;
-}
-
-.settings-logo-panel {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 8px;
-  padding: 18px;
-  border-radius: 8px;
-  background: #f4f6f3;
-
-  strong {
-    color: var(--mall-ink);
-    font-size: 13px;
-  }
-
-  > span {
-    color: var(--mall-muted);
-    font-size: 12px;
-    text-align: center;
-  }
-}
-
-.settings-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 22px;
-
-  :deep(.el-form-item) {
-    margin-bottom: 16px;
-  }
-
-  :deep(.settings-form-wide) {
-    grid-column: 1 / -1;
-  }
-}
-
-.upload-area {
-  cursor: pointer;
-}
-
-.shop-logo-preview,
-.upload-placeholder {
-  width: 120px;
-  height: 120px;
-  overflow: hidden;
-  border: 1px dashed var(--mall-line-strong);
-  border-radius: 8px;
-}
-
-.upload-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 8px;
-  color: var(--mall-muted);
-  background: #fff;
-  transition: 0.2s ease;
-
-  &:hover {
-    color: var(--mall-brand);
-    border-color: var(--mall-brand);
-    background: var(--mall-brand-soft);
-  }
-}
-
-.form-tip {
-  margin-top: 6px;
-  color: var(--mall-muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.settings-save-bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 14px 20px;
-  border-top: 1px solid var(--mall-line);
-  background: #fafbfa;
-}
-
-@media (max-width: 900px) {
-  .settings-form-layout,
-  .settings-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .settings-form-grid :deep(.settings-form-wide) {
-    grid-column: auto;
-  }
-}
-</style>

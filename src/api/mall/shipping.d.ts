@@ -1,0 +1,14 @@
+export function getShippingInfo(...args: unknown[]): Promise<any>
+export function saveShippingInfo(...args: unknown[]): Promise<any>
+export function getLogisticsList(...args: unknown[]): Promise<any>
+export function saveLogistics(...args: unknown[]): Promise<any>
+export function deleteLogistics(...args: unknown[]): Promise<any>
+export function getAreaTree(...args: unknown[]): Promise<any>
+export function createDeliveryProvider(...args: unknown[]): Promise<any>
+export function queryDeliveryProviderList(...args: unknown[]): Promise<any>
+export function getDeliveryProviderDetail(...args: unknown[]): Promise<any>
+export function updateDeliveryProvider(...args: unknown[]): Promise<any>
+export function setDefaultDeliveryProvider(...args: unknown[]): Promise<any>
+export function setPopularDeliveryProvider(...args: unknown[]): Promise<any>
+export function deleteDeliveryProvider(...args: unknown[]): Promise<any>
+export function syncExpCompany(...args: unknown[]): Promise<any>

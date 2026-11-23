@@ -1083,7 +1083,7 @@
   max-height: calc(100vh - 96px);
   flex-direction: column;
   box-sizing: border-box;
-  margin: 48px auto !important;
+  margin: 0 auto !important;
   padding: 0;
   color: var(--ym-ink);
   border: 0;

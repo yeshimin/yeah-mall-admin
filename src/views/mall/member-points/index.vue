@@ -31,23 +31,23 @@
               <CopyableText :value="row.memberId" label="会员ID" />
             </template>
           </el-table-column>
-          <el-table-column label="业务类型" width="110">
+          <el-table-column label="业务类型" min-width="110">
             <template #default="{ row }">
               <el-tag :type="bizTypeTone(row.bizType)">{{ bizTypeLabel(row.bizType) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="description" label="说明" min-width="180" show-overflow-tooltip />
-          <el-table-column label="变动" width="100" align="right">
+          <el-table-column label="变动" min-width="100" align="right">
             <template #default="{ row }">
               <span :class="row.changePoints >= 0 ? 'plus' : 'minus'">
                 {{ row.changePoints >= 0 ? '+' : '' }}{{ formatPoints(row.changePoints) }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="变动前" width="100" align="right">
+          <el-table-column label="变动前" min-width="100" align="right">
             <template #default="{ row }">{{ formatPoints(row.balanceBefore) }}</template>
           </el-table-column>
-          <el-table-column label="变动后" width="100" align="right">
+          <el-table-column label="变动后" min-width="100" align="right">
             <template #default="{ row }">{{ formatPoints(row.balanceAfter) }}</template>
           </el-table-column>
           <el-table-column label="业务单号" min-width="160" show-overflow-tooltip>
@@ -56,7 +56,7 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" width="160">
+          <el-table-column label="创建时间" min-width="160">
             <template #default="{ row }">
               <span>{{ formatDate(row.createTime) }}</span>
               <small class="points-time-sub">{{ formatTime(row.createTime) }}</small>
@@ -83,20 +83,20 @@
       <el-tab-pane label="积分规则" name="rule">
         <section class="mall-table-panel points-rule-table">
         <el-table data-ym-table="r32" v-loading="loading" :data="rules">
-          <el-table-column prop="name" label="规则" width="130" />
-          <el-table-column prop="code" label="编码" width="160" />
-          <el-table-column label="计算方式" width="120">
+          <el-table-column prop="name" label="规则" min-width="130" />
+          <el-table-column prop="code" label="编码" min-width="160" />
+          <el-table-column label="计算方式" min-width="120">
             <template #default="{ row }">
               {{ row.calcType === MEMBER_POINTS_RULE_CALC_TYPE.FIXED ? '固定积分' : '按金额比例' }}
             </template>
           </el-table-column>
-          <el-table-column label="规则值" width="140" align="right">
+          <el-table-column label="规则值" min-width="140" align="right">
             <template #default="{ row }">
               {{ row.calcType === MEMBER_POINTS_RULE_CALC_TYPE.FIXED ? `${row.fixedPoints} 积分` : `每元 ${row.pointsPerYuan} 积分` }}
             </template>
           </el-table-column>
           <el-table-column prop="description" label="说明" min-width="220" />
-          <el-table-column label="状态" width="90">
+          <el-table-column label="状态" min-width="90">
             <template #default="{ row }">
               <el-tag :type="row.isEnabled ? 'success' : 'info'">
                 {{ row.isEnabled ? '启用' : '停用' }}

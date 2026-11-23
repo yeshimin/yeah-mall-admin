@@ -43,7 +43,7 @@
         @selection-change="selectedRows = $event"
       >
         <el-table-column type="selection" width="48" align="center" />
-        <el-table-column prop="id" label="ID" width="170" align="center" />
+        <el-table-column prop="id" label="ID" min-width="170" align="center" />
         <el-table-column label="所属商品" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <CopyableText :value="spuNameOf(row)" label="所属商品" />
@@ -55,12 +55,12 @@
             <CopyableText :value="row.specCode" label="规格编码" />
           </template>
         </el-table-column>
-        <el-table-column label="销售价格" width="120" align="center">
+        <el-table-column label="销售价格" min-width="120" align="center">
           <template #default="{ row }">
             <span class="numeric amount-strong">¥{{ Number(row.price || 0).toFixed(2) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="库存数量" width="130" align="center">
+        <el-table-column label="库存数量" min-width="130" align="center">
           <template #default="{ row }">
             <span :class="stockClass(row.stock)">
               {{ row.stock }}

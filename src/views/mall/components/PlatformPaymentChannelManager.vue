@@ -7,16 +7,16 @@
     </div>
 
     <el-table data-ym-table="r3" v-loading="loading" :data="records" stripe>
-      <el-table-column prop="channelName" label="通道名称" min-width="170" />
-      <el-table-column prop="shopName" label="适用范围" min-width="150" />
-      <el-table-column label="收款模式" width="170">
+      <el-table-column prop="channelName" label="通道名称" min-width="160" />
+      <el-table-column prop="shopName" label="适用范围" min-width="130" />
+      <el-table-column label="收款模式" min-width="130">
         <template #default="{ row }">{{ modeText(row.collectionMode) }}</template>
       </el-table-column>
-      <el-table-column prop="appTarget" label="App目标" min-width="130" />
-      <el-table-column prop="appId" label="AppID" min-width="170" show-overflow-tooltip />
-      <el-table-column prop="mchId" label="商户号" min-width="140" />
-      <el-table-column prop="subMchId" label="子商户号" min-width="140" />
-      <el-table-column label="状态" width="90">
+      <el-table-column prop="appTarget" label="App目标" min-width="110" />
+      <el-table-column prop="appId" label="AppID" min-width="140" show-overflow-tooltip />
+      <el-table-column prop="mchId" label="商户号" min-width="120" />
+      <el-table-column prop="subMchId" label="子商户号" min-width="120" />
+      <el-table-column label="状态" min-width="90">
         <template #default="{ row }"><el-tag :type="row.isEnabled ? 'success' : 'info'">{{ row.isEnabled ? '启用' : '停用' }}</el-tag></template>
       </el-table-column>
       <el-table-column label="操作" width="90" fixed="right">

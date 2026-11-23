@@ -66,7 +66,7 @@
         :data="pagedRows"
         row-key="id"
       >
-        <el-table-column label="活动信息" min-width="260">
+        <el-table-column label="活动信息" min-width="240">
           <template #default="{ row }">
             <div class="sk-activity-cell">
               <span class="sk-cover-art">
@@ -89,7 +89,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="报名时间" width="200">
+        <el-table-column label="报名时间" min-width="162">
           <template #default="{ row }">
             <div
               class="sk-when-cell"
@@ -105,7 +105,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="活动时间" width="200">
+        <el-table-column label="活动时间" min-width="162">
           <template #default="{ row }">
             <div
               class="sk-when-cell"
@@ -121,15 +121,15 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="成团人数" width="90">
+        <el-table-column label="成团人数" min-width="72">
           <template #default="{ row }">{{ row.minPeople }} 人</template>
         </el-table-column>
 
-        <el-table-column label="开团上限" width="90">
+        <el-table-column label="开团上限" min-width="78">
           <template #default="{ row }">{{ groupbuyLimitText(row.groupLimit) }}</template>
         </el-table-column>
 
-        <el-table-column label="报名 / 商品" width="110">
+        <el-table-column label="报名 / 商品" min-width="92">
           <template #default="{ row }">
             <div class="gb-link-stack">
               <el-button
@@ -152,7 +152,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="状态" width="100">
+        <el-table-column label="状态" min-width="82">
           <template #default="{ row }">
             <span class="status-ticket" :class="`tone-${groupbuyStatusMeta(row.status).tone}`">
               {{ groupbuyStatusMeta(row.status).label }}
@@ -160,9 +160,9 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="sort" label="排序" width="60" />
+        <el-table-column prop="sort" label="排序" min-width="54" />
 
-        <el-table-column label="启用" width="96">
+        <el-table-column label="启用" min-width="90">
           <template #default="{ row }">
             <div class="sk-switch">
               <el-switch
@@ -176,7 +176,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="190" fixed="right" class-name="mall-actions-column">
+        <el-table-column label="操作" width="150" fixed="right" class-name="mall-actions-column">
           <template #default="{ row }">
             <div class="gb-operations">
               <el-button

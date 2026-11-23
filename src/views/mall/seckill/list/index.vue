@@ -67,7 +67,7 @@
         row-key="id"
         class="sk-activity-table"
       >
-        <el-table-column label="活动信息" min-width="290">
+        <el-table-column label="活动信息" min-width="300">
           <template #default="{ row }">
             <div class="sk-activity-cell">
               <span class="sk-cover-art">
@@ -90,7 +90,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="报名时间" width="190">
+        <el-table-column label="报名时间" min-width="160">
           <template #default="{ row }">
             <div
               class="sk-when-cell"
@@ -106,7 +106,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="活动时间" width="190">
+        <el-table-column label="活动时间" min-width="160">
           <template #default="{ row }">
             <div
               class="sk-when-cell"
@@ -122,7 +122,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="场次" width="88">
+        <el-table-column label="场次" min-width="84">
           <template #default="{ row }">
             <button
               type="button"
@@ -135,7 +135,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="状态" width="100">
+        <el-table-column label="状态" min-width="96">
           <template #default="{ row }">
             <span class="sk-ticket" :class="`tone-${statusMeta(row.status).tone}`">
               {{ statusMeta(row.status).label }}
@@ -143,9 +143,9 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="sort" label="排序" width="60" />
+        <el-table-column prop="sort" label="排序" min-width="56" />
 
-        <el-table-column label="启用" width="96">
+        <el-table-column label="启用" min-width="84">
           <template #default="{ row }">
             <div class="sk-switch">
               <el-switch
@@ -159,7 +159,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="180" fixed="right" class-name="mall-actions-column">
+        <el-table-column label="操作" width="160" fixed="right" class-name="mall-actions-column">
           <template #default="{ row }">
             <div class="sk-row-actions">
               <el-button
@@ -1740,13 +1740,6 @@ onBeforeUnmount(() => {
   display: none;
 }
 
-:global(.el-overlay .el-dialog.sk-editor-dialog) {
-  margin-top: 4vh !important;
-}
-
-:global(.el-overlay .el-dialog.sk-editor-dialog .el-dialog__body) {
-  max-height: calc(100vh - 82px);
-}
 
 .sk-detail,
 .sk-editor,

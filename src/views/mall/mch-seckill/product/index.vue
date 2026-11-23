@@ -69,7 +69,7 @@
       </div>
 
       <el-table data-ym-table="r82" v-loading="loading" :data="products" row-key="id" style="width: 100%">
-        <el-table-column label="秒杀商品" min-width="240" align="center" header-align="center">
+        <el-table-column label="秒杀商品" min-width="220" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-product-cell">
               <SeckillThumb :src="row.mainImage" :alt="row.name" />
@@ -80,7 +80,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="活动 / 场次" min-width="190" align="center" header-align="center">
+        <el-table-column label="活动 / 场次" min-width="170" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-event-cell">
               <b :title="row.activityName">{{ row.activityName }}</b>
@@ -88,7 +88,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="秒杀价" min-width="150" align="center" header-align="center">
+        <el-table-column label="秒杀价" min-width="130" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-price-cell">
               <b>{{ priceRange(row.minSeckillPrice, row.maxSeckillPrice) }}</b>
@@ -96,14 +96,14 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="原价" min-width="130" align="center" header-align="center">
+        <el-table-column label="原价" min-width="110" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-price-cell is-muted">
               <b>{{ priceRange(row.minOriginPrice, row.maxOriginPrice) }}</b>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="库存 / 已售" min-width="173" align="center" header-align="center">
+        <el-table-column label="库存 / 已售" min-width="150" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-stock-cell">
               <div class="ms-stock-line">
@@ -116,7 +116,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="成交额" min-width="115" align="center" header-align="center">
+        <el-table-column label="成交额" min-width="100" align="center" header-align="center">
           <template #default="{ row }">
             <b v-if="row.salesAmount && Number(row.salesAmount) > 0" class="ms-amount">
               {{ money(row.salesAmount) }}
@@ -124,14 +124,14 @@
             <span v-else class="ms-muted">—</span>
           </template>
         </el-table-column>
-        <el-table-column label="审核状态" min-width="105" align="center" header-align="center">
+        <el-table-column label="审核状态" min-width="96" align="center" header-align="center">
           <template #default="{ row }">
             <span class="status-ticket" :class="`tone-${auditMeta(row.auditStatus).tone}`">
               {{ auditMeta(row.auditStatus).label }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="95" fixed="right" align="center" header-align="center">
+        <el-table-column label="操作" width="90" fixed="right" align="center" header-align="center">
           <template #default="{ row }">
             <button type="button" class="ms-link" @click="openDetail(row)">详情</button>
           </template>

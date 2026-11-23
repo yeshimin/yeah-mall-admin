@@ -21,25 +21,25 @@
 
     <section class="mall-table-panel">
       <el-table data-ym-table="r4" v-loading="loading" :data="records" height="100%">
-        <el-table-column prop="shopId" label="店铺ID" width="110" />
-        <el-table-column label="账户类型" width="110">
+        <el-table-column prop="shopId" label="店铺ID" min-width="90" />
+        <el-table-column label="账户类型" min-width="90">
           <template #default="{ row }">{{ row.accountType === '1' ? '银行卡' : '支付宝' }}</template>
         </el-table-column>
         <el-table-column prop="accountName" label="收款名称" min-width="160" />
-        <el-table-column prop="accountNo" label="收款账号" min-width="150" />
-        <el-table-column prop="bankName" label="开户银行" min-width="180">
+        <el-table-column prop="accountNo" label="收款账号" min-width="130" />
+        <el-table-column prop="bankName" label="开户银行" min-width="150">
           <template #default="{ row }">{{ row.bankName || '-' }}</template>
         </el-table-column>
-        <el-table-column label="审核状态" width="110">
+        <el-table-column label="审核状态" min-width="96">
           <template #default="{ row }">
             <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="auditRemark" label="审核备注" min-width="180">
+        <el-table-column prop="auditRemark" label="审核备注" min-width="150">
           <template #default="{ row }">{{ row.auditRemark || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="createTime" label="提交时间" width="170" />
-        <el-table-column label="操作" width="110" fixed="right">
+        <el-table-column prop="createTime" label="提交时间" min-width="150" />
+        <el-table-column label="操作" width="104" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openAudit(row)">{{ row.status === '1' ? '审核' : '查看' }}</el-button>
           </template>

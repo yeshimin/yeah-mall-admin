@@ -50,7 +50,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="跳转目标" min-width="240">
+          <el-table-column label="跳转目标" min-width="200">
             <template #default="{ row }">
               <span v-if="row.target" class="ho-target">
                 <i />
@@ -59,12 +59,12 @@
               <span v-else class="ho-target-empty">不跳转</span>
             </template>
           </el-table-column>
-          <el-table-column v-if="scope === 'platform'" label="排序" width="80">
+          <el-table-column v-if="scope === 'platform'" label="排序" min-width="64">
             <template #default="{ row }">
               <div class="ho-sort-cell">{{ row.sort ?? 1 }}</div>
             </template>
           </el-table-column>
-          <el-table-column v-if="scope === 'platform'" label="状态" width="120">
+          <el-table-column v-if="scope === 'platform'" label="状态" min-width="100">
             <template #default="{ row }">
               <div class="ho-status-cell">
                 <el-switch
@@ -76,12 +76,12 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" width="190">
+          <el-table-column label="创建时间" min-width="150">
             <template #default="{ row }">
               <div class="ho-time-cell">{{ formatDateTime(row.createTime) }}</div>
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" width="190">
+          <el-table-column label="更新时间" min-width="150">
             <template #default="{ row }">
               <div class="ho-time-cell">{{ formatDateTime(row.updateTime) }}</div>
             </template>
@@ -346,8 +346,8 @@ async function saveBanner() {
   dialog.submitting = true
   try {
     if (props.scope === 'merchant') {
-      if (dialog.id) await updateMerchantBanner(dialog.id, currentShopId, file, target)
-      else await createMerchantBanner(currentShopId, file!, target)
+      if (dialog.id) await updateMerchantBanner(dialog.id, currentShopId, file, { target })
+      else await createMerchantBanner(currentShopId, file!, { target })
     } else if (dialog.id) {
       await updatePlatformBanner(dialog.id, file, target, dialog.sort, dialog.isEnabled)
     } else {

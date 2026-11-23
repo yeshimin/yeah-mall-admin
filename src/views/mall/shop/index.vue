@@ -51,7 +51,7 @@
     <section class="mall-table-panel">
       <el-table data-ym-table="r54" v-loading="loading" :data="shopList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="52" />
-        <el-table-column label="店铺" min-width="220">
+        <el-table-column label="店铺" min-width="210">
           <template #default="{ row }">
             <div class="shop-cell">
               <span class="shop-logo-wrap">
@@ -73,33 +73,33 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="所属商家" min-width="120">
+        <el-table-column label="所属商家" min-width="110">
           <template #default="{ row }">
             <CopyableText :value="row.mchName || '-'" label="商家账号" />
           </template>
         </el-table-column>
-        <el-table-column label="平台状态" width="100">
+        <el-table-column label="平台状态" min-width="92">
           <template #default="{ row }">
             <ReadOnlyStatus :tone="row.isEnabled ? 'success' : 'neutral'">
               {{ row.isEnabled ? '已启用' : '已停用' }}
             </ReadOnlyStatus>
           </template>
         </el-table-column>
-        <el-table-column label="营业状态" width="100">
+        <el-table-column label="营业状态" min-width="92">
           <template #default="{ row }">
             <ReadOnlyStatus :tone="row.isOpen ? 'success' : 'warning'">
               {{ row.isOpen ? '营业中' : '已停业' }}
             </ReadOnlyStatus>
           </template>
         </el-table-column>
-        <el-table-column label="平台佣金" width="100">
+        <el-table-column label="平台佣金" min-width="92">
           <template #default="{ row }">{{ formatPercent(row.settlementCommissionRate) }}</template>
         </el-table-column>
-        <el-table-column label="结算周期" width="100">
+        <el-table-column label="结算周期" min-width="92">
           <template #default="{ row }">T+{{ Number(row.settlementDelayDays ?? 0) }}</template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="168" />
-        <el-table-column label="操作" width="172" fixed="right">
+        <el-table-column prop="createTime" label="创建时间" min-width="150" />
+        <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
             <div class="table-row-actions">
               <el-button link type="primary" @click="openDetail(row)">查看</el-button>

@@ -44,7 +44,7 @@
         <el-table-column type="selection" width="48" align="center" />
         <el-table-column
           label="平台分类名称"
-          min-width="320"
+          min-width="260"
           class-name="category-name-column"
           label-class-name="category-name-column"
         >
@@ -58,19 +58,19 @@
             <StorageImage :src="row.image" :width="40" :height="40" :preview="Boolean(row.image)" />
           </template>
         </el-table-column>
-        <el-table-column prop="code" label="分类编码" min-width="158" show-overflow-tooltip />
-        <el-table-column prop="sort" label="排序" width="76" align="center" />
-        <el-table-column prop="remark" label="备注" min-width="220" show-overflow-tooltip>
+        <el-table-column prop="code" label="分类编码" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="sort" label="排序" min-width="70" align="center" />
+        <el-table-column prop="remark" label="备注" min-width="170" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="category-muted">{{ row.remark || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="updateTime" label="更新时间" width="168" show-overflow-tooltip>
+        <el-table-column prop="updateTime" label="更新时间" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="category-muted">{{ row.updateTime || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="176" fixed="right" align="center">
+        <el-table-column label="操作" width="160" fixed="right" align="center">
           <template #default="{ row }">
             <div class="table-row-actions">
               <el-button link type="primary" @click="openEditDialog(row)">编辑</el-button>

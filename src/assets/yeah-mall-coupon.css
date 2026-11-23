@@ -347,9 +347,7 @@
 }
 
 .el-dialog.mc-dialog .el-dialog__body {
-  max-height: calc(100vh - 180px);
   padding: 0 4px 0 0;
-  overflow-y: auto;
 }
 
 .mc-dialog-head span,

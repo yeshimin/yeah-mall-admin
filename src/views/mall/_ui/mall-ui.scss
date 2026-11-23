@@ -745,12 +745,21 @@
 }
 
 /* Dialogs and drawers are teleported outside mall-page, so their finish lives here. */
+.el-overlay-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 24px 20px;
+  overflow: auto;
+}
+
 .el-overlay .el-dialog {
   display: flex;
   flex-direction: column;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 48px);
-  margin-top: 24px !important;
+  margin: 0 auto !important;
   overflow: hidden;
   border: 1px solid #dce4de;
   border-radius: 10px;
@@ -793,7 +802,7 @@
 .el-overlay .el-dialog__body {
   flex: 1 1 auto;
   min-height: 0;
-  max-height: calc(100vh - 180px);
+  max-height: none;
   padding: 20px 22px;
   overflow: auto;
 }

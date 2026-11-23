@@ -131,7 +131,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="商家 / 店铺" width="150">
+          <el-table-column label="商家 / 店铺" min-width="130">
             <template #default="{ row }">
               <div class="sa-party-cell">
                 <b :title="row.mchName">{{ row.mchName || '—' }}</b>
@@ -139,7 +139,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="拼团价" width="170">
+          <el-table-column label="拼团价" min-width="150">
             <template #default="{ row }">
               <div class="skp-price-cell">
                 <b>{{ seckillRange(row.minGroupPrice, row.maxGroupPrice) }}</b>
@@ -150,7 +150,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="报名时间" width="128">
+          <el-table-column label="报名时间" min-width="128">
             <template #default="{ row }">
               <div class="sa-time-cell">
                 <b>{{ dateOnly(row.createTime) }}</b>
@@ -158,14 +158,14 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="审核状态" width="104">
+          <el-table-column label="审核状态" min-width="96">
             <template #default="{ row }">
               <span class="status-ticket" :class="`tone-${applyStatusMeta(row.auditStatus).tone}`">
                 {{ applyStatusMeta(row.auditStatus).label }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="申请备注" min-width="150">
+          <el-table-column label="申请备注" min-width="130">
             <template #default="{ row }">
               <span
                 class="sa-remark"
@@ -176,7 +176,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="审核备注" min-width="150">
+          <el-table-column label="审核备注" min-width="130">
             <template #default="{ row }">
               <span
                 class="sa-remark"

@@ -80,7 +80,7 @@
 
     <section class="mall-table-panel">
       <el-table data-ym-table="r76" v-loading="loading" :data="records" row-key="id" style="width: 100%">
-        <el-table-column label="商品" min-width="235" align="center" header-align="center">
+        <el-table-column label="商品" min-width="210" align="center" header-align="center">
           <template #default="{ row }">
             <div class="mr-product">
               <el-image
@@ -99,35 +99,35 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="订单编号" min-width="185" align="center" header-align="center">
+        <el-table-column label="订单编号" min-width="150" align="center" header-align="center">
           <template #default="{ row }">
             <CopyableText :value="row.orderNo" label="订单编号" />
           </template>
         </el-table-column>
-        <el-table-column label="评价用户" min-width="88" align="center" header-align="center">
+        <el-table-column label="评价用户" min-width="80" align="center" header-align="center">
           <template #default="{ row }">{{ row.nickname || '—' }}</template>
         </el-table-column>
-        <el-table-column label="评分" min-width="64" align="center" header-align="center">
+        <el-table-column label="评分" min-width="60" align="center" header-align="center">
           <template #default="{ row }">
             <b class="rv-rating" :class="ratingTone(row.overallRating)">{{ `${row.overallRating} 星` }}</b>
           </template>
         </el-table-column>
-        <el-table-column label="评价内容" min-width="226" align="center" header-align="center">
+        <el-table-column label="评价内容" min-width="210" align="center" header-align="center">
           <template #default="{ row }">
             <span class="mr-content" :title="row.content">{{ row.content || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="回复状态" min-width="100" align="center" header-align="center">
+        <el-table-column label="回复状态" min-width="90" align="center" header-align="center">
           <template #default="{ row }">
             <span class="status-ticket" :class="isPending(row) ? 'tone-warning' : 'tone-info'">
               {{ isPending(row) ? '待商家回复' : '待买家回复' }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="评价时间" min-width="150" align="center" header-align="center">
+        <el-table-column label="评价时间" min-width="136" align="center" header-align="center">
           <template #default="{ row }">{{ row.createTime || '—' }}</template>
         </el-table-column>
-        <el-table-column label="操作" min-width="140" fixed="right" align="right" header-align="center">
+        <el-table-column label="操作" min-width="132" fixed="right" align="right" header-align="center">
           <template #default="{ row }">
             <div class="mr-row-actions">
               <el-button link type="primary" @click="openReply(row)">{{ replyActionText(row) }}</el-button>

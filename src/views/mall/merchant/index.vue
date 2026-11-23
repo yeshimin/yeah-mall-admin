@@ -104,8 +104,8 @@
           <el-table data-ym-table="r35" v-if="merchantDetail.shops.length" :data="merchantDetail.shops" border>
             <el-table-column prop="shopNo" label="店铺编号" min-width="130" />
             <el-table-column prop="shopName" label="店铺名称" min-width="150" />
-            <el-table-column label="平台状态" width="90"><template #default="{ row }">{{ row.isEnabled ? '启用' : '停用' }}</template></el-table-column>
-            <el-table-column label="营业状态" width="90"><template #default="{ row }">{{ row.isOpen ? '营业中' : '休息中' }}</template></el-table-column>
+            <el-table-column label="平台状态" min-width="90"><template #default="{ row }">{{ row.isEnabled ? '启用' : '停用' }}</template></el-table-column>
+            <el-table-column label="营业状态" min-width="90"><template #default="{ row }">{{ row.isOpen ? '营业中' : '休息中' }}</template></el-table-column>
           </el-table>
           <el-empty v-else :image-size="52" description="该商家暂未创建店铺" />
         </section>

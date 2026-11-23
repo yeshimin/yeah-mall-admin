@@ -66,7 +66,7 @@
             </el-table-column>
             <el-table-column prop="path" label="路径" min-width="150"></el-table-column>
             <el-table-column prop="permission" label="权限标识" min-width="170"></el-table-column>
-            <el-table-column prop="remark" label="备注" min-width="220" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="remark" label="备注" min-width="180" show-overflow-tooltip></el-table-column>
             <el-table-column prop="sort" label="排序" min-width="80"></el-table-column>
             <el-table-column prop="status" label="状态" min-width="90">
               <template #default="scope">
@@ -79,7 +79,7 @@
                 ></el-switch>
               </template>
             </el-table-column>
-            <el-table-column v-if="hasViewRowActions" label="操作" min-width="220" fixed="right">
+            <el-table-column v-if="hasViewRowActions" label="操作" min-width="180" fixed="right">
               <template #default="scope">
                 <div class="table-row-actions">
                   <el-button
@@ -180,7 +180,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="permission" label="权限标识" min-width="220"></el-table-column>
-            <el-table-column prop="remark" label="备注" min-width="220" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="remark" label="备注" min-width="180" show-overflow-tooltip></el-table-column>
             <el-table-column prop="sort" label="排序" min-width="80"></el-table-column>
             <el-table-column prop="status" label="状态" min-width="90">
               <template #default="scope">
@@ -195,7 +195,7 @@
                 ></el-switch>
               </template>
             </el-table-column>
-            <el-table-column v-if="hasApiRowActions" label="操作" min-width="260" fixed="right">
+            <el-table-column v-if="hasApiRowActions" label="操作" min-width="200" fixed="right">
               <template #default="scope">
                 <div class="table-row-actions">
                   <template v-if="isApiGroupRow(scope.row)">

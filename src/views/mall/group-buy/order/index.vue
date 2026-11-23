@@ -125,12 +125,12 @@
           </div>
 
           <el-table data-ym-table="r74" v-loading="ordersLoading" :data="pagedOrders" row-key="id" style="width: 100%">
-            <el-table-column label="订单编号" min-width="176" align="center">
+            <el-table-column label="订单编号" min-width="150" align="center">
               <template #default="{ row }">
                 <span class="mono"><CopyableText :value="row.orderNo" label="订单编号" /></span>
               </template>
             </el-table-column>
-            <el-table-column label="会员" min-width="140" align="center">
+            <el-table-column label="会员" min-width="110" align="center">
               <template #default="{ row }">
                 <div class="gb-member-cell">
                   <span class="avatar" style="width: 30px; height: 30px">{{ avatarChar(row.memberName) }}</span>
@@ -141,7 +141,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="拼团商品" min-width="220" align="center">
+            <el-table-column label="拼团商品" min-width="190" align="center">
               <template #default="{ row }">
                 <div class="sa-product-cell">
                   <span class="sa-product-art">
@@ -159,7 +159,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="拼团价" min-width="140" align="center">
+            <el-table-column label="拼团价" min-width="120" align="center">
               <template #default="{ row }">
                 <div class="skp-price-cell">
                   <b>{{ seckillMoney(row.groupPrice) }}</b>
@@ -167,7 +167,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="团编号" min-width="160" align="center">
+            <el-table-column label="团编号" min-width="130" align="center">
               <template #default="{ row }">
                 <span class="mono"><CopyableText :value="row.groupNo" label="团编号" /></span>
               </template>
@@ -179,14 +179,14 @@
                 </span>
               </template>
             </el-table-column>
-            <el-table-column label="团状态" min-width="100" align="center">
+            <el-table-column label="团状态" min-width="88" align="center">
               <template #default="{ row }">
                 <span class="status-ticket is-small" :class="`tone-${orderGroupMeta(row).tone}`">
                   {{ orderGroupMeta(row).label }}
                 </span>
               </template>
             </el-table-column>
-            <el-table-column label="下单时间" min-width="122" align="center">
+            <el-table-column label="下单时间" min-width="116" align="center">
               <template #default="{ row }">
                 <div class="sa-time-cell">
                   <b>{{ dateOnly(row.createTime) }}</b>
@@ -281,12 +281,12 @@
           </div>
 
           <el-table data-ym-table="r75" v-loading="groupsLoading" :data="pagedGroups" row-key="id" style="width: 100%">
-            <el-table-column label="团编号" min-width="160" align="center">
+            <el-table-column label="团编号" min-width="140" align="center">
               <template #default="{ row }">
                 <span class="mono"><CopyableText :value="row.groupNo" label="团编号" /></span>
               </template>
             </el-table-column>
-            <el-table-column label="拼团商品" min-width="220" align="center">
+            <el-table-column label="拼团商品" min-width="190" align="center">
               <template #default="{ row }">
                 <div class="sa-product-cell">
                   <span class="sa-product-art">
@@ -315,12 +315,12 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="成团人数" min-width="92" align="center">
+            <el-table-column label="成团人数" min-width="88" align="center">
               <template #default="{ row }">
                 {{ Number(row.minPeople || 0) }} 人
               </template>
             </el-table-column>
-            <el-table-column label="已参团" min-width="92" align="center">
+            <el-table-column label="已参团" min-width="88" align="center">
               <template #default="{ row }">
                 {{ memberCountOf(row) }} / {{ reservedCountOf(row) }}
               </template>
@@ -336,7 +336,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="团状态" min-width="100" align="center">
+            <el-table-column label="团状态" min-width="92" align="center">
               <template #default="{ row }">
                 <span class="status-ticket" :class="`tone-${groupStatusMeta(row.status).tone}`">
                   {{ groupStatusMeta(row.status).label }}

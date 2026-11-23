@@ -86,7 +86,7 @@
 
     <section class="mall-table-panel">
     <el-table data-ym-table="r45" v-loading="loading" :data="records">
-      <el-table-column label="商品" min-width="220">
+      <el-table-column label="商品" min-width="180">
         <template #default="{ row }">
           <div class="review-product-cell">
             <el-image
@@ -105,23 +105,23 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="skuName" label="规格" min-width="120" show-overflow-tooltip />
-      <el-table-column prop="orderNo" label="订单编号" min-width="150" show-overflow-tooltip />
-      <el-table-column prop="nickname" label="用户" width="110" show-overflow-tooltip />
-      <el-table-column prop="overallRating" label="评分" width="80" />
-      <el-table-column prop="content" label="评价内容" min-width="220" show-overflow-tooltip />
-      <el-table-column label="回复" width="90">
+      <el-table-column prop="skuName" label="规格" min-width="90" show-overflow-tooltip />
+      <el-table-column prop="orderNo" label="订单编号" min-width="162" show-overflow-tooltip />
+      <el-table-column prop="nickname" label="用户" min-width="72" show-overflow-tooltip />
+      <el-table-column prop="overallRating" label="评分" min-width="56" />
+      <el-table-column prop="content" label="评价内容" min-width="180" show-overflow-tooltip />
+      <el-table-column label="回复" min-width="88">
         <template #default="{ row }">
           <el-tag :type="row.lastReplySenderType === 1 || !row.isReplied ? 'warning' : 'info'">
             {{ replyStatusText(row) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="90">
+      <el-table-column label="状态" min-width="76">
         <template #default="{ row }"><el-tag :type="row.isVisible ? 'success' : 'info'">{{ row.isVisible ? '公开' : '已隐藏' }}</el-tag></template>
       </el-table-column>
-      <el-table-column prop="createTime" label="评价时间" width="180" />
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column prop="createTime" label="评价时间" min-width="148" />
+      <el-table-column label="操作" width="128" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="detail(row)">详情</el-button>
           <el-button link :type="row.isVisible ? 'danger' : 'success'" @click="toggle(row)">{{ row.isVisible ? '隐藏' : '恢复' }}</el-button>

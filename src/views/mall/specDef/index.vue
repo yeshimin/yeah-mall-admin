@@ -32,15 +32,15 @@
             <CopyableText :value="row.specName" label="规格名称" />
           </template>
         </el-table-column>
-        <el-table-column label="选项数" width="90" align="center">
+        <el-table-column label="选项数" min-width="90" align="center">
           <template #default="{ row }">{{ row.optCount ?? 0 }}</template>
         </el-table-column>
-        <el-table-column label="创建时间" width="168" show-overflow-tooltip>
+        <el-table-column label="创建时间" min-width="168" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="mp-time">{{ row.createTime || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="更新时间" width="168" show-overflow-tooltip>
+        <el-table-column label="更新时间" min-width="168" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="mp-time">{{ row.updateTime || '—' }}</span>
           </template>
@@ -110,12 +110,12 @@
         <el-table-column label="选项名称" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">{{ row.optName }}</template>
         </el-table-column>
-        <el-table-column label="创建时间" width="168" show-overflow-tooltip>
+        <el-table-column label="创建时间" min-width="168" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="mp-time">{{ row.createTime || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="更新时间" width="168" show-overflow-tooltip>
+        <el-table-column label="更新时间" min-width="168" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="mp-time">{{ row.updateTime || '—' }}</span>
           </template>

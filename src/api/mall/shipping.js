@@ -16,23 +16,13 @@ export function getShippingInfo() {
 // 保存商家发货信息
 export function saveShippingInfo(data) {
   const shopId = getShopId();
-  const saveData = {
-    shopId,
-    name: data.senderName,
-    contact: data.senderPhone,
-    provinceCode: data.provinceCode,
-    provinceName: data.province,
-    cityCode: data.cityCode,
-    cityName: data.city,
-    districtCode: data.districtCode,
-    districtName: data.district,
-    detailAddress: data.senderAddress,
-    postalCode: data.postalCode
-  };
   return request({
     url: `/mch/deliveryInfo/save`,
     method: 'post',
-    data: saveData
+    data: {
+      shopId,
+      ...data
+    }
   })
 }
 

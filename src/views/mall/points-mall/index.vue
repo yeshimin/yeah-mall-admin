@@ -19,13 +19,13 @@
                 <span v-else class="muted">-</span>
               </template>
             </el-table-column>
-            <el-table-column prop="sort" label="排序" width="90" />
-            <el-table-column label="状态" width="100">
+            <el-table-column prop="sort" label="排序" min-width="90" />
+            <el-table-column label="状态" min-width="100">
               <template #default="{ row }">
                 <el-tag :type="row.isEnabled ? 'success' : 'info'">{{ row.isEnabled ? '启用' : '停用' }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="createTime" label="创建时间" width="180" />
+            <el-table-column prop="createTime" label="创建时间" min-width="180" />
             <el-table-column label="操作" width="150" fixed="right">
               <template #default="{ row }">
                 <el-button link type="primary" @click="openCategoryDialog(row)">编辑</el-button>
@@ -86,10 +86,10 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="分类" width="120">
+            <el-table-column label="分类" min-width="120">
               <template #default="{ row }">{{ categoryName(row.categoryId) }}</template>
             </el-table-column>
-            <el-table-column label="类型 / 履约" width="160">
+            <el-table-column label="类型 / 履约" min-width="160">
               <template #default="{ row }">
                 <div class="points-cell-stack">
                   <span>{{ productTypeText(row.productType) }}</span>
@@ -105,10 +105,10 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="每人限兑" width="90">
+            <el-table-column label="每人限兑" min-width="90">
               <template #default="{ row }">{{ row.perMemberLimit > POINTS_UNLIMITED_PER_MEMBER_LIMIT ? row.perMemberLimit : '不限' }}</template>
             </el-table-column>
-            <el-table-column label="状态" width="120">
+            <el-table-column label="状态" min-width="120">
               <template #default="{ row }">
                 <div class="status-switch-cell">
                   <el-switch
@@ -169,12 +169,12 @@
         </section>
         <section class="mall-table-panel">
           <el-table data-ym-table="r42" v-loading="loading" :data="orders">
-            <el-table-column label="订单编号" width="135" show-overflow-tooltip>
+            <el-table-column label="订单编号" min-width="135" show-overflow-tooltip>
               <template #default="{ row }">
                 <CopyableText :value="row.orderNo" label="订单编号" />
               </template>
             </el-table-column>
-            <el-table-column label="会员ID" width="125">
+            <el-table-column label="会员ID" min-width="125">
               <template #default="{ row }">
                 <CopyableText :value="row.memberId" label="会员ID" />
               </template>
@@ -188,7 +188,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="兑换" width="120">
+            <el-table-column label="兑换" min-width="120">
               <template #default="{ row }">
                 <div class="points-cell-stack">
                   <span>{{ row.pointsPrice }} 积分 × {{ row.quantity }}</span>
@@ -196,15 +196,15 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="履约方式" width="95">
+            <el-table-column label="履约方式" min-width="95">
               <template #default="{ row }">{{ fulfillmentText(row.fulfillmentType) }}</template>
             </el-table-column>
-            <el-table-column label="状态" width="90">
+            <el-table-column label="状态" min-width="90">
               <template #default="{ row }">
                 <el-tag :type="statusTag(row.status)">{{ statusText(row.status) }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="兑换时间" width="130">
+            <el-table-column label="兑换时间" min-width="130">
               <template #default="{ row }">
                 <div class="points-cell-stack">
                   <span class="points-mall-time">{{ formatDate(row.createTime) }}</span>
@@ -365,10 +365,10 @@
             <span v-else class="table-image image-placeholder"><el-icon><Picture /></el-icon></span>
           </template>
         </el-table-column>
-        <el-table-column prop="pointsPrice" label="积分价格" width="90" />
-        <el-table-column prop="stock" label="可用库存" width="90" />
-        <el-table-column prop="totalStock" label="累计库存" width="90" />
-        <el-table-column label="状态" width="80">
+        <el-table-column prop="pointsPrice" label="积分价格" min-width="90" />
+        <el-table-column prop="stock" label="可用库存" min-width="90" />
+        <el-table-column prop="totalStock" label="累计库存" min-width="90" />
+        <el-table-column label="状态" min-width="80">
           <template #default="{ row }"><el-tag :type="row.isEnabled ? 'success' : 'info'">{{ row.isEnabled ? '启用' : '停用' }}</el-tag></template>
         </el-table-column>
         <el-table-column label="操作" width="130" fixed="right">
@@ -834,8 +834,6 @@ watch(() => route.query.tab, (value) => {
 .status-switch-cell span { color: var(--mall-muted, #65726a); font-size: 12px; }
 .product-image { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 7px; background: var(--mall-paper, #f4f6f3); }.table-image { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 7px; background: var(--mall-paper, #f4f6f3); }
 .image-placeholder { display: inline-flex; align-items: center; justify-content: center; color: var(--mall-muted, #65726a); font-size: 16px; }
-:global(.el-overlay .el-dialog.points-product-dialog) { margin-top: 6vh; }
-:global(.el-overlay .el-dialog.points-product-dialog .el-dialog__body) { max-height: calc(100vh - 240px); }
 .muted { color: var(--mall-muted, #65726a); font-size: 12px; }.form-tip { margin-left: 12px; color: var(--mall-muted, #65726a); font-size: 12px; }.dialog-form { margin-top: 18px; }
 .timeline-title { margin: 26px 0 18px; font-size: 16px; }.image-uploader { display: flex; align-items: center; gap: 12px; }.image-uploader :deep(.upload-preview) { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 9px; background: var(--mall-paper, #f4f6f3); }
 .points-mall-empty { display: flex; min-height: 180px; align-items: center; justify-content: center; flex-direction: column; gap: 7px; color: var(--mall-muted, #65726a); }

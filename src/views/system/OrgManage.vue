@@ -50,8 +50,8 @@
         :tree-props="{ children: 'children' }"
       >
         <el-table-column prop="name" label="组织名称" min-width="220"></el-table-column>
-        <el-table-column prop="sort" label="排序" width="90"></el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="sort" label="排序" min-width="90"></el-table-column>
+        <el-table-column prop="status" label="状态" min-width="100">
           <template #default="{ row }">
             <el-switch
               v-model="row.status"

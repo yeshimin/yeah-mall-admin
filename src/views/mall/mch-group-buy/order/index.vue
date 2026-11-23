@@ -125,12 +125,12 @@
           </div>
 
           <el-table data-ym-table="r86" v-loading="ordersLoading" :data="pagedOrders" row-key="id" style="width: 100%" class="gb-order-table">
-            <el-table-column label="订单编号" width="176" align="center" header-align="center">
+            <el-table-column label="订单编号" min-width="150" align="center" header-align="center">
               <template #default="{ row }">
                 <span class="mono"><CopyableText :value="row.orderNo" label="订单编号" /></span>
               </template>
             </el-table-column>
-            <el-table-column label="会员" width="140" align="center" header-align="center">
+            <el-table-column label="会员" min-width="110" align="center" header-align="center">
               <template #default="{ row }">
                 <div class="gb-member-cell">
                   <span class="avatar" style="width: 30px; height: 30px">{{ avatarChar(row.memberName) }}</span>
@@ -141,7 +141,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="拼团商品" min-width="220" align="center" header-align="center">
+            <el-table-column label="拼团商品" min-width="190" align="center" header-align="center">
               <template #default="{ row }">
                 <div class="sa-product-cell">
                   <span class="sa-product-art">
@@ -159,7 +159,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="拼团价" width="140" align="center" header-align="center">
+            <el-table-column label="拼团价" min-width="120" align="center" header-align="center">
               <template #default="{ row }">
                 <div class="skp-price-cell">
                   <b>{{ seckillMoney(row.groupPrice) }}</b>
@@ -167,26 +167,26 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="团编号" width="160" align="center" header-align="center">
+            <el-table-column label="团编号" min-width="130" align="center" header-align="center">
               <template #default="{ row }">
                 <span class="mono"><CopyableText :value="row.groupNo" label="团编号" /></span>
               </template>
             </el-table-column>
-            <el-table-column label="订单状态" width="104" align="center" header-align="center">
+            <el-table-column label="订单状态" min-width="104" align="center" header-align="center">
               <template #default="{ row }">
                 <span class="status-ticket" :class="`tone-${orderStatusMeta(row.orderStatus).tone}`">
                   {{ orderStatusMeta(row.orderStatus).label }}
                 </span>
               </template>
             </el-table-column>
-            <el-table-column label="团状态" width="104" align="center" header-align="center">
+            <el-table-column label="团状态" min-width="88" align="center" header-align="center">
               <template #default="{ row }">
                 <span class="status-ticket is-small" :class="`tone-${orderGroupMeta(row).tone}`">
                   {{ orderGroupMeta(row).label }}
                 </span>
               </template>
             </el-table-column>
-            <el-table-column label="下单时间" width="122" align="center" header-align="center">
+            <el-table-column label="下单时间" min-width="116" align="center" header-align="center">
               <template #default="{ row }">
                 <div class="sa-time-cell">
                   <b>{{ dateOnly(row.createTime) }}</b>
@@ -283,12 +283,12 @@
           </div>
 
           <el-table data-ym-table="r87" v-loading="groupsLoading" :data="pagedGroups" row-key="id" style="width: 100%" class="gb-group-table">
-            <el-table-column label="团编号" width="160" align="center" header-align="center">
+            <el-table-column label="团编号" min-width="140" align="center" header-align="center">
               <template #default="{ row }">
                 <span class="mono"><CopyableText :value="row.groupNo" label="团编号" /></span>
               </template>
             </el-table-column>
-            <el-table-column label="拼团商品" min-width="220" align="center" header-align="center">
+            <el-table-column label="拼团商品" min-width="190" align="center" header-align="center">
               <template #default="{ row }">
                 <div class="sa-product-cell">
                   <span class="sa-product-art">
@@ -306,7 +306,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="团长" width="140" align="center" header-align="center">
+            <el-table-column label="团长" min-width="140" align="center" header-align="center">
               <template #default="{ row }">
                 <div class="gb-member-cell">
                   <span class="avatar" style="width: 30px; height: 30px">{{ avatarChar(row.leaderMemberName) }}</span>
@@ -317,17 +317,17 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="成团人数" width="96" align="center" header-align="center">
+            <el-table-column label="成团人数" min-width="88" align="center" header-align="center">
               <template #default="{ row }">
                 {{ Number(row.minPeople || 0) }} 人
               </template>
             </el-table-column>
-            <el-table-column label="已参团" width="96" align="center" header-align="center">
+            <el-table-column label="已参团" min-width="88" align="center" header-align="center">
               <template #default="{ row }">
                 {{ memberCountOf(row) }} / {{ reservedCountOf(row) }}
               </template>
             </el-table-column>
-            <el-table-column label="成团进度" width="150" align="center" header-align="center">
+            <el-table-column label="成团进度" min-width="150" align="center" header-align="center">
               <template #default="{ row }">
                 <div class="gb-progress" :class="{ 'is-full': progressOf(row).full, 'is-fail': progressOf(row).fail }">
                   <span class="gb-progress-track"><em :style="{ width: `${progressOf(row).percent}%` }"></em></span>
@@ -338,14 +338,14 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="团状态" width="104" align="center" header-align="center">
+            <el-table-column label="团状态" min-width="92" align="center" header-align="center">
               <template #default="{ row }">
                 <span class="status-ticket" :class="`tone-${groupStatusMeta(row.status).tone}`">
                   {{ groupStatusMeta(row.status).label }}
                 </span>
               </template>
             </el-table-column>
-            <el-table-column label="开团时间" width="122" align="center" header-align="center">
+            <el-table-column label="开团时间" min-width="122" align="center" header-align="center">
               <template #default="{ row }">
                 <div class="sa-time-cell">
                   <b>{{ dateOnly(row.createTime) }}</b>

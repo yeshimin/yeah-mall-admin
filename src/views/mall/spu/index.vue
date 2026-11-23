@@ -31,7 +31,7 @@
     <section class="mall-table-panel">
       <el-table data-ym-table="r58" v-loading="loading" :data="tableData" row-key="id" @selection-change="selectedRows = $event">
         <el-table-column type="selection" width="48" align="center" />
-        <el-table-column prop="id" label="ID" width="170" align="center" />
+        <el-table-column prop="id" label="ID" min-width="160" align="center" />
         <el-table-column label="主图" width="80" align="center">
           <template #default="{ row }">
             <span class="mp-thumb">
@@ -45,27 +45,27 @@
             <CopyableText :value="row.name" label="商品名称" />
           </template>
         </el-table-column>
-        <el-table-column label="商品副标题" min-width="180" show-overflow-tooltip>
+        <el-table-column label="商品副标题" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="mp-subtitle">{{ row.subtitle || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="categoryName" label="分类名称" min-width="140" show-overflow-tooltip />
-        <el-table-column label="状态" width="100" align="center">
+        <el-table-column prop="categoryName" label="分类名称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="状态" min-width="100" align="center">
           <template #default="{ row }">
             <span :class="['status-ticket', row.isEnabled ? 'tone-success' : 'tone-neutral']">
               {{ row.isEnabled ? '已上架' : '已下架' }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="createBy" label="创建人" width="110" align="center" />
-        <el-table-column label="创建时间" width="170" align="center">
+        <el-table-column prop="createBy" label="创建人" min-width="90" align="center" />
+        <el-table-column label="创建时间" min-width="150" align="center">
           <template #default="{ row }">
             <span class="mp-time">{{ row.createTime || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="updateBy" label="更新人" width="110" align="center" />
-        <el-table-column label="更新时间" width="170" align="center">
+        <el-table-column prop="updateBy" label="更新人" min-width="90" align="center" />
+        <el-table-column label="更新时间" min-width="150" align="center">
           <template #default="{ row }">
             <span class="mp-time">{{ row.updateTime || '—' }}</span>
           </template>

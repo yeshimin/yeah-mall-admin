@@ -73,29 +73,29 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column v-if="canDeleteStorage" type="selection" width="55" />
-        <el-table-column prop="id" label="ID" width="90" />
+        <el-table-column prop="id" label="ID" min-width="90" />
         <el-table-column prop="originalName" label="原始文件名" min-width="180" show-overflow-tooltip />
         <el-table-column prop="fileKey" label="文件Key" min-width="220" show-overflow-tooltip />
-        <el-table-column prop="suffix" label="后缀" width="90" show-overflow-tooltip />
-        <el-table-column prop="storageType" label="存储类型" width="100">
+        <el-table-column prop="suffix" label="后缀" min-width="90" show-overflow-tooltip />
+        <el-table-column prop="storageType" label="存储类型" min-width="100">
           <template #default="{ row }">
             {{ formatStorageType(row.storageType) }}
           </template>
         </el-table-column>
         <el-table-column prop="bucket" label="Bucket" min-width="120" show-overflow-tooltip />
         <el-table-column prop="path" label="路径" min-width="120" show-overflow-tooltip />
-        <el-table-column prop="isPublic" label="公开" width="80">
+        <el-table-column prop="isPublic" label="公开" min-width="80">
           <template #default="{ row }">
             {{ formatBooleanText(row.isPublic) }}
           </template>
         </el-table-column>
-        <el-table-column prop="isUsed" label="已使用" width="80">
+        <el-table-column prop="isUsed" label="已使用" min-width="80">
           <template #default="{ row }">
             {{ formatBooleanText(row.isUsed) }}
           </template>
         </el-table-column>
-        <el-table-column prop="cleanableTime" label="可清理时间" width="176" show-overflow-tooltip />
-        <el-table-column prop="createTime" label="创建时间" width="176" show-overflow-tooltip />
+        <el-table-column prop="cleanableTime" label="可清理时间" min-width="176" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="创建时间" min-width="176" show-overflow-tooltip />
         <el-table-column v-if="hasStorageRowActions" label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <div class="table-row-actions">

@@ -123,7 +123,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="拼团价" width="170" align="center" header-align="center">
+          <el-table-column label="拼团价" min-width="150" align="center" header-align="center">
             <template #default="{ row }">
               <div class="skp-price-cell">
                 <b>{{ seckillRange(row.minGroupPrice, row.maxGroupPrice) }}</b>
@@ -134,7 +134,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="报名时间" width="128" align="center" header-align="center">
+          <el-table-column label="报名时间" min-width="128" align="center" header-align="center">
             <template #default="{ row }">
               <div class="sa-time-cell">
                 <b>{{ dateOnly(row.applyTime) }}</b>
@@ -142,14 +142,14 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="审核状态" width="104" align="center" header-align="center">
+          <el-table-column label="审核状态" min-width="96" align="center" header-align="center">
             <template #default="{ row }">
               <span class="status-ticket" :class="`tone-${applyStatusMeta(row.auditStatus).tone}`">
                 {{ applyStatusMeta(row.auditStatus).label }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="审核时间" width="128" align="center" header-align="center">
+          <el-table-column label="审核时间" min-width="120" align="center" header-align="center">
             <template #default="{ row }">
               <div class="sa-time-cell">
                 <b>{{ row.auditTime ? dateOnly(row.auditTime) : '—' }}</b>
@@ -157,7 +157,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="申请备注" min-width="150" align="center" header-align="center">
+          <el-table-column label="申请备注" min-width="130" align="center" header-align="center">
             <template #default="{ row }">
               <span
                 class="sa-remark"
@@ -168,7 +168,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="审核备注" min-width="150" align="center" header-align="center">
+          <el-table-column label="审核备注" min-width="130" align="center" header-align="center">
             <template #default="{ row }">
               <span
                 class="sa-remark"

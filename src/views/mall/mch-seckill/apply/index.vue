@@ -61,7 +61,7 @@
       </div>
 
       <el-table data-ym-table="r81" v-loading="loading" :data="records" row-key="applyId" style="width: 100%">
-        <el-table-column label="报名商品" min-width="245" align="center" header-align="center">
+        <el-table-column label="报名商品" min-width="230" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-product-cell">
               <SeckillThumb :src="row.mainImage" :alt="row.spuName" />
@@ -72,7 +72,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="活动 / 场次" min-width="205" align="center" header-align="center">
+        <el-table-column label="活动 / 场次" min-width="180" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-event-cell">
               <b :title="applyActivityName(row)">{{ applyActivityName(row) }}</b>
@@ -80,7 +80,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="审核状态" min-width="125" align="center" header-align="center">
+        <el-table-column label="审核状态" min-width="110" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-audit-cell">
               <span class="status-ticket" :class="`tone-${auditMeta(row.auditStatus).tone}`">
@@ -90,12 +90,12 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="报名时间" min-width="148" align="center" header-align="center">
+        <el-table-column label="报名时间" min-width="136" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-time-text" :title="dateTime(row.applyTime)">{{ dateTime(row.applyTime) }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="审核时间" min-width="148" align="center" header-align="center">
+        <el-table-column label="审核时间" min-width="136" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ms-time-text" :title="row.auditTime ? dateTime(row.auditTime) : '—'">
               {{ row.auditTime ? dateTime(row.auditTime) : '—' }}

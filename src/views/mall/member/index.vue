@@ -37,7 +37,7 @@
 
     <section class="mall-table-panel">
       <el-table data-ym-table="r33" v-loading="loading" :data="members">
-        <el-table-column label="会员" min-width="220">
+        <el-table-column label="会员" min-width="200">
           <template #default="{ row }">
             <div class="member-cell">
               <el-avatar :size="42" :src="avatarUrl(row.avatar)">{{ displayName(row).slice(0, 1) }}</el-avatar>
@@ -48,28 +48,28 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="账号" min-width="130">
+        <el-table-column label="账号" min-width="120">
           <template #default="{ row }">
             <CopyableText v-if="row.account" :value="row.account" label="会员账号" />
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="手机号" width="140">
+        <el-table-column label="手机号" min-width="130">
           <template #default="{ row }">
             <CopyableText v-if="row.mobile" :value="row.mobile" label="手机号" />
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="可用积分" width="110" align="right">
+        <el-table-column label="可用积分" min-width="92" align="right">
           <template #default="{ row }">{{ formatNumber(row.pointsBalance) }}</template>
         </el-table-column>
-        <el-table-column label="累计获得" width="110" align="right">
+        <el-table-column label="累计获得" min-width="92" align="right">
           <template #default="{ row }">{{ formatNumber(row.totalPointsEarned) }}</template>
         </el-table-column>
-        <el-table-column label="累计使用" width="110" align="right">
+        <el-table-column label="累计使用" min-width="92" align="right">
           <template #default="{ row }">{{ formatNumber(row.totalPointsUsed) }}</template>
         </el-table-column>
-        <el-table-column label="注册时间" width="180">
+        <el-table-column label="注册时间" min-width="156">
           <template #default="{ row }">
             <span class="member-time">{{ formatDate(row.createTime) }}</span>
             <small class="member-time-sub">{{ formatTime(row.createTime) }}</small>

@@ -45,7 +45,7 @@
         <el-table-column type="selection" width="48" align="center" />
         <el-table-column
           label="店铺分类名称"
-          min-width="260"
+          min-width="250"
           class-name="ptc-name-column"
           label-class-name="ptc-name-column"
         >
@@ -62,26 +62,26 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="分类编码" min-width="150" show-overflow-tooltip>
+        <el-table-column label="分类编码" min-width="140" show-overflow-tooltip>
           <template #default="{ row }">
             <CopyableText :value="row.code" label="分类编码" />
           </template>
         </el-table-column>
-        <el-table-column label="层级" width="76" align="center">
+        <el-table-column label="层级" min-width="70" align="center">
           <template #default="{ row }">{{ Number(row.level) === 1 ? '一级' : '二级' }}</template>
         </el-table-column>
-        <el-table-column prop="sort" label="排序" width="72" align="center" />
-        <el-table-column label="备注" min-width="170" show-overflow-tooltip>
+        <el-table-column prop="sort" label="排序" min-width="64" align="center" />
+        <el-table-column label="备注" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="ptc-muted">{{ row.remark || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="更新时间" width="160" show-overflow-tooltip>
+        <el-table-column label="更新时间" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="ptc-muted">{{ row.updateTime || '—' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="110" fixed="right" align="center">
+        <el-table-column label="操作" width="104" fixed="right" align="center">
           <template #default="{ row }">
             <div class="table-row-actions">
               <el-button link type="primary" @click="openEditDialog(row)">编辑</el-button>

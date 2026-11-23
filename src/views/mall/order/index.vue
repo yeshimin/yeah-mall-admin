@@ -76,7 +76,7 @@
         :default-sort="{ prop: sortConfig.prop, order: sortConfig.order === 'asc' ? 'ascending' : 'descending' }"
         @sort-change="handleSortChange"
       >
-        <el-table-column label="订单编号" width="200" align="center">
+        <el-table-column label="订单编号" min-width="160" align="center">
           <template #default="{ row }">
             <div class="mo-stack">
               <span class="mono"><CopyableText :value="row.orderNo" label="订单编号" /></span>
@@ -88,15 +88,15 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="下单时间" prop="createTime" sortable="custom" width="176" align="center">
+        <el-table-column label="下单时间" prop="createTime" sortable="custom" min-width="144" align="center">
           <template #default="{ row }">{{ row.createTime || '—' }}</template>
         </el-table-column>
-        <el-table-column label="实付金额" width="110" align="center">
+        <el-table-column label="实付金额" min-width="92" align="center">
           <template #default="{ row }">
             <span class="amount-strong">{{ moMoney(row.finalAmount) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="订单状态" width="140" align="center">
+        <el-table-column label="订单状态" min-width="106" align="center">
           <template #default="{ row }">
             <div class="mo-stack">
               <span class="status-ticket" :class="`tone-${MO_STATUS_TONE[String(row.status)] || 'neutral'}`">
@@ -108,7 +108,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="售后类型" width="100" align="center">
+        <el-table-column label="售后类型" min-width="80" align="center">
           <template #default="{ row }">
             <span v-if="hasRefund(row)" class="status-ticket is-small" :class="String(row.refundType) === '2' ? 'tone-warning' : 'tone-info'">
               {{ moRefundType(row.refundType) }}
@@ -116,7 +116,7 @@
             <template v-else>—</template>
           </template>
         </el-table-column>
-        <el-table-column label="买家信息" width="180" align="center">
+        <el-table-column label="买家信息" min-width="144" align="center">
           <template #default="{ row }">
             <div class="mo-stack">
               <b>{{ row.receiverName || '—' }}</b>
@@ -124,10 +124,10 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="收货地址" min-width="220" align="center">
+        <el-table-column label="收货地址" min-width="212" align="center" show-overflow-tooltip>
           <template #default="{ row }">{{ row.receiverFullAddress || '—' }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right" class-name="mall-actions-column" align="right" header-align="center">
+        <el-table-column label="操作" width="168" fixed="right" class-name="mall-actions-column" align="right" header-align="center">
           <template #default="{ row }">
             <div class="mo-row-actions">
               <el-button link type="primary" @click="handleOrderDetail(row)">详情</el-button>
@@ -322,13 +322,13 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="数量" width="70" align="center">
+            <el-table-column label="数量" min-width="70" align="center">
               <template #default="{ row }">{{ row.quantity }}</template>
             </el-table-column>
-            <el-table-column label="单价" width="100" align="center">
+            <el-table-column label="单价" min-width="100" align="center">
               <template #default="{ row }">{{ moMoney(row.price) }}</template>
             </el-table-column>
-            <el-table-column label="小计" width="110" align="center">
+            <el-table-column label="小计" min-width="110" align="center">
               <template #default="{ row }">{{ moMoney(Number(row.price || 0) * Number(row.quantity || 0)) }}</template>
             </el-table-column>
           </el-table>
@@ -543,13 +543,13 @@
         <el-table-column label="退款编号" min-width="150" align="center">
           <template #default="{ row }"><span class="mono">{{ row.refundNo }}</span></template>
         </el-table-column>
-        <el-table-column label="总金额" width="80" align="center">
+        <el-table-column label="总金额" min-width="80" align="center">
           <template #default="{ row }">{{ moMoney(row.totalAmount) }}</template>
         </el-table-column>
-        <el-table-column label="退款金额" width="80" align="center">
+        <el-table-column label="退款金额" min-width="80" align="center">
           <template #default="{ row }">{{ moMoney(row.refundAmount) }}</template>
         </el-table-column>
-        <el-table-column label="退款状态" width="96" align="center">
+        <el-table-column label="退款状态" min-width="96" align="center">
           <template #default="{ row }">
             <span class="status-ticket is-small" :class="`tone-${MO_REFUND_RECORD_TONE[row.refundStatus] || 'info'}`">
               {{ MO_REFUND_RECORD_STATUS[row.refundStatus] || row.refundStatus }}
@@ -559,10 +559,10 @@
         <el-table-column label="退款原因" min-width="112" align="center">
           <template #default="{ row }">{{ row.refundReason || '—' }}</template>
         </el-table-column>
-        <el-table-column label="创建时间" width="138" align="center">
+        <el-table-column label="创建时间" min-width="138" align="center">
           <template #default="{ row }">{{ row.createTime || '—' }}</template>
         </el-table-column>
-        <el-table-column label="成功时间" width="138" align="center">
+        <el-table-column label="成功时间" min-width="138" align="center">
           <template #default="{ row }">{{ row.successTime || '—' }}</template>
         </el-table-column>
         <el-table-column label="操作" width="70" fixed="right" class-name="mall-actions-column" align="right" header-align="center">

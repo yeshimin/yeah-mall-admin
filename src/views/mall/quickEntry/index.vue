@@ -43,7 +43,7 @@
           @selection-change="selectedRows = $event"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column label="入口" min-width="200">
+          <el-table-column label="入口" min-width="180">
             <template #default="{ row }">
               <div class="ho-entry-cell">
                 <HomeQuickIcon :entry="row" :size="38" />
@@ -54,7 +54,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="跳转目标" min-width="240">
+          <el-table-column label="跳转目标" min-width="200">
             <template #default="{ row }">
               <span v-if="row.target" class="ho-target">
                 <i />
@@ -63,12 +63,12 @@
               <span v-else class="ho-target-empty">按内置动作跳转</span>
             </template>
           </el-table-column>
-          <el-table-column label="排序" width="80">
+          <el-table-column label="排序" min-width="64">
             <template #default="{ row }">
               <div class="ho-sort-cell">{{ row.sort }}</div>
             </template>
           </el-table-column>
-          <el-table-column label="状态" width="110">
+          <el-table-column label="状态" min-width="100">
             <template #default="{ row }">
               <div class="ho-status-cell">
                 <el-switch v-model="row.isEnabled" @change="changeStatus(row)" />
@@ -76,12 +76,12 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="备注" min-width="180">
+          <el-table-column label="备注" min-width="150">
             <template #default="{ row }">
               <span class="ho-remark-cell">{{ row.remark || '—' }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" width="190">
+          <el-table-column label="更新时间" min-width="150">
             <template #default="{ row }">
               <div class="ho-time-cell">{{ formatDateTime(row.updateTime) }}</div>
             </template>

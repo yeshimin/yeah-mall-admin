@@ -109,14 +109,14 @@
           style="width: 100%"
           :empty-text="childEmptyText"
         >
-          <el-table-column prop="level" label="类型" width="68">
+          <el-table-column prop="level" label="类型" min-width="68">
             <template #default="{ row }">
               {{ row.level === 2 ? '城市' : row.level === 3 ? '区县' : '省份' }}
             </template>
           </el-table-column>
-          <el-table-column prop="name" label="名称" width="100" show-overflow-tooltip />
-          <el-table-column prop="code" label="编码" width="96" show-overflow-tooltip />
-          <el-table-column prop="createTime" label="创建时间" width="176" show-overflow-tooltip />
+          <el-table-column prop="name" label="名称" min-width="100" show-overflow-tooltip />
+          <el-table-column prop="code" label="编码" min-width="96" show-overflow-tooltip />
+          <el-table-column prop="createTime" label="创建时间" min-width="176" show-overflow-tooltip />
           <el-table-column v-if="hasChildRowActions" label="操作" width="104">
             <template #default="{ row }">
               <div class="table-row-actions">
